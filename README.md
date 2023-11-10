@@ -37,9 +37,10 @@ pytest phylo2vec
 
 Example:
 ```python
+import numpy as np
 from phylo2vec.base import to_newick, to_vector
 
-v = [0, 1, 2, 3, 4]
+v = np.array([0, 1, 2, 3, 4])
 
 newick = to_newick(v) # '(0,(1,(2,(3,(4,5)6)7)8)9)10;'
 
