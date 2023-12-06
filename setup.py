@@ -7,10 +7,15 @@ Licensed under GNU Lesser General Public License v3.0
 
 from setuptools import find_packages, setup
 
+with open("README.md", encoding="utf-8") as f:
+    LONG_DESCRIPTION = f.read()
+
 setup(
     name="phylo2vec",
-    version="0.1.0",
+    version="0.1.1",
     description="Phylo2Vec: integer vector representation of binary (phylogenetic) trees",
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",  # This is important!
     author="Neil Scheidwasser",
     author_email="neil.clow@sund.ku.dk",
     url="https://github.com/Neclow/phylo2vec",
