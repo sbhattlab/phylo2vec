@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """
-Phylo2Vec 0.1.0
 https://github.com/Neclow/Phylo2Vec
 Licensed under GNU Lesser General Public License v3.0
 """
