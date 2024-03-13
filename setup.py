@@ -19,7 +19,7 @@ setup(
     author_email="neil.clow@sund.ku.dk",
     url="https://github.com/Neclow/phylo2vec",
     packages=find_packages(),
-    python_requires="==3.10",
+    python_requires=">=3.9",
     install_requires=[
         "numba==0.56.4",
         "numpy==1.23.5",
