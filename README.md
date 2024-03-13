@@ -10,7 +10,7 @@ Link to the preprint: <https://arxiv.org/abs/2304.12693>
 
 ### Dependencies
 
-* python==3.10
+* python>=3.9
 * numba==0.56.4
 * numpy==1.23.5
 * biopython==1.80.0
