@@ -1,6 +1,7 @@
 """
 Methods to convert a Phylo2Vec vector to a Newick-format string.
 """
+
 import numba as nb
 import numpy as np
 
@@ -8,10 +9,9 @@ import numpy as np
 @nb.njit(cache=True)
 def _get_ancestry(v):
     """
+    Get the "ancestry" of v (see "Returns" paragraph)
 
-    New get ancestry, but with a MUCH clearer interpretation of what v[i] is.
     v[i] = which BRANCH we do the pairing from
-
 
     The initial situation looks like this:
                       R
@@ -68,7 +68,7 @@ def _get_ancestry(v):
 
     # We have our pairs, we can now build our ancestry
     # Matrix with 3 columns: child1, child2, parent
-    ancestry = np.zeros((len(pairs), 3), dtype=np.int32)
+    ancestry = np.zeros((len(pairs), 3), dtype=np.int16)
 
     # Dictionary to keep track of the following relationship: child->highest parent
     parents = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=nb.types.int64)

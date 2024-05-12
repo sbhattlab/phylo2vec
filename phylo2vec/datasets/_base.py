@@ -1,4 +1,5 @@
 """Base IO code for all datasets."""
+
 from importlib import resources
 
 from Bio import SeqIO

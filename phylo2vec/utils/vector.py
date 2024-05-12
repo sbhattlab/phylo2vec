@@ -1,4 +1,5 @@
 """Phylo2Vec vector manipulation functions."""
+
 import random
 
 import numba as nb
@@ -10,6 +11,7 @@ from phylo2vec.base.to_newick import _get_ancestry, to_newick
 from phylo2vec.base.to_vector import (
     _build_vector,
     _find_cherries,
+    _order_cherries_no_parents,
     to_vector_no_parents,
 )
 from phylo2vec.utils.validation import check_v
@@ -140,9 +142,9 @@ def _reorder_birth_death(
                     # Then relabel 9 in M_old as 7 in M_new
                     internal_node = internal_labels.pop()
                     ancestry_new[row, i] = internal_node
-                    ancestry_new[
-                        2 * len(ancestry_new) - ancestry_old[row, i], 2
-                    ] = ancestry_new[row, i]
+                    ancestry_new[2 * len(ancestry_new) - ancestry_old[row, i], 2] = (
+                        ancestry_new[row, i]
+                    )
 
                 to_visit.append(child)
 
@@ -219,3 +221,121 @@ def reroot_at_random(v):
     check_v(v_new)
 
     return to_vector_no_parents(newick)
+
+
+# faster than np.nonzero
+@nb.njit(cache=True)
+def _find_indices_of_first_leaf(ancestry, leaf):
+    for r in range(ancestry.shape[0]):
+        for c in range(ancestry.shape[1]):
+            if ancestry[r, c] == leaf:
+                return r, c
+
+
+@nb.njit(cache=True)
+def remove_leaf(v, leaf):
+    """Remove a leaf from a Phylo2Vec v
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    leaf : int
+        A leaf node to remove
+
+    Returns
+    -------
+    v_sub : numpy.ndarray
+        Phylo2Vec vector without `leaf`
+    """
+
+    # get the triplets from v
+    ancestry = _get_ancestry(v)
+
+    # Find the first rows and columns containg the leaf to remove
+    r, c = _find_indices_of_first_leaf(ancestry, leaf)
+
+    # Find the parent of the leaf to remove
+    parent = ancestry[r, -1]
+    sister = ancestry[r, 1 - c]
+
+    ancestry_sub = np.zeros(
+        (ancestry.shape[0] - 1, ancestry.shape[1]), dtype=ancestry.dtype
+    )
+    ancestry_sub[:r, :] = ancestry[:r]
+    ancestry_sub[r:, :] = ancestry[r + 1 :]
+
+    for row in range(ancestry_sub.shape[0]):
+        for col in range(ancestry_sub.shape[1]):
+            if ancestry_sub[row, col] == parent:
+                # Replace the parent by the sister node of the leaf of interest
+                ancestry_sub[row, col] = sister
+
+            # Subtract 1 from the leafs larger > "leaf" (so that the vector is still valid)
+            if ancestry_sub[row, col] > leaf:
+                ancestry_sub[row, col] -= 1
+
+                # Substract 1 from the parent nodes larger than the parent of "leaf"
+                if ancestry_sub[row, col] >= parent:
+                    ancestry_sub[row, col] -= 1
+
+    # We now have a correct ancestry without "leaf"
+    # So we build a vector from it
+    cherries = _find_cherries(ancestry_sub)
+
+    # Cherries have to be ordered according to the scheme presented in Fig. 2
+    # Build the new vector
+    v_sub = _build_vector(_order_cherries_no_parents(cherries))
+
+    return v_sub, sister
+
+
+@nb.njit
+def add_leaf(v, leaf, pos):
+    """Add a leaf to a Phylo2Vec vector v
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    leaf : int >= 0
+        A leaf node to add
+    leaf : int >= 0
+        A branch from where the leaf will be added
+
+    Returns
+    -------
+    v_add : numpy.ndarray
+        Phylo2Vec vector including the new leaf
+    """
+    v_tmp = np.zeros((len(v) + 1,), dtype=v.dtype)
+
+    # Append a new leaf branching out from "pos"
+    v_tmp[:-1] = v
+    v_tmp[-1] = pos
+
+    # Get its ancestry
+    ancestry_add = _get_ancestry(v_tmp)
+
+    # Set the leaf value in the ancestry to -1
+    # (Temporary masking)
+    r_leaf, c_leaf = _find_indices_of_first_leaf(ancestry_add, len(v_tmp))
+
+    ancestry_add[r_leaf, c_leaf] = -1
+
+    for r in range(ancestry_add.shape[0]):
+        for c in range(ancestry_add.shape[1]):
+            # Increment the other leaves that are >= leaf
+            if ancestry_add[r, c] >= leaf:
+                ancestry_add[r, c] += 1
+
+    # Re-instate the missing leaf
+    ancestry_add[r_leaf, c_leaf] = leaf
+
+    # Find the cherries
+    cherries = _order_cherries_no_parents(_find_cherries(ancestry_add))
+
+    # Build the new vector
+    v_add = _build_vector(cherries)
+
+    return v_add

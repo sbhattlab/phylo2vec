@@ -1,4 +1,5 @@
 """Base class for all optimisation methods in Phylo2Vec."""
+
 import random
 
 import numba as nb

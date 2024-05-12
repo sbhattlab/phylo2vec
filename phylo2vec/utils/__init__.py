@@ -1,6 +1,7 @@
 """
 Various utilities to process Newick strings, check and sample Phylo2Vec vectors.
 """
+
 from .newick import (
     create_label_mapping,
     find_num_leaves,
@@ -9,14 +10,16 @@ from .newick import (
 )
 from .random import sample, seed_everything
 from .validation import check_v
-from .vector import reorder_v, reroot_at_random
+from .vector import add_leaf, remove_leaf, reorder_v, reroot_at_random
 
 
 __all__ = [
+    "add_leaf",
     "check_v",
     "create_label_mapping",
     "find_num_leaves",
     "remove_annotations",
+    "remove_leaf",
     "remove_parent_labels",
     "reorder_v",
     "reroot_at_random",

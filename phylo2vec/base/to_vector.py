@@ -5,6 +5,7 @@ Two main methods:
     - to_vector for a Newick with parent labels
     - to_vector_no_parents for a Newick without parent labels
 """
+
 import numba as nb
 import numpy as np
 
@@ -33,7 +34,7 @@ def _reduce(newick):
 
     do_reduce(ancestry, newick[:-1])
 
-    return np.array(ancestry)
+    return np.array(ancestry, dtype=np.int16)
 
 
 def _reduce_no_parents(newick):
@@ -59,7 +60,7 @@ def _reduce_no_parents(newick):
 
     do_reduce(ancestry, newick[:-1])
 
-    return np.array(ancestry)
+    return np.array(ancestry, dtype=np.int16)
 
 
 @nb.njit(cache=True)
@@ -67,7 +68,7 @@ def _find_cherries(ancestry):
     ancestry_sorted = ancestry[np.argsort(ancestry[:, -1]), :]
 
     small_children = nb.typed.Dict.empty(
-        key_type=nb.types.int64, value_type=nb.types.int64
+        key_type=nb.types.int16, value_type=nb.types.int16
     )
 
     for i, row in enumerate(ancestry_sorted):
@@ -126,7 +127,7 @@ def _order_cherries_no_parents(cherries):
 
 @nb.njit(cache=True)
 def _build_vector(cherries):
-    v_res = np.zeros((cherries.shape[0],), dtype=np.int16)
+    v_res = np.zeros((cherries.shape[0],), dtype=np.uint16)
     for i in range(cherries.shape[0] - 1, -1, -1):
         c1, c2, _ = cherries[i]
 
@@ -145,7 +146,7 @@ def _build_vector(cherries):
 
 
 def to_vector(newick):
-    """Convert a newick string with parent labels to a vector
+    """Convert a Newick string with parent labels to a vector
 
     Parameters
     ----------
@@ -167,7 +168,7 @@ def to_vector(newick):
 
 
 def to_vector_no_parents(newick_no_parents):
-    """Convert a newick string without parent labels to a vector
+    """Convert a Newick string without parent labels to a vector
 
     Parameters
     ----------

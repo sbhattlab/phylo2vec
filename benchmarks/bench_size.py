@@ -1,3 +1,7 @@
+"""
+Comparison of storage size of Phylo2Vec vectors vs. Newick strings
+"""
+
 # pylint: disable=protected-access
 import sys
 
@@ -14,17 +18,6 @@ from tqdm import tqdm
 from benchmarks.plot import clear_axes, set_size
 from phylo2vec.base import to_newick
 from phylo2vec.utils import sample
-
-plt.rcParams.update(
-    {
-        "font.serif": ["sffamily"],
-        "figure.dpi": "100",
-        "font.size": 9,
-        "text.usetex": True,
-    }
-)
-
-matplotlib.rc("text.latex", preamble=r"\usepackage{amsmath}")
 
 MIN_LEAVES = 5
 MAX_LEAVES = 10000
@@ -47,13 +40,19 @@ def parse_args():
         help="Show plot output with matplotlib.",
     )
     parser.add_argument(
+        "--no-latex",
+        action="store_false",
+        help="Do not use LaTeX fonts for math in matplotlib",
+    )
+    parser.add_argument(
         "--output-file", type=str, default="bench_size", help="Output file name"
     )
 
     return parser.parse_args()
 
 
-if __name__ == "__main__":
+def main():
+    """Main script"""
     args = parse_args()
 
     output_csv = f"benchmarks/res/{args.output_file}.csv"
@@ -61,12 +60,12 @@ if __name__ == "__main__":
 
     all_leaves = np.arange(MIN_LEAVES, MAX_LEAVES, STEP_LEAVES)
 
+    # Pre-allocate size arrays for each test
     sizes = {test: np.zeros((len(all_leaves),), dtype=np.int32) for test in tests}
 
-    palette = dict(zip(tests, [*sns.color_palette("OrRd_r", n_colors=3).as_hex(), "k"]))
-
+    # Compute sizes
     for i, n_leaves in tqdm(enumerate(all_leaves), total=len(all_leaves)):
-        v = sample(n_leaves).astype(np.int16)
+        v = sample(n_leaves)
         newick = to_newick(v)
 
         sizes["Phylo2Vec (int16)"][i] = sys.getsizeof(v)
@@ -74,6 +73,7 @@ if __name__ == "__main__":
         sizes["Phylo2Vec (string)"][i] = sys.getsizeof(",".join(map(str, v)))
         sizes["Newick (string)"][i] = sys.getsizeof(newick)
 
+    # Make a DataFrame and convert to long format
     sizes_df = pd.DataFrame(sizes)
     sizes_df["n_leaves"] = all_leaves
 
@@ -86,7 +86,22 @@ if __name__ == "__main__":
     sizes_df.to_csv(output_csv, index=False)
     print(f"Data saved at {output_csv}")
 
-    fig, ax = plt.subplots(1, 1, figsize=set_size(290, "h"))
+    if not args.no_latex:
+        plt.rcParams.update(
+            {
+                "font.serif": ["sffamily"],
+                "figure.dpi": "100",
+                "font.size": 9,
+                "text.usetex": True,
+            }
+        )
+
+        matplotlib.rc("text.latex", preamble=r"\usepackage{amsmath}")
+
+    # Make the plot
+    _, ax = plt.subplots(1, 1, figsize=set_size(290, "h"))
+
+    palette = dict(zip(tests, [*sns.color_palette("OrRd_r", n_colors=3).as_hex(), "k"]))
 
     sns.scatterplot(
         x="n_leaves",
@@ -110,3 +125,7 @@ if __name__ == "__main__":
 
     if args.show_plot:
         plt.show()
+
+
+if __name__ == "__main__":
+    main()

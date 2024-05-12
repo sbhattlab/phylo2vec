@@ -1,4 +1,5 @@
 """Newick string manipulation functions"""
+
 import re
 
 
