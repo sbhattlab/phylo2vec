@@ -41,12 +41,14 @@ def create_label_mapping(newick):
     -------
     label_mapping : str
         Mapping of leaf labels (integer) to taxa
+    newick_clean : str
+        Newick with integer labels
     """
     label_mapping = {}
 
     newick = newick[:-1]  # For ";"
 
-    newick_clean = newick[:-1]  # For ";"
+    newick_clean = newick
 
     def do_reduce(newick, newick_clean, j):
         for i, char in enumerate(newick):
