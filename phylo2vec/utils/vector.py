@@ -50,8 +50,16 @@ def reorder_v(reorder_method, v_old, taxa_dict_old):
     else:
         raise ValueError("`method` must be 'birth_death' or 'bfs'")
 
+    # Pass the dict to Numba
+    taxa_dict_old_ = nb.typed.Dict.empty(
+        key_type=nb.types.uint16, value_type=nb.types.unicode_type
+    )
+
+    for k, v in taxa_dict_old.items():
+        taxa_dict_old_[k] = v
+
     ancestry_new, taxa_dict_new = reorder_fun(
-        np.flip(ancestry_old, axis=0), taxa_dict_old
+        np.flip(ancestry_old, axis=0), taxa_dict_old_
     )
 
     # Re-build v
@@ -109,7 +117,9 @@ def _reorder_birth_death(
     visited_internals = []
 
     # Taxa dict to be updated
-    taxa_dict_new = {}
+    taxa_dict_new = nb.typed.Dict.empty(
+        key_type=nb.types.uint16, value_type=nb.types.unicode_type
+    )
 
     while len(to_visit) > 0:
         row = 2 * len(ancestry_old) - to_visit.pop(0)
@@ -172,7 +182,7 @@ def _reorder_bfs(ancestry_old, taxa_dict_old):
 
     # Taxa dict to be updated
     taxa_dict_new = nb.typed.Dict.empty(
-        key_type=nb.types.int64, value_type=nb.types.unicode_type
+        key_type=nb.types.uint16, value_type=nb.types.unicode_type
     )
 
     while len(to_visit) > 0:
