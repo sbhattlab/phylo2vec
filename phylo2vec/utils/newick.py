@@ -30,17 +30,21 @@ def find_num_leaves(newick):
 
 
 def create_label_mapping(newick):
-    """Create an integer-taxon label mapping (taxa_dict)
+    """
+    Create an integer-taxon label mapping (label_mapping)
+    from a string-based newick (where leaves are strings)
+    and produce a mapped integer-based newick (where leaves are integers)
+    this also remove annotations pertaining to parent nodes
 
     Parameters
     ----------
     newick : str
-        Newick representation of a tree
+        Newick with string labels
 
     Returns
     -------
-    label_mapping : str
-        Mapping of leaf labels (integer) to taxa
+    label_mapping : Dict str --> str
+        Mapping of leaf labels (integers converted to string) to taxa
     newick_clean : str
         Newick with integer labels
     """
@@ -48,7 +52,7 @@ def create_label_mapping(newick):
 
     newick = newick[:-1]  # For ";"
 
-    newick_clean = newick
+    newick_int = newick
 
     def do_reduce(newick, newick_clean, j):
         for i, char in enumerate(newick):
@@ -76,9 +80,35 @@ def create_label_mapping(newick):
 
         return newick_clean
 
-    newick_clean = do_reduce(newick, newick_clean, 0)
+    newick_int = do_reduce(newick, newick_int, 0)
 
-    return label_mapping, newick_clean + ";"
+    return label_mapping, newick_int + ";"
+
+
+def apply_label_mapping(newick, label_mapping):
+    """
+    Apply an integer-taxon label mapping (label_mapping)
+    from a string-based newick (where leaves are strings)
+    and produce a mapped integer-based newick (where leaves are integers)
+
+    Parameters
+    ----------
+    newick : str
+        Newick with integer labels
+    label_mapping : Dict str --> str
+        Mapping of leaf labels (integers converted to string) to taxa
+
+    Returns
+    -------
+    newick : str
+        Newick with string labels
+    """
+    for i in range(len(label_mapping)):
+        key = f"{len(label_mapping) - i - 1}"
+
+        newick = newick.replace(key, label_mapping[key])
+
+    return newick
 
 
 def remove_annotations(newick):

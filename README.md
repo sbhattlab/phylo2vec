@@ -15,6 +15,7 @@ Link to the preprint: <https://arxiv.org/abs/2304.12693>
 * numpy==1.23.5
 * biopython==1.80.0
 * joblib==1.1.1
+* ete3==3.1.3
 
 ### User installation
 
