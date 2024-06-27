@@ -17,7 +17,7 @@ from phylo2vec.base.to_vector import (
 from phylo2vec.utils.validation import check_v
 
 
-def reorder_v(reorder_method, v_old, taxa_dict_old):
+def reorder_v(reorder_method, v_old, label_mapping_old):
     """Shuffle v by reordering leaf labels
 
     Current pipeline: get ancestry matrix --> reorder --> re-build vector
@@ -28,14 +28,14 @@ def reorder_v(reorder_method, v_old, taxa_dict_old):
         Function used to reorder the ancestry matrix
     v_old : numpy.ndarray or list
         Current Phylo2vec vector
-    taxa_dict_old : dict[int, str]
+    label_mapping_old : dict[int, str]
         Current mapping of node label (integer) to taxa
 
     Returns
     -------
     v_new : numpy.ndarray or list
         New Phylo2vec vector
-    taxa_dict_new : nb.types.Dict
+    label_mapping_new : nb.types.Dict
         New integer-taxon dictionary
     """
     # TODO: make this function inplace?
@@ -51,26 +51,26 @@ def reorder_v(reorder_method, v_old, taxa_dict_old):
         raise ValueError("`method` must be 'birth_death' or 'bfs'")
 
     # Pass the dict to Numba
-    taxa_dict_old_ = nb.typed.Dict.empty(
+    label_mapping_old_ = nb.typed.Dict.empty(
         key_type=nb.types.uint16, value_type=nb.types.unicode_type
     )
 
-    for k, v in taxa_dict_old.items():
-        taxa_dict_old_[k] = v
+    for k, v in label_mapping_old.items():
+        label_mapping_old_[k] = v
 
-    ancestry_new, taxa_dict_new = reorder_fun(
-        np.flip(ancestry_old, axis=0), taxa_dict_old_
+    ancestry_new, label_mapping_new = reorder_fun(
+        np.flip(ancestry_old, axis=0), label_mapping_old_
     )
 
     # Re-build v
     v_new = _build_vector(_find_cherries(ancestry_new))
 
-    return v_new, taxa_dict_new
+    return v_new, label_mapping_new
 
 
 @nb.njit
 def _reorder_birth_death(
-    ancestry_old, taxa_dict_old, reorder_internal=True, shuffle_cols=False
+    ancestry_old, label_mapping_old, reorder_internal=True, shuffle_cols=False
 ):
     """Reorder v as a birth-death process (i.e., an "ordered" vector)
 
@@ -81,7 +81,7 @@ def _reorder_birth_death(
         1st column: child 1 parent node
         2nd column: child 2
         3rd column: parent node
-    taxa_dict_old : dict[int, str]
+    label_mapping_old : dict[int, str]
         Mapping of leaf labels (integer) to taxa
     reorder_internal : bool, optional
         If True, reorder internal labels, by default True
@@ -92,7 +92,7 @@ def _reorder_birth_death(
     -------
     ancestry_new : numpy.ndarray
         Reordered ancestry matrix
-    taxa_dict_new :
+    label_mapping_new :
         Reordered mapping of leaf labels (integer) to taxa
     """
     # Copy old M
@@ -117,14 +117,13 @@ def _reorder_birth_death(
     visited_internals = []
 
     # Taxa dict to be updated
-    taxa_dict_new = nb.typed.Dict.empty(
+    label_mapping_new = nb.typed.Dict.empty(
         key_type=nb.types.uint16, value_type=nb.types.unicode_type
     )
 
     while len(to_visit) > 0:
         row = 2 * len(ancestry_old) - to_visit.pop(0)
 
-        # some trickery
         if node_code:
             next_pair = [node_code[visited.index(visited_internals.pop(0))], visits]
         else:
@@ -137,10 +136,8 @@ def _reorder_birth_death(
 
         for i, child in enumerate(ancestry_old[row, :2]):
             if child < len(ancestry_old) + 1:
-                # Update taxa dict (not sure that's correct but hey)
-                taxa_dict_new[next_pair[i]] = taxa_dict_old[child]
+                label_mapping_new[next_pair[i]] = label_mapping_old[child]
 
-                # Update M_new (23.01: ugly)
                 ancestry_new[row, i] = next_pair[i]
 
             # Not a leaf node --> add it to the visit list
@@ -166,11 +163,11 @@ def _reorder_birth_death(
     # Re-sort M such that the root node R is the first row, then internal nodes R-1, R-2, ...
     ancestry_new = ancestry_new[ancestry_new[:, 2].argsort()[::-1]]
 
-    return ancestry_new, taxa_dict_new
+    return ancestry_new, label_mapping_new
 
 
 @nb.njit(cache=True)
-def _reorder_bfs(ancestry_old, taxa_dict_old):
+def _reorder_bfs(ancestry_old, label_mapping_old):
     # Copy old M
     ancestry_new = ancestry_old.copy()
 
@@ -181,7 +178,7 @@ def _reorder_bfs(ancestry_old, taxa_dict_old):
     order = []
 
     # Taxa dict to be updated
-    taxa_dict_new = nb.typed.Dict.empty(
+    label_mapping_new = nb.typed.Dict.empty(
         key_type=nb.types.uint16, value_type=nb.types.unicode_type
     )
 
@@ -195,7 +192,7 @@ def _reorder_bfs(ancestry_old, taxa_dict_old):
                 order.append(child)
 
                 # Update taxa dict
-                taxa_dict_new[len(order) - 1] = taxa_dict_old[child]
+                label_mapping_new[len(order) - 1] = label_mapping_old[child]
 
                 # Update M_new
                 ancestry_new[row, i] = len(order) - 1
@@ -204,7 +201,7 @@ def _reorder_bfs(ancestry_old, taxa_dict_old):
             else:
                 to_visit.append(child)
 
-    return ancestry_new, taxa_dict_new
+    return ancestry_new, label_mapping_new
 
 
 def reroot_at_random(v):

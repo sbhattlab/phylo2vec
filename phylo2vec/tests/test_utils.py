@@ -66,7 +66,7 @@ def test_create_and_apply_label_mapping(n_leaves):
         nw_str = t.write(format=9)
 
         # Create an int-to-str label mapping and create an integer Newick
-        label_mapping, nw_int = create_label_mapping(nw_str)
+        nw_int, label_mapping = create_label_mapping(nw_str)
 
         # Apply the mapping to retrieve the string Newick
         new_nw_str = apply_label_mapping(nw_int, label_mapping)

@@ -27,15 +27,15 @@ class BaseOptimizer:
         seed_everything(self.random_seed)
 
     @staticmethod
-    def _make_taxa_dict(records):
-        taxa_dict = nb.typed.Dict.empty(
+    def _make_label_mapping(records):
+        label_mapping = nb.typed.Dict.empty(
             key_type=nb.types.int64, value_type=nb.types.unicode_type
         )
 
         for i, r in enumerate(records):
-            taxa_dict[i] = r.id.replace(" ", ".")
+            label_mapping[i] = r.id.replace(" ", ".")
 
-        return taxa_dict
+        return label_mapping
 
     def fit(self, fasta_path):
         """Fit an optimizer to a fasta file
@@ -49,7 +49,7 @@ class BaseOptimizer:
         -------
         v_opt : numpy.ndarray
             Optimized phylo2vec vector
-        taxa_dict : dict[int, str]
+        label_mapping : dict[int, str]
             Mappping of leaf labels (integer) to taxa
         losses : array-like
             List/Array of collected losses
@@ -59,17 +59,17 @@ class BaseOptimizer:
         # If True, change the fasta path to include the module name
         records = list(read_fasta(fasta_path))
 
-        taxa_dict = self._make_taxa_dict(records)
+        label_mapping = self._make_label_mapping(records)
 
-        n_leaves = len(taxa_dict)
+        n_leaves = len(label_mapping)
 
         v_init = sample(n_leaves)
 
-        v_opt, taxa_dict, losses = self._optimise(fasta_path, v_init, taxa_dict)
+        v_opt, label_mapping, losses = self._optimise(fasta_path, v_init, label_mapping)
 
-        return v_opt, taxa_dict, losses
+        return v_opt, label_mapping, losses
 
-    def _optimise(self, fasta_path, v, taxa_dict):
+    def _optimise(self, fasta_path, v, label_mapping):
         raise NotImplementedError
 
     def __repr__(self):

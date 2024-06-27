@@ -43,10 +43,10 @@ def create_label_mapping(newick):
 
     Returns
     -------
+    newick_int : str
+        Newick with integer labels
     label_mapping : Dict str --> str
         Mapping of leaf labels (integers converted to string) to taxa
-    newick_clean : str
-        Newick with integer labels
     """
     label_mapping = {}
 
@@ -80,9 +80,9 @@ def create_label_mapping(newick):
 
         return newick_clean
 
-    newick_int = do_reduce(newick, newick_int, 0)
+    newick_int = do_reduce(newick, newick_int, 0) + ";"
 
-    return label_mapping, newick_int + ";"
+    return newick_int, label_mapping
 
 
 def apply_label_mapping(newick, label_mapping):

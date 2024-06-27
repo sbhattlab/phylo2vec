@@ -1,7 +1,7 @@
 """
-Comparison of tree sampling using the rtree
-function from ape (Paradis and Schliep, 2019)
-and Phylo2Vec in terms of execution time
+Benchmark execution times of p2v and ape (Paradis and Schliep, 2019) functions:
+ * tree sampling (rtree)
+ * pairwise cophenetic distance matrix (cophenetic.phylo)
 """
 
 # pylint: disable=redefined-outer-name, protected-access
@@ -22,6 +22,7 @@ from rpy2.robjects.packages import importr
 
 from benchmarks.plot import clear_axes, set_size
 from phylo2vec.base import to_newick
+from phylo2vec.metrics import cophenetic_distances
 from phylo2vec.utils import sample
 
 plt.rcParams.update(
@@ -46,18 +47,27 @@ def parse_args():
     """Parse optional arguments."""
     parser = ArgumentParser(description="Newick sampling time benchmark tool")
     parser.add_argument(
+        "--sample-file",
+        type=str,
+        default="bench_sample_time",
+        help="Output file name for sampling",
+    )
+    parser.add_argument(
+        "--coph-file",
+        type=str,
+        default="bench_coph_time",
+        help="Output file name for pairwise cophenetic distance",
+    )
+    parser.add_argument(
         "--show_plot",
         action="store_true",
         help="Show plot output with matplotlib.",
-    )
-    parser.add_argument(
-        "--output-file", type=str, default="bench_sample_time", help="Output file name"
     )
 
     return parser.parse_args()
 
 
-def bench_p2v(all_leaves):
+def sample_p2v(all_leaves):
     """Benchmark execution times of Phylo2Vec tree sampling
 
     Parameters
@@ -94,7 +104,7 @@ def bench_p2v(all_leaves):
     return pd.Series(np.mean(perfs / N_TIMES, 1)).rename("Phylo2Vec")
 
 
-def bench_ape(all_leaves):
+def sample_ape(all_leaves):
     """Benchmark execution times of ape tree sampling
 
     Parameters
@@ -140,18 +150,98 @@ def bench_ape(all_leaves):
     return perfs
 
 
-if __name__ == "__main__":
-    args = parse_args()
-    output_csv = f"benchmarks/res/{args.output_file}.csv"
-    output_pdf = f"benchmarks/img/{args.output_file}.pdf"
+def coph_p2v(all_leaves):
+    """Benchmark execution times of Phylo2Vec pairwise cophenetic distances
 
+    Parameters
+    ----------
+    all_leaves : numpy.ndarray
+        List of tree sizes (in number of leaves)
+
+    Returns
+    -------
+    perfs
+        Execution times in seconds for each tree size
+    """
+    print("Benchmark phylo2vec.metrics.cophenetic_distances...")
+
+    perfs = np.zeros((len(all_leaves), N_REPEATS))
+
+    for i, n_leaves in enumerate(all_leaves):
+        # Compile
+        v = sample(n_leaves)
+        _ = cophenetic_distances(v)
+
+        all_runs = np.array(
+            timeit.repeat(
+                f"cophenetic_distances(sample({n_leaves}))",
+                "from phylo2vec.metrics import cophenetic_distances; from phylo2vec.utils import sample;"
+                f"v = sample({n_leaves}); nw = cophenetic_distances(sample({n_leaves}));",
+                number=N_TIMES,
+                repeat=N_REPEATS,
+            )
+        )
+
+        perfs[i, :] = all_runs
+
+    return pd.Series(np.mean(perfs / N_TIMES, 1)).rename("Phylo2Vec")
+
+
+def coph_ape(all_leaves):
+    """Benchmark execution times of ape tree sampling
+
+    Parameters
+    ----------
+    all_leaves : numpy.ndarray
+        List of tree sizes (in number of leaves)
+
+    Returns
+    -------
+    perfs
+        Execution times in seconds for each tree size
+    """
+    print("Benchmark ape.rtree...")
+
+    with localconverter(ro.default_converter + numpy2ri.converter):
+        importr("ape")
+        importr("microbenchmark")
+
+        ro.globalenv["n_times"] = N_TIMES
+        ro.globalenv["all_leaves"] = all_leaves
+
+        perfs = pd.Series(
+            ro.r(
+                """
+                perfs <- rep(0L, length(all_leaves))
+
+                for (i in 1:length(all_leaves)) {
+                    tr <- rtree(all_leaves[[i]], br = 1)
+                    perfs[[i]] <- summary(
+                        microbenchmark(
+                            tr,
+                            unit = "s",
+                            times = 100L
+                        )
+                    )$mean
+                }
+
+                perfs
+                """
+            )
+        ).rename("ape (cophenetic.phylo)")
+
+    return perfs
+
+
+def get_perfs(funcs, output_csv):
     all_leaves = np.arange(MIN_LEAVES, MAX_LEAVES, STEP_LEAVES)
+
+    perfs = [func(all_leaves) for func in funcs]
 
     # Make DataFrame
     perfs_df = pd.concat(
         [
-            bench_p2v(all_leaves),
-            bench_ape(all_leaves),
+            *perfs,
             pd.Series(all_leaves).rename("n_leaves"),
         ],
         axis=1,
@@ -166,6 +256,10 @@ if __name__ == "__main__":
     perfs_df.to_csv(output_csv, index=False)
     print(f"Data saved at {output_csv}")
 
+    return perfs
+
+
+def plot_perfs(perfs_df, output_pdf, show_plot=False):
     # Plot
     fig, ax = plt.subplots(1, 1, figsize=set_size(290, "h"))
 
@@ -196,5 +290,32 @@ if __name__ == "__main__":
 
     print(f"Plot saved at {output_pdf}")
 
-    if args.show_plot:
+    if show_plot:
         plt.show()
+
+
+def _main_single(funcs, output_file, show_plot):
+    output_csv = f"benchmarks/res/{output_file}.csv"
+    output_pdf = f"benchmarks/img/{output_file}.pdf"
+
+    perfs_df = get_perfs(funcs, output_csv)
+
+    plot_perfs(perfs_df, output_pdf, show_plot=show_plot)
+
+
+def main():
+    args = parse_args()
+
+    _main_single(
+        funcs=(sample_ape, sample_p2v),
+        output_file=args.sample_file,
+        show_plot=args.show_plot,
+    )
+
+    _main_single(
+        funcs=(coph_ape, coph_p2v), output_file=args.coph_file, show_plot=args.show_plot
+    )
+
+
+if __name__ == "__main__":
+    main()
