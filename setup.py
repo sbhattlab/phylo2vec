@@ -11,7 +11,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setup(
     name="phylo2vec",
-    version="0.1.5",
+    version="0.1.6",
     description="Phylo2Vec: integer vector representation of binary (phylogenetic) trees",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",  # This is important!
@@ -28,9 +28,8 @@ setup(
         "ete3==3.1.3",
     ],
     classifiers=[
-        "Topic :: Scientific/Engineering",
+        "Development Status :: 3 - Alpha",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "Topic :: Software Development :: Libraries :: Python Modules",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",

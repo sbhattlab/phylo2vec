@@ -6,11 +6,13 @@ from phylo2vec.utils.validation import check_v
 
 
 @nb.njit(cache=True)
-def cophenetic_distances(v):
+def cophenetic_distances(v, unrooted=False):
     # Should be very similar to dist_nodes in ape
 
     # Ancestry
     A = _get_ancestry(v)
+    if unrooted:
+        A[-1, -1] = A.max() - 1
 
     n_leaves = len(v) + 1
 

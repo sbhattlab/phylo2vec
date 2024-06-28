@@ -218,7 +218,7 @@ def coph_ape(all_leaves):
                     tr <- rtree(all_leaves[[i]], br = 1)
                     perfs[[i]] <- summary(
                         microbenchmark(
-                            tr,
+                            cophenetic.phylo(tr),
                             unit = "s",
                             times = 100L
                         )

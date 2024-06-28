@@ -41,7 +41,6 @@ pip install -e .
 
 * ete3==3.1.3
 * pytest==7.4.2
-* rpy2==3.5.11
 * six==1.16.0
 
 ### Testing
