@@ -21,10 +21,10 @@ setup(
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=[
-        "numba==0.56.4",
+        "numba>=0.56.4",
         "numpy==1.23.5",
         "biopython==1.80.0",
-        "joblib==1.1.1",
+        "joblib>=1.2.0",
         "ete3==3.1.3",
     ],
     classifiers=[
