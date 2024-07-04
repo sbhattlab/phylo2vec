@@ -84,45 +84,47 @@ def _find_cherries(ancestry):
 
 @nb.njit(cache=True)
 def _order_cherries_no_parents(cherries):
-    cherries_ = np.zeros((len(cherries), 4), dtype=np.int16) - 1
-    cherries_[:, :-1] = cherries
-    cherries_copy = cherries[:, :-1]
+    old_cherries = cherries.copy()
 
-    n_leaves = cherries.shape[0]
+    n_cherries = cherries.shape[0]
 
-    for i in range(n_leaves):
-        next_internal = len(cherries) + i + 1
+    idxs = np.zeros((n_cherries,), dtype=np.int32)
 
+    for i in range(n_cherries):
+        d = np.zeros((2 * n_cherries,), dtype=np.uint8)
         max_leaf = -1
 
-        d = set()
+        for j, ch in enumerate(old_cherries):
+            c1, c2, _ = ch
 
-        for j, ch in enumerate(cherries_copy):
-            c1, c2 = ch
-
-            if c1 == -1 and c2 == -1:
+            if idxs[j] == 1:
                 continue
 
-            if not (c1 in d or c2 in d):
-                leaf_tmp = ch[ch <= n_leaves]
-
-                if leaf_tmp.shape[0] > 0:
-                    max_leaf_tmp = leaf_tmp.max()
-                    if max_leaf_tmp > max_leaf:
-                        max_leaf = max_leaf_tmp
+            if not (d[c1] == 1 or d[c2] == 1):
+                if c1 <= n_cherries and c2 > n_cherries:
+                    if c1 > max_leaf:
+                        max_leaf = c1
+                        idx = j
+                elif c2 <= n_cherries and c1 > n_cherries:
+                    if c2 > max_leaf:
+                        max_leaf = c2
+                        idx = j
+                elif c1 <= n_cherries and c2 <= n_cherries:
+                    c_max = max(c1, c2)
+                    if c_max > max_leaf:
+                        max_leaf = c_max
                         idx = j
                 else:
                     idx = j
-            d.add(c1)
-            d.add(c2)
 
-        cherries_[idx, -1] = next_internal
+            d[c1] = 1
+            d[c2] = 1
 
-        cherries_copy[idx] = -1
+        idxs[idx] = 1  # idx
 
-    cherries_ = cherries_[cherries_[:, -1].argsort()]
+        cherries[i] = old_cherries[idx]
 
-    return cherries_[:, :-1]
+    return cherries
 
 
 @nb.njit(cache=True)

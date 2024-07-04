@@ -36,7 +36,7 @@ def _get_ancestry(v):
     -------
     ancestry : numpy.array
         Ancestry matrix
-        1st column: child 1 parent node
+        1st column: child 1
         2nd column: child 2
         3rd column: parent node
     """
@@ -53,11 +53,11 @@ def _get_ancestry(v):
             # (as the branch leading to v[i] gives birth to the next_leaf)
             # Why pairs.insert(0)? Let's take an example with [0, 0]
             # We initially have (0, 1), but 0 gives birth to 2 afterwards
-            # So the "deepest" pair is (0, 2)
+            # So the "shallowest" pair is (0, 2)
             pairs.insert(0, (v[i], next_leaf))
         else:
             # If v[i] > i, it's not the branch leading v[i] that gives birth but an internal branch
-            # Remark 1: it will not be the "deepest" pair, so we do not insert it at position 0
+            # Remark 1: it will not be the "shallowest" pair, so we do not insert it at position 0
             # len(pairs) = number of pairings we did so far
             # So what v[i] - len(pairs) gives us is the depth of the next pairing
             # And pairs[v[i] - len(pairs) - 1][0] is a node that we processed beforehand
@@ -74,7 +74,7 @@ def _get_ancestry(v):
     parents = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=nb.types.int64)
 
     # Dictionary to keep track of siblings (i.e., sister nodes)
-    siblings = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=nb.types.int64)
+    # siblings = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=nb.types.int64)
 
     # Leaves are number 0, 1, ..., n_leaves - 1, so the next parent is n_leaves
     next_parent = len(v) + 1
@@ -91,17 +91,17 @@ def _get_ancestry(v):
         parents[child1] = next_parent
         parents[child2] = next_parent
 
-        # Change the parents of the siblings
-        parents[siblings.get(child1, child1)] = next_parent
-        parents[siblings.get(child2, child2)] = next_parent
+        # # Change the parents of the siblings
+        # parents[siblings.get(child1, child1)] = next_parent
+        # parents[siblings.get(child2, child2)] = next_parent
 
-        # Change the previous parents of the child if there are any
-        parents[parent_child1] = next_parent
-        parents[parent_child2] = next_parent
+        # # Change the previous parents of the child if there are any
+        # parents[parent_child1] = next_parent
+        # parents[parent_child2] = next_parent
 
-        # Update siblings
-        siblings[child1] = child2
-        siblings[child2] = child1
+        # # Update siblings
+        # siblings[child1] = child2
+        # siblings[child2] = child1
 
         next_parent += 1
 
@@ -113,7 +113,7 @@ def _build_newick(ancestry):
     """Build a Newick string from an "ancestry" array
 
     The input should always be 3-dimensional with the following format:
-    1st column: child 1 parent node
+    1st column: child 1
     2nd column: child 2
     3rd column: parent node
 
@@ -138,17 +138,18 @@ def _build_newick(ancestry):
 
     queue = []
 
-    n_leaves = ancestry.shape[0]
+    # Max number for a leaf
+    n_max = ancestry.shape[0]
 
-    if c1 > n_leaves:
+    if c1 > n_max:
         queue.append(c1)
-    if c2 > n_leaves:
+    if c2 > n_max:
         queue.append(c2)
 
     for _ in range(1, ancestry.shape[0]):
         next_parent = queue.pop()
 
-        c1, c2, p = ancestry[next_parent - n_leaves - 1, :]
+        c1, c2, p = ancestry[next_parent - n_max - 1, :]
 
         sub_newick = f"({c1},{c2}){p}"
 
@@ -159,9 +160,9 @@ def _build_newick(ancestry):
         node_idxs[c1] = node_idxs[p] + 1
         node_idxs[c2] = node_idxs[c1] + 1 + len(f"{c1}")
 
-        if c1 > n_leaves:
+        if c1 > n_max:
             queue.append(c1)
-        if c2 > n_leaves:
+        if c2 > n_max:
             queue.append(c2)
 
     return newick
