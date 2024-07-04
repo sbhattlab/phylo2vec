@@ -4,7 +4,7 @@ This repository contains an implementation of Phylo2Vec. It is distributed under
 
 [![PyPI version](https://badge.fury.io/py/phylo2vec.svg)](https://pypi.org/project/phylo2vec/)
 
-Link to the preprint: <https://arxiv.org/abs/2304.12693>
+Link to the paper: <https://doi.org/10.1093/sysbio/syae030>
 
 ## Installation
 
