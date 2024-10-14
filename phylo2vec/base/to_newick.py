@@ -40,13 +40,10 @@ def _get_ancestry(v):
         2nd column: child 2
         3rd column: parent node
     """
-    # This is the first pair, we start with (0, 1)
-    pairs = [(0, 1)]
+    pairs = []
 
-    # The goal here is to add mergers like in the previous iteration
-    for i in range(1, len(v)):
+    for i in range(len(v) - 1, -1, -1):
         next_leaf = i + 1
-
         if v[i] <= i:
             # If v[i] <= i, it's an easy BD
             # We now that the next pair to add now is (v[i], next_leaf)
@@ -54,17 +51,22 @@ def _get_ancestry(v):
             # Why pairs.insert(0)? Let's take an example with [0, 0]
             # We initially have (0, 1), but 0 gives birth to 2 afterwards
             # So the "shallowest" pair is (0, 2)
-            pairs.insert(0, (v[i], next_leaf))
-        else:
+            pairs.append((v[i], next_leaf))
+
+    for j in range(1, len(v)):
+        next_leaf = j + 1
+        if v[j] == 2 * j:
+            # 2*j = extra root ==> pairing = (0, next_leaf)
+            pairs.append((0, next_leaf))
+        elif v[j] > j:
             # If v[i] > i, it's not the branch leading v[i] that gives birth but an internal branch
             # Remark 1: it will not be the "shallowest" pair, so we do not insert it at position 0
             # len(pairs) = number of pairings we did so far
             # So what v[i] - len(pairs) gives us is the depth of the next pairing
             # And pairs[v[i] - len(pairs) - 1][0] is a node that we processed beforehand
             # which is deeper than the branch v[i]
-            pairs.insert(
-                v[i] - len(pairs), (pairs[v[i] - len(pairs) - 1][0], next_leaf)
-            )
+            index = v[j] - 2 * j
+            pairs.insert(index, (pairs[index - 1][0], next_leaf))
 
     # We have our pairs, we can now build our ancestry
     # Matrix with 3 columns: child1, child2, parent
