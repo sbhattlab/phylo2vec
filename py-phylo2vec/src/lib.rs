@@ -33,7 +33,7 @@ fn build_newick(input_ancestry: Vec<(usize, usize, usize)>) -> String {
 
 /// This module is exposed to Python.
 #[pymodule]
-fn phylo2vec(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(to_newick, m)?)?;
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;

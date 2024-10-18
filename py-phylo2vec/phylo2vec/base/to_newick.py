@@ -1,6 +1,7 @@
 """
 Methods to convert a Phylo2Vec vector to a Newick-format string.
 """
+from phylo2vec import _phylo2vec_core
 
 import numba as nb
 import numpy as np
