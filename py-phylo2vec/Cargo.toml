@@ -1,16 +1,16 @@
 [package]
+edition = "2021"
 name = "py-phylo2vec"
 version = "0.1.0"
-authors = ["Your Name <you@example.com>"]
-edition = "2021"
-description = "A library to convert Phylo2Vec vectors to Newick-format strings."
+authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
+description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
 license = "MIT"
 
 [lib]
 # The name of the native library. This is the name which will be used in Python to import the
 # library (i.e. `import string_sum`). If you change this, you must also change the name of the
 # `#[pymodule]` in `src/lib.rs`.
-name = "phylo2vec"
+name = "_phylo2vec_core"
 # "cdylib" is necessary to produce a shared library for Python to import from.
 #
 # Downstream Rust code (including code in `bin/`, `examples/`, and `tests/`) will not be able
@@ -20,5 +20,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 git2 = "0.19.0"
-pyo3 = { version = "0.22.3", features = ["abi3-py310"] }
+pyo3 = { version = "0.22.3", features = ["abi3-py310", "abi3-py39"] }
 phylo2vec = { workspace = true }

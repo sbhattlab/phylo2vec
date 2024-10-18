@@ -28,6 +28,15 @@ build-release = "cargo build --release"
 start-release = "cargo run --release"
 open-doc = "cargo doc --open"
 
+[tasks.build-python-wheel]
+cmd = "rm -rf dist && maturin build --release --out dist --find-interpreter"
+cwd = "py-phylo2vec"
+
+[tasks.install-python]
+cmd = "pip install --force-reinstall dist/*.whl"
+cwd = "py-phylo2vec"
+depends-on = ["build-python-wheel"]
+
 [dependencies]
 python = "==3.11"
 rust = ">=1.81.0,<2"
