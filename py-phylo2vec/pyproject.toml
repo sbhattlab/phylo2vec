@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "phylo2vec"
-version = "0.1.1"
+version = "0.1.0"
 description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
 authors = [
   { name = "Neil Scheidwasser", email = "neil.clow@sund.ku.dk" }

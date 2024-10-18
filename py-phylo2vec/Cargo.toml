@@ -4,7 +4,7 @@ name = "py-phylo2vec"
 version = "0.1.0"
 authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
 description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
-license = "MIT"
+license = "LGPL-3.0"
 
 [lib]
 # The name of the native library. This is the name which will be used in Python to import the
