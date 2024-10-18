@@ -25,9 +25,9 @@ within Python:
 from phylo2vec import _phylo2vec_core
 ```
 
-An example of calling `to_newick`:
+An example of calling `get_ancestry`:
 
 ```
-_phylo2vec_core.to_newick([0,2,2,5,2])
+_phylo2vec_core.get_ancestry([0,2,2,5,2])
 ```
 
