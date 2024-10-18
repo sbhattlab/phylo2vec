@@ -177,4 +177,6 @@ drafts/
 drafts.ipynb
 
 # Temporary trees
-trees/
+trees/# pixi environments
+.pixi
+*.egg-info

@@ -1,0 +1,50 @@
+[project]
+name = "phylo2vec"
+version = "0.1.0"
+description = "Phylo2Vec"
+authors = ["Don Setiawan"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tasks]
+# We can build a project using cargo build
+build = "cargo build"
+# We can build and run a project in one step using cargo run
+start = "cargo run"
+test = "cargo test"
+clean = "cargo clean"
+fmt = "cargo fmt"
+lint = { cmd = "cargo clippy", depends-on = ["fmt"] }
+# We can build a project without producing a binary to check for errors using cargo check
+check = "cargo check"
+# Create an executable in target/release instead of target/debug,
+# it will compile with optimizations
+# This is why there are two different profiles: one for development,
+# when you want to rebuild quickly and often,
+# and another for building the final program 
+# and will run as fast as possible.
+# **If you’re benchmarking your code’s running time, be sure to run this build**
+build-release = "cargo build --release"
+start-release = "cargo run --release"
+open-doc = "cargo doc --open"
+
+[dependencies]
+python = "==3.11"
+rust = ">=1.81.0,<2"
+openssl = ">=3.3.1,<3.4"
+pkg-config = ">=0.29.2,<0.30"
+compilers = ">=1.7.0,<1.8"
+pixi-kernel = ">=0.4.0,<0.5"
+clang = ">=16.0.6,<17"
+rust-src = ">=1.81.0,<2"
+pip = ">=24.2,<25"
+maturin = ">=1.7.4,<2"
+
+# [target.linux-64.dependencies]
+# gcc = "*"
+
+# [target.osx-64.dependencies]
+# clang = "*"
+
+[target.osx-arm64.dependencies]
+clang = "*"
