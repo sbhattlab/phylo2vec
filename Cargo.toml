@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/*",
+    "py-phylo2vec"
+]
+
+[workspace.dependencies]
+phylo2vec = { path = "crates/phylo2vec", default-features = false }

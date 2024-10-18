@@ -1,0 +1,7 @@
+[package]
+name = "phylo2vec"
+version = "0.1.0"
+authors = ["Your Name <you@example.com>"]
+edition = "2021"
+description = "A library to convert Phylo2Vec vectors to Newick-format strings."
+license = "MIT"
