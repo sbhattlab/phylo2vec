@@ -5,7 +5,7 @@ Methods to convert a Phylo2Vec vector to a Newick-format string.
 import numba as nb
 import numpy as np
 
-# Numba tuple type
+# tuple type
 value_type = nb.types.UniTuple(nb.types.int64, 2)
 
 
@@ -85,9 +85,6 @@ def _get_ancestry(v):
     # Dictionary to keep track of the following relationship: child->highest parent
     parents = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=nb.types.int64)
 
-    # Dictionary to keep track of siblings (i.e., sister nodes)
-    # siblings = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=nb.types.int64)
-
     # Leaves are number 0, 1, ..., n_leaves - 1, so the next parent is n_leaves
     next_parent = len(v) + 1
 
@@ -130,44 +127,35 @@ def _build_newick(ancestry):
     newick : str
         Newick string
     """
+    root = ancestry[-1][-1]
 
-    # TODO: drop the ancestry matrix form?
-    ancestry_dict = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=value_type)
-
-    for c1, c2, p in ancestry:
-        ancestry_dict[p] = (c1, c2)
-
-    newick = f"{_build_newick_inner(ancestry[-1][-1], ancestry_dict)};"
+    newick = _build_newick_inner(root, ancestry) + ";"
 
     return newick
 
 
 @nb.njit
-def _build_newick_inner(node, ancestry_dict):
-    if node in ancestry_dict:
-        c1, c2 = ancestry_dict.pop(node)
-        return "".join(
-            (
-                "(",
-                _build_newick_inner(c1, ancestry_dict),
-                _build_newick_inner(c2, ancestry_dict),
-                ")",
-                f"{node}",
-            )
-        )
+def _build_newick_inner(node, ancestry):
+    leaf_max = ancestry.shape[0]
 
-        #    ( "("
-        #     + _build_newick_inner(c1, ancestry_dict)
-        #     + ","
-        #     + _build_newick_inner(c2, ancestry_dict)
-        #     + ")"
-        #     + f"{node}"
-        # )
+    c1, c2, _ = ancestry[node - leaf_max - 1]
+
+    if c1 > leaf_max:
+        left = _build_newick_inner(c1, ancestry)
     else:
-        return f"{node}"
+        left = f"{c1}"
+
+    if c2 > leaf_max:
+        right = _build_newick_inner(c2, ancestry)
+    else:
+        right = f"{c2}"
+
+    newick = f"({left},{right}){node}"
+
+    return newick
 
 
-@nb.njit
+@nb.njit(cache=True)
 def to_newick(v):
     """Recover a rooted tree (in Newick format) from a Phylo2Vec v
 
