@@ -1,0 +1,7 @@
+[package]
+name = "phylo2vec"
+version = "0.1.0"
+authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
+edition = "2021"
+description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
+license = "LGPL-3.0"

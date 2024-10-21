@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "phylo2vec",
+    "py-phylo2vec"
+]
+default-members = ["phylo2vec"]
+
+[workspace.dependencies]
+phylo2vec = { path = "phylo2vec", default-features = false }
