@@ -5,6 +5,42 @@ Methods to convert a Phylo2Vec vector to a Newick-format string.
 import numba as nb
 import numpy as np
 
+# Numba tuple type
+value_type = nb.types.UniTuple(nb.types.int64, 2)
+
+
+@nb.njit(cache=True)
+def _get_pairs(v):
+    pairs = []
+
+    for i in range(len(v) - 1, -1, -1):
+        next_leaf = i + 1
+        if v[i] <= i:
+            # If v[i] <= i, it's an easy BD
+            # We now that the next pair to add now is (v[i], next_leaf)
+            # (as the branch leading to v[i] gives birth to the next_leaf)
+            # Why pairs.insert(0)? Let's take an example with [0, 0]
+            # We initially have (0, 1), but 0 gives birth to 2 afterwards
+            # So the "shallowest" pair is (0, 2)
+            pairs.append((v[i], next_leaf))
+
+    for j in range(1, len(v)):
+        next_leaf = j + 1
+        if v[j] == 2 * j:
+            # 2*j = extra root ==> pairing = (0, next_leaf)
+            pairs.append((0, next_leaf))
+        elif v[j] > j:
+            # If v[i] > i, it's not the branch leading v[i] that gives birth but an internal branch
+            # Remark 1: it will not be the "shallowest" pair, so we do not insert it at position 0
+            # len(pairs) = number of pairings we did so far
+            # So what v[i] - len(pairs) gives us is the depth of the next pairing
+            # And pairs[v[i] - len(pairs) - 1][0] is a node that we processed beforehand
+            # which is deeper than the branch v[i]
+            index = v[j] - 2 * j
+            pairs.insert(index, (pairs[index - 1][0], next_leaf))
+
+    return pairs
+
 
 @nb.njit(cache=True)
 def _get_ancestry(v):
@@ -40,33 +76,7 @@ def _get_ancestry(v):
         2nd column: child 2
         3rd column: parent node
     """
-    pairs = []
-
-    for i in range(len(v) - 1, -1, -1):
-        next_leaf = i + 1
-        if v[i] <= i:
-            # If v[i] <= i, it's an easy BD
-            # We now that the next pair to add now is (v[i], next_leaf)
-            # (as the branch leading to v[i] gives birth to the next_leaf)
-            # Why pairs.insert(0)? Let's take an example with [0, 0]
-            # We initially have (0, 1), but 0 gives birth to 2 afterwards
-            # So the "shallowest" pair is (0, 2)
-            pairs.append((v[i], next_leaf))
-
-    for j in range(1, len(v)):
-        next_leaf = j + 1
-        if v[j] == 2 * j:
-            # 2*j = extra root ==> pairing = (0, next_leaf)
-            pairs.append((0, next_leaf))
-        elif v[j] > j:
-            # If v[i] > i, it's not the branch leading v[i] that gives birth but an internal branch
-            # Remark 1: it will not be the "shallowest" pair, so we do not insert it at position 0
-            # len(pairs) = number of pairings we did so far
-            # So what v[i] - len(pairs) gives us is the depth of the next pairing
-            # And pairs[v[i] - len(pairs) - 1][0] is a node that we processed beforehand
-            # which is deeper than the branch v[i]
-            index = v[j] - 2 * j
-            pairs.insert(index, (pairs[index - 1][0], next_leaf))
+    pairs = _get_pairs(v)
 
     # We have our pairs, we can now build our ancestry
     # Matrix with 3 columns: child1, child2, parent
@@ -93,24 +103,12 @@ def _get_ancestry(v):
         parents[child1] = next_parent
         parents[child2] = next_parent
 
-        # # Change the parents of the siblings
-        # parents[siblings.get(child1, child1)] = next_parent
-        # parents[siblings.get(child2, child2)] = next_parent
-
-        # # Change the previous parents of the child if there are any
-        # parents[parent_child1] = next_parent
-        # parents[parent_child2] = next_parent
-
-        # # Update siblings
-        # siblings[child1] = child2
-        # siblings[child2] = child1
-
         next_parent += 1
 
     return ancestry
 
 
-@nb.njit(cache=True)
+@nb.njit
 def _build_newick(ancestry):
     """Build a Newick string from an "ancestry" array
 
@@ -132,45 +130,44 @@ def _build_newick(ancestry):
     newick : str
         Newick string
     """
-    c1, c2, p = ancestry[-1, :]
 
-    newick = f"({c1},{c2}){p};"
+    # TODO: drop the ancestry matrix form?
+    ancestry_dict = nb.typed.Dict.empty(key_type=nb.types.int64, value_type=value_type)
 
-    node_idxs = {c1: 1, c2: 2 + len(f"{c1}")}
+    for c1, c2, p in ancestry:
+        ancestry_dict[p] = (c1, c2)
 
-    queue = []
-
-    # Max number for a leaf
-    n_max = ancestry.shape[0]
-
-    if c1 > n_max:
-        queue.append(c1)
-    if c2 > n_max:
-        queue.append(c2)
-
-    for _ in range(1, ancestry.shape[0]):
-        next_parent = queue.pop()
-
-        c1, c2, p = ancestry[next_parent - n_max - 1, :]
-
-        sub_newick = f"({c1},{c2}){p}"
-
-        newick = (
-            newick[: node_idxs[p]] + sub_newick + newick[node_idxs[p] + len(f"{p}") :]
-        )
-
-        node_idxs[c1] = node_idxs[p] + 1
-        node_idxs[c2] = node_idxs[c1] + 1 + len(f"{c1}")
-
-        if c1 > n_max:
-            queue.append(c1)
-        if c2 > n_max:
-            queue.append(c2)
+    newick = f"{_build_newick_inner(ancestry[-1][-1], ancestry_dict)};"
 
     return newick
 
 
-@nb.njit(cache=True)
+@nb.njit
+def _build_newick_inner(node, ancestry_dict):
+    if node in ancestry_dict:
+        c1, c2 = ancestry_dict.pop(node)
+        return "".join(
+            (
+                "(",
+                _build_newick_inner(c1, ancestry_dict),
+                _build_newick_inner(c2, ancestry_dict),
+                ")",
+                f"{node}",
+            )
+        )
+
+        #    ( "("
+        #     + _build_newick_inner(c1, ancestry_dict)
+        #     + ","
+        #     + _build_newick_inner(c2, ancestry_dict)
+        #     + ")"
+        #     + f"{node}"
+        # )
+    else:
+        return f"{node}"
+
+
+@nb.njit
 def to_newick(v):
     """Recover a rooted tree (in Newick format) from a Phylo2Vec v
 

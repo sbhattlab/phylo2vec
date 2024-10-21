@@ -84,45 +84,36 @@ def _find_cherries(ancestry):
 
 @nb.njit(cache=True)
 def _order_cherries_no_parents(cherries):
-    old_cherries = cherries.copy()
-
     n_cherries = cherries.shape[0]
 
-    idxs = np.zeros((n_cherries,), dtype=np.int32)
+    old_cherries = cherries.copy()
+
+    idxs = np.zeros((n_cherries,), dtype=np.uint8)
 
     for i in range(n_cherries):
-        d = np.zeros((2 * n_cherries,), dtype=np.uint8)
+        unvisited = np.ones((n_cherries + 1,), dtype=np.uint8)
         max_leaf = -1
 
         for j, ch in enumerate(old_cherries):
-            c1, c2, _ = ch
-
             if idxs[j] == 1:
                 continue
 
-            if not (d[c1] == 1 or d[c2] == 1):
-                if c1 <= n_cherries and c2 > n_cherries:
-                    if c1 > max_leaf:
-                        max_leaf = c1
-                        idx = j
-                elif c2 <= n_cherries and c1 > n_cherries:
-                    if c2 > max_leaf:
-                        max_leaf = c2
-                        idx = j
-                elif c1 <= n_cherries and c2 <= n_cherries:
-                    c_max = max(c1, c2)
-                    if c_max > max_leaf:
-                        max_leaf = c_max
-                        idx = j
-                else:
+            c1, c2, c_max = ch
+
+            if unvisited[c1] and unvisited[c2]:
+                if c_max > max_leaf:
+                    max_leaf = c_max
                     idx = j
 
-            d[c1] = 1
-            d[c2] = 1
+            unvisited[c1] = 0
+            unvisited[c2] = 0
 
-        idxs[idx] = 1  # idx
-
+        # Swap the rows for the new ancestry
+        # row idx becomes row i
         cherries[i] = old_cherries[idx]
+
+        # Row idx has been processed
+        idxs[idx] = 1
 
     return cherries
 
