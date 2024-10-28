@@ -4,6 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "phylo2vec"
+# TODO: Set the correct version by dynamically reading version via git
 version = "0.1.0"
 description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
 authors = [
