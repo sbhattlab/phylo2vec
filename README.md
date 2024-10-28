@@ -14,7 +14,7 @@ Link to the paper: <https://doi.org/10.1093/sysbio/syae030>
 * numba==0.56.4
 * numpy==1.23.5
 * biopython==1.80.0
-* joblib==1.1.1
+* joblib>=1.2.0
 * ete3==3.1.3
 
 ### User installation
@@ -39,16 +39,22 @@ pip install -e .
 
 ### Additional test dependencies
 
-* ete3==3.1.3
 * pytest==7.4.2
 * six==1.16.0
 
 ### Testing
 
-After installation, you can launch the test suite from outside the source directory (you will need to have pytest >= 7.4.2 installed):
+After installation, you can launch the test suite from outside the source directory:
 
 ```bash
 pytest phylo2vec
+```
+
+Warning! You might need to clear your ```__pycache__``` folders beforehand:
+
+```bash
+rm -rf phylo2vec/__pycache__/
+rm -rf phylo2vec/base/__pycache__/
 ```
 
 ## Basic usage
