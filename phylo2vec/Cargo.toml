@@ -5,3 +5,9 @@ authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
 edition = "2021"
 description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
 license = "LGPL-3.0"
+
+[dependencies]
+rand = "*"
+
+[dev-dependencies]
+rstest = "0.23.0"
