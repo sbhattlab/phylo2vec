@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
-pub use::phylo2vec::to_newick as _to_newick;
+pub use phylo2vec::to_newick as _to_newick;
+pub use phylo2vec::utils as _utils;
 // pub use crate::core::to_vector as _to_vector;
 
 /// This function takes a Python list and converts it to a Rust vector.
@@ -30,6 +31,26 @@ fn build_newick(input_ancestry: Vec<(usize, usize, usize)>) -> String {
     newick_string
 }
 
+#[pyfunction]
+#[pyo3(signature = (n_leaves, ordered=false, /), text_signature = "(n_leaves, ordered=False, /)")]
+fn sample(n_leaves: usize, ordered: bool) -> Vec<usize> {
+    let v: Vec<usize>;
+    match ordered {
+        true => {
+            v = _utils::sample(n_leaves, _utils::SampleOrdering::Ordered);
+        }
+        false => {
+            v = _utils::sample(n_leaves, _utils::SampleOrdering::NotOrdered);
+        }
+    }
+    v
+}
+
+#[pyfunction]
+fn check_v(input_vector: Vec<usize>) {
+    _utils::check_v(&input_vector);
+}
+
 
 /// This module is exposed to Python.
 #[pymodule]
@@ -38,7 +59,8 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
-
+    m.add_function(wrap_pyfunction!(sample, m)?)?;
+    m.add_function(wrap_pyfunction!(check_v, m)?)?;
     Ok(())
 }
 
