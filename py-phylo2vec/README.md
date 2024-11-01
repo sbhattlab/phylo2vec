@@ -8,14 +8,14 @@ To install this python package, simply run the following within the root directo
 the repository with [`pixi`](https://pixi.sh/latest/):
 
 ```
-pixi run install-python
+pixi run -e py-phylo2vec install-python
 ```
 
 Once installed you can try it by opening up `ipython` within the pixi
 environment:
 
 ```
-pixi run ipython
+pixi run -e py-phylo2vec ipython
 ```
 
 As of 10/18/2024 the phylo2vec Rust core code can be accesed from `_phylo2vec_core` module
