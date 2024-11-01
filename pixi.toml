@@ -28,26 +28,17 @@ build-release = "cargo build --release"
 start-release = "cargo run --release"
 open-doc = "cargo doc --open"
 
-[tasks.build-python-wheel]
-cmd = "rm -rf dist && maturin build --release --out dist --find-interpreter"
-cwd = "py-phylo2vec"
-
-[tasks.install-python]
-cmd = "pip install --force-reinstall dist/*.whl"
-cwd = "py-phylo2vec"
-depends-on = ["build-python-wheel"]
+[environments]
+py-phylo2vec = ["python"]
+r-phylo2vec = ["r"]
 
 [dependencies]
-python = "==3.11"
 rust = ">=1.81.0,<2"
 openssl = ">=3.3.1,<3.4"
 pkg-config = ">=0.29.2,<0.30"
 compilers = ">=1.7.0,<1.8"
-pixi-kernel = ">=0.4.0,<0.5"
 clang = ">=16.0.6,<17"
 rust-src = ">=1.81.0,<2"
-pip = ">=24.2,<25"
-maturin = ">=1.7.4,<2"
 
 [target.linux-64.dependencies]
 gcc = "*"
@@ -57,3 +48,26 @@ clang = "*"
 
 [target.osx-arm64.dependencies]
 clang = "*"
+
+# ======= py-phylo2vec ==========
+
+[feature.python.dependencies]
+python = "==3.11"
+pixi-kernel = ">=0.4.0,<0.5"
+pip = ">=24.2,<25"
+maturin = ">=1.7.4,<2"
+
+[feature.python.tasks.build-python-wheel]
+cmd = "rm -rf dist && maturin build --release --out dist --find-interpreter"
+cwd = "py-phylo2vec"
+
+[feature.python.tasks.install-python]
+cmd = "pip install --force-reinstall dist/*.whl"
+cwd = "py-phylo2vec"
+depends-on = ["build-python-wheel"]
+
+
+# ======== r-phylo2vec ===========
+
+[feature.r.dependencies]
+r = "*"
