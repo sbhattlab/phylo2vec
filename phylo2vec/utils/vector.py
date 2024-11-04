@@ -346,3 +346,30 @@ def add_leaf(v, leaf, pos):
     v_add = _build_vector(cherries)
 
     return v_add
+
+
+@nb.njit(cache=True)
+def ancestry_paths(v):
+    ancestry = _get_ancestry(v)
+    parent_vec = np.zeros(2 * len(v), dtype=np.int64)
+
+    for i in range(len(ancestry)):
+        parent_vec[ancestry[i, 0:2]] = ancestry[i, 2]
+
+    ancestry_paths = []
+    for i in range(2 * len(v)):
+        path = [i]
+        while (2 * len(v)) not in path:
+            path.insert(0, parent_vec[path[0]])
+        ancestry_paths.append(path)
+
+    return ancestry_paths
+
+
+@nb.njit(cache=True)
+def get_common_ancestor(v, node1, node2):
+    paths = ancestry_paths(v)
+    path1 = paths[node1]
+    path2 = paths[node2]
+    common_path = np.intersect1d(path1, path2)
+    return common_path[0]

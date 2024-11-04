@@ -14,9 +14,10 @@ from phylo2vec.utils import (
     apply_label_mapping,
     create_label_mapping,
     check_v,
+    find_num_leaves,
+    get_common_ancestor,
     remove_leaf,
     sample,
-    find_num_leaves,
 )
 
 
@@ -101,6 +102,24 @@ def test_remove_and_add(n_leaves):
         v_add = add_leaf(v_sub, leaf, sis)
 
         assert np.array_equal(v, v_add)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_get_common_ancestor(n_leaves):
+    for _ in range(N_REPEATS):
+        v = sample(n_leaves)
+
+        node1, node2 = np.random.choice(np.arange(2 * (n_leaves - 1)), 2, replace=False)
+
+        p2v_common_ancestor = get_common_ancestor(v, node1, node2)
+
+        nw = to_newick(v)
+
+        tr = Tree(nw, format=8)
+
+        ete3_common_ancestor = int(tr.get_common_ancestor(f"{node1}", f"{node2}").name)
+
+        assert p2v_common_ancestor == ete3_common_ancestor
 
 
 if __name__ == "__main__":
