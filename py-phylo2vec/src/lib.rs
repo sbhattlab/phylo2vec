@@ -34,15 +34,7 @@ fn build_newick(input_ancestry: Vec<(usize, usize, usize)>) -> String {
 #[pyfunction]
 #[pyo3(signature = (n_leaves, ordered=false, /), text_signature = "(n_leaves, ordered=False, /)")]
 fn sample(n_leaves: usize, ordered: bool) -> Vec<usize> {
-    let v: Vec<usize>;
-    match ordered {
-        true => {
-            v = _utils::sample(n_leaves, _utils::SampleOrdering::Ordered);
-        }
-        false => {
-            v = _utils::sample(n_leaves, _utils::SampleOrdering::NotOrdered);
-        }
-    }
+    let v = _utils::sample(n_leaves, ordered);
     v
 }
 
