@@ -1,16 +1,5 @@
 use rand::Rng;
 
-pub enum SampleOrdering {
-    Ordered,
-    NotOrdered
-}
-
-impl Default for SampleOrdering {
-    fn default() -> Self {
-        SampleOrdering::NotOrdered
-    }
-}
-
 /// Sample a vector with `n_leaves - 1` elements.
 /// 
 /// If ordering is True, sample an ordered tree, by default ordering is False
@@ -21,21 +10,20 @@ impl Default for SampleOrdering {
 /// 
 /// ```
 /// use phylo2vec::utils::sample;
-/// use phylo2vec::utils::SampleOrdering;
-/// let v = sample(10, SampleOrdering::NotOrdered);
-/// let v2 = sample(5, SampleOrdering::Ordered);
+/// let v = sample(10, false);
+/// let v2 = sample(5, true);
 /// ```
-pub fn sample(n_leaves: usize, ordering: SampleOrdering) -> Vec<usize> {
+pub fn sample(n_leaves: usize, ordering: bool) -> Vec<usize> {
     let mut v: Vec<usize> = Vec::with_capacity(n_leaves - 1);
     let mut rng = rand::thread_rng();
 
     match ordering {
-        SampleOrdering::Ordered => {
+        true => {
             for i in 0..(n_leaves - 1) {
                 v.push(rng.gen_range(0..(i + 1)));
             }
         }
-        SampleOrdering::NotOrdered => {
+        false => {
             for i in 0..(n_leaves - 1) {
                 v.push(rng.gen_range(0..(2 * i + 1)));
             }
@@ -74,9 +62,9 @@ mod tests {
     use super::*;
 
     #[rstest]
-    #[case(20, SampleOrdering::Ordered, 1)]
-    #[case(20, SampleOrdering::NotOrdered, 2)]
-    fn test_sample(#[case] n_leaves: usize, #[case] ordering: SampleOrdering, #[case] scale: usize) {
+    #[case(50, true, 1)]
+    #[case(50, false, 2)]
+    fn test_sample(#[case] n_leaves: usize, #[case] ordering: bool, #[case] scale: usize) {
         let v = sample(n_leaves, ordering);
         assert_eq!(v.len(), n_leaves - 1);
         check_v(&v);
