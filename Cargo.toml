@@ -6,5 +6,12 @@ members = [
 ]
 default-members = ["phylo2vec"]
 
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
+description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
+license = "LGPL-3.0"
+
 [workspace.dependencies]
 phylo2vec = { path = "phylo2vec", default-features = false }

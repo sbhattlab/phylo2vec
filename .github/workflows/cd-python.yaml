@@ -13,9 +13,8 @@ on:
 permissions:
   contents: read
 
-defaults:
-  run:
-    working-directory: ./py-phylo2vec
+env:
+  MATURIN_MANIFEST_PATH: ./py-phylo2vec/Cargo.toml
 
 jobs:
   linux:
@@ -44,7 +43,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist --manifest-path ${{ env.MATURIN_MANIFEST_PATH }}
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
@@ -75,7 +74,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist --manifest-path ${{ env.MATURIN_MANIFEST_PATH }}
           sccache: 'true'
           manylinux: musllinux_1_2
       - name: Upload wheels
@@ -103,7 +102,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist --manifest-path ${{ env.MATURIN_MANIFEST_PATH }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -129,7 +128,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist --manifest-path ${{ env.MATURIN_MANIFEST_PATH }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -145,7 +144,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
-          args: --out dist
+          args: --out dist --manifest-path ${{ env.MATURIN_MANIFEST_PATH }}
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:

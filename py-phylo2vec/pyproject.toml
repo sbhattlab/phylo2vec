@@ -10,9 +10,9 @@ description = "Phylo2Vec: integer vector representation of binary (phylogenetic)
 authors = [
   { name = "Neil Scheidwasser", email = "neil.clow@sund.ku.dk" }
 ]
-readme = "../README.md"
-requires-python = ">=3.9"
-license = {file = "../LICENSE"}
+readme = "README.md"
+requires-python = ">=3.9,<3.11"
+license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
@@ -26,7 +26,7 @@ classifiers = [
 ]
 dependencies = [
   "numba>=0.56.4",
-  "numpy==1.23.5",
+  "numpy==1.24",
   "biopython==1.80.0",
   "joblib>=1.2.0",
   "ete3==3.1.3",
