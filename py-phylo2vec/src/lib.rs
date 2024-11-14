@@ -26,6 +26,12 @@ fn get_pairs(input_vector: Vec<usize>) -> Vec<(usize, usize)> {
 }
 
 #[pyfunction]
+fn get_pairs_avl(input_vector: Vec<usize>) -> Vec<(usize, usize)> {
+    let pairs: Vec<(usize, usize)> = _to_newick::_get_pairs_avl(&input_vector);
+    pairs
+}
+
+#[pyfunction]
 fn build_newick(input_ancestry: Vec<(usize, usize, usize)>) -> String {
     let newick_string: String = _to_newick::_build_newick(&input_ancestry);
     newick_string
@@ -51,6 +57,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
+    m.add_function(wrap_pyfunction!(get_pairs_avl, m)?)?;
     m.add_function(wrap_pyfunction!(sample, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
     Ok(())
