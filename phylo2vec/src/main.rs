@@ -1,4 +1,5 @@
 mod to_newick;
+mod avl;
 
 fn main() {
     // Currently a small testing routine to ensure things are working as intended

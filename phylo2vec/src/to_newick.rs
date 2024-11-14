@@ -1,6 +1,7 @@
+use crate::avl::{AVLTree, Pair};
+
 // A type alias for the Ancestry type, which is a vector of tuples representing (child1, child2, parent)
 type Ancestry = Vec<(usize, usize, usize)>;
-
 
 pub fn _get_pairs(v: &Vec<usize>) -> Vec<(usize, usize)> {
 
@@ -41,6 +42,28 @@ pub fn _get_pairs(v: &Vec<usize>) -> Vec<(usize, usize)> {
 
     pairs
 }
+
+
+pub fn _get_pairs_avl(v: &Vec<usize>) -> Vec<Pair> {
+    // AVL tree implementation of get_pairs
+    let k = v.len();
+    let mut avl_tree = AVLTree::new();
+    avl_tree.insert(0, (0, 1));
+
+    for i in 1..k {
+        let next_leaf = i + 1;
+        if v[i] <= i {
+            avl_tree.insert(0, (v[i], next_leaf));
+        } else {
+            let index = v[i] - next_leaf;
+            let pair = AVLTree::lookup(&avl_tree, index);
+            avl_tree.insert(index + 1, (pair.0, next_leaf));
+        }
+    }
+
+    avl_tree.get_pairs()
+}
+
 
 
 /// Get the ancestry of the Phylo2Vec vector
