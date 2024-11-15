@@ -30,8 +30,8 @@ open-doc = "cargo doc --open"
 benchmark = "cargo bench"
 
 [environments]
-py-phylo2vec = ["python"]
-r-phylo2vec = ["r"]
+py-phylo2vec = {features = ["python"], solve-group = "default"}
+r-phylo2vec = {features = ["r"], solve-group = "default"}
 
 [dependencies]
 rust = ">=1.81.0,<2"
@@ -53,10 +53,11 @@ clang = "*"
 # ======= py-phylo2vec ==========
 
 [feature.python.dependencies]
-python = "==3.11"
+python = "==3.10"
 pixi-kernel = ">=0.4.0,<0.5"
 pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
+jupyterlab = ">=4.3.0,<5"
 
 [feature.python.tasks.build-python-wheel]
 cmd = "rm -rf dist && maturin build --release --out dist --find-interpreter"
@@ -67,8 +68,17 @@ cmd = "pip install --force-reinstall dist/*.whl"
 cwd = "py-phylo2vec"
 depends-on = ["build-python-wheel"]
 
+[feature.python.tasks.test-rust]
+cmd = "cargo test --lib"
+cwd = "py-phylo2vec"
+
 
 # ======== r-phylo2vec ===========
 
 [feature.r.dependencies]
 r = "*"
+r-devtools = ">=2.4.5,<3"
+
+# [feature.r.tasks.install-r]
+# cmd = 'Rscript -e "devtools::install_local(force=TRUE)"'
+# cwd = "r-phylo2vec"
