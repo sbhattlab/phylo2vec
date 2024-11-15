@@ -1,3 +1,2 @@
-pub mod avl;
-pub mod to_newick;
+pub mod tree_vec;
 pub mod utils;
