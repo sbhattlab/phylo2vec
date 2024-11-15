@@ -56,11 +56,11 @@ impl AVLTree {
                 let t2 = x.right.take();
                 x.right = Some(y_node);
                 x.right.as_mut().unwrap().left = t2;
-    
+
                 // Update heights
                 Self::update(x.right.as_mut().unwrap());
                 Self::update(&mut x);
-    
+
                 return Some(x);
             } else {
                 // If no left child, revert the state and return `None`
@@ -79,11 +79,11 @@ impl AVLTree {
                 let t2 = y.left.take();
                 y.left = Some(x_node);
                 y.left.as_mut().unwrap().right = t2;
-    
+
                 // Update heights
                 Self::update(y.left.as_mut().unwrap());
                 Self::update(&mut y);
-    
+
                 return Some(y);
             } else {
                 // If no right child, revert the state and return `None`
@@ -179,7 +179,7 @@ impl AVLTree {
                 current = &n.left;
             }
 
-            let node  = stack.pop().unwrap();
+            let node = stack.pop().unwrap();
             result.push(node.value);
 
             current = &node.right;

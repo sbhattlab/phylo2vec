@@ -4,7 +4,6 @@ use crate::avl::{AVLTree, Pair};
 type Ancestry = Vec<(usize, usize, usize)>;
 
 pub fn _get_pairs(v: &Vec<usize>) -> Vec<(usize, usize)> {
-
     let num_of_leaves: usize = v.len();
     let mut pairs: Vec<(usize, usize)> = Vec::with_capacity(num_of_leaves);
 
@@ -43,7 +42,6 @@ pub fn _get_pairs(v: &Vec<usize>) -> Vec<(usize, usize)> {
     pairs
 }
 
-
 pub fn _get_pairs_avl(v: &Vec<usize>) -> Vec<Pair> {
     // AVL tree implementation of get_pairs
     let k = v.len();
@@ -63,8 +61,6 @@ pub fn _get_pairs_avl(v: &Vec<usize>) -> Vec<Pair> {
 
     avl_tree.get_pairs()
 }
-
-
 
 /// Get the ancestry of the Phylo2Vec vector
 pub fn _get_ancestry(v: &Vec<usize>) -> Ancestry {
