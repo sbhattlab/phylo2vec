@@ -49,7 +49,6 @@ fn check_v(input_vector: Vec<usize>) {
     _utils::check_v(&input_vector);
 }
 
-
 /// This module is exposed to Python.
 #[pymodule]
 fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
