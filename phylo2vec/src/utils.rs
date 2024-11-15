@@ -47,24 +47,67 @@ pub fn sample(n_leaves: usize, ordering: bool) -> Vec<usize> {
 /// use phylo2vec::utils::check_v;
 /// check_v(&vec![0, 0, 1]);
 /// ```
-pub fn check_v(v: &Vec<usize>) {
-    let k = v.len();
-    let v_max: Vec<usize> = (0..k).map(|i| i * 2).collect();
-
-    for i in 0..k {
-        assert!(
-            v[i] <= v_max[i],
-            "Validation failed: v[{}] = {} is out of bounds",
-            i,
-            v[i]
-        );
+pub fn check_v(v: &Vec<usize>) -> () {
+    for i in 0..v.len() {
+        _check_max(i, v[i]);
     }
+}
+
+/// Validate the maximum value of a Phylo2Vec vector element
+///
+/// # Panics
+///
+/// Panics if the value is out of bounds (max = 2 * idx)
+fn _check_max(idx: usize, value: usize) -> () {
+    let absolute_max = 2 * idx;
+    assert!(
+        value <= absolute_max,
+        "Validation failed: v[{}] = {} is out of bounds (max = {})",
+        idx,
+        value,
+        absolute_max
+    );
+}
+
+/// Check if a Phylo2Vec vector is unordered
+///
+/// # Panics
+///
+/// Panics if any element of the input vector is out of bounds
+///
+/// # Returns
+///
+/// Returns true if the vector is unordered, false otherwise
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::utils::is_unordered;
+///
+/// let unordered = is_unordered(&vec![0, 0, 0, 3, 2, 9, 4, 1, 12]);
+///
+/// assert_eq!(unordered, true);
+///
+/// let unordered = is_unordered(&vec![0, 0, 0, 1, 3, 3, 1, 4, 4]);
+///
+/// assert_eq!(unordered, false);
+/// ```
+pub fn is_unordered(v: &Vec<usize>) -> bool {
+    let mut unordered = false;
+    for i in 0..v.len() {
+        _check_max(i, v[i]);
+        if v[i] > i + 1 {
+            unordered = true;
+        }
+    }
+
+    unordered
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rstest::rstest;
+    use rstest::*;
 
     #[rstest]
     #[case(50, true, 1)]
@@ -85,5 +128,14 @@ mod tests {
     #[case(vec![0, 0, 9, 1])]
     fn test_check_v(#[case] v: Vec<usize>) {
         check_v(&v);
+    }
+
+    #[rstest]
+    #[case(vec![0, 0, 0, 1, 3, 3, 1, 4, 4], false)]
+    #[case(vec![0, 0, 0, 3, 2, 9, 4, 1, 12], true)]
+    #[should_panic]
+    #[case(vec![0, 0, 1, 10, 2, 9, 4, 1, 12], true)]
+    fn test_is_unordered(#[case] v: Vec<usize>, #[case] expected: bool) {
+        assert_eq!(is_unordered(&v), expected);
     }
 }
