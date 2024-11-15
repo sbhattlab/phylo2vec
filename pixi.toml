@@ -27,6 +27,7 @@ check = "cargo check"
 build-release = "cargo build --release"
 start-release = "cargo run --release"
 open-doc = "cargo doc --open"
+benchmark = "cargo bench"
 
 [environments]
 py-phylo2vec = ["python"]
