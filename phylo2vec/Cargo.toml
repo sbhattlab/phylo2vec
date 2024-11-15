@@ -11,3 +11,12 @@ rand = "*"
 
 [dev-dependencies]
 rstest = "0.23.0"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+
+[[bench]]
+name = "bench_main"
+harness = false
+
+[lib]
+bench = false
