@@ -254,6 +254,8 @@ def remove_leaf(v, leaf):
     -------
     v_sub : numpy.ndarray
         Phylo2Vec vector without `leaf`
+    sister : int
+        Sister node of leaf
     """
 
     # get the triplets from v
@@ -288,16 +290,19 @@ def remove_leaf(v, leaf):
 
     # We now have a correct ancestry without "leaf"
     # So we build a vector from it
-    cherries = _find_cherries(ancestry_sub)
 
     # Cherries have to be ordered according to the scheme presented in Fig. 2
+    # NOTE: not 100% sure why I need both orderings?
+    cherries = _find_cherries(ancestry_sub)
+    cherries_no_parents = _order_cherries_no_parents(cherries)
+
     # Build the new vector
-    v_sub = _build_vector(_order_cherries_no_parents(cherries))
+    v_sub = _build_vector(cherries_no_parents)
 
     return v_sub, sister
 
 
-@nb.njit
+@nb.njit(cache=True)
 def add_leaf(v, leaf, pos):
     """Add a leaf to a Phylo2Vec vector v
 
@@ -307,7 +312,7 @@ def add_leaf(v, leaf, pos):
         Phylo2Vec vector
     leaf : int >= 0
         A leaf node to add
-    leaf : int >= 0
+    pos : int >= 0
         A branch from where the leaf will be added
 
     Returns
@@ -340,9 +345,68 @@ def add_leaf(v, leaf, pos):
     ancestry_add[r_leaf, c_leaf] = leaf
 
     # Find the cherries
-    cherries = _order_cherries_no_parents(_find_cherries(ancestry_add))
+    # NOTE: not 100% sure why I need both orderings?
+    cherries = _find_cherries(ancestry_add)
+    cherries_no_parents = _order_cherries_no_parents(cherries)
 
     # Build the new vector
-    v_add = _build_vector(cherries)
+    v_add = _build_vector(cherries_no_parents)
 
     return v_add
+
+
+@nb.njit(cache=True)
+def get_ancestry_paths(v):
+    """
+    Get the ancestry paths for each node in the Phylo2Vec vector.
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+
+    Returns
+    -------
+    ancestry_paths : list of list of int
+        Ancestry paths for each node
+    """
+    ancestry = _get_ancestry(v)
+    parent_vec = np.zeros(2 * len(v), dtype=np.uint64)
+
+    for i in range(len(ancestry)):
+        parent_vec[ancestry[i, :2]] = ancestry[i, 2]
+
+    ancestry_paths = []
+    for i in range(2 * len(v)):
+        path = [i]
+        while (2 * len(v)) not in path:
+            path.insert(0, parent_vec[int(path[0])])
+        ancestry_paths.append(path)
+
+    return ancestry_paths
+
+
+@nb.njit(cache=True)
+def get_common_ancestor(v, node1, node2):
+    """Get the first recent common ancestor between two nodes in a Phylo2Vec tree
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    node1 : int
+        A node in the tree
+    node2 : int
+        A node in the tree
+
+    Returns
+    -------
+    mrca : int
+        Most recent common ancestor node between node1 and node2
+    """
+    paths = get_ancestry_paths(v)
+    path1 = paths[node1]
+    path2 = paths[node2]
+    common_path = np.intersect1d(path1, path2)
+    mrca = common_path[0]
+    return mrca
