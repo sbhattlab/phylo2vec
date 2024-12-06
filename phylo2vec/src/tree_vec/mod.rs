@@ -36,7 +36,7 @@ impl TreeVec {
         return ops::to_newick(&self.data);
     }
 
-    pub fn get_ancestry(&self) -> Vec<(usize, usize, usize)> {
+    pub fn get_ancestry(&self) -> Vec<[usize; 3]> {
         return ops::get_ancestry(&self.data);
     }
 
@@ -93,19 +93,19 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![0, 0, 0, 1, 3], vec![( 3,  5,  6),
-        ( 1,  4,  7),
-        ( 0,  6,  8),
-        ( 8,  2,  9),
-        ( 9,  7, 10)])]
-    #[case(vec![0, 1, 2, 3], vec![(3, 4, 5),
-        (2, 5, 6),
-        (1, 6, 7),
-        (0, 7, 8)])]
-    #[case(vec![0, 0, 1], vec![(1, 3, 4),
-        (0, 2, 5),
-        (5, 4, 6)])]
-    fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: Vec<(usize, usize, usize)>) {
+    #[case(vec![0, 0, 0, 1, 3], vec![[3, 5, 6],
+        [1, 4, 7],
+        [0, 6, 8],
+        [8, 2, 9],
+        [9, 7, 10]])]
+    #[case(vec![0, 1, 2, 3], vec![[3, 4, 5],
+        [2, 5, 6],
+        [1, 6, 7],
+        [0, 7, 8]])]
+    #[case(vec![0, 0, 1], vec![[1, 3, 4],
+        [0, 2, 5],
+        [5, 4, 6]])]
+    fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: Vec<[usize; 3]>) {
         let tree = TreeVec::new(v, None, None);
         let ancestry = tree.get_ancestry();
         assert_eq!(ancestry, expected);

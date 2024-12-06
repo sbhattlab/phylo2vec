@@ -1,8 +1,8 @@
 use crate::tree_vec::ops::avl::{AVLTree, Pair};
 use crate::utils::is_unordered;
 
-/// A type alias for the Ancestry type, which is a vector of tuples representing (child1, child2, parent)
-pub type Ancestry = Vec<(usize, usize, usize)>;
+/// A type alias for the Ancestry type, which is a vector of vectors representing [child1, child2, parent]
+pub type Ancestry = Vec<[usize; 3]>;
 
 /// A type alias for the PairsVec type, which is a vector of tuples representing (child1, child2)
 pub type PairsVec = Vec<Pair>;
@@ -139,7 +139,7 @@ pub fn get_ancestry(v: &Vec<usize>) -> Ancestry {
 
         // Next parent
         let next_parent = (num_of_leaves + i + 1) as isize;
-        ancestry.push((parent_of_child1, parent_of_child2, next_parent as usize));
+        ancestry.push([parent_of_child1, parent_of_child2, next_parent as usize]);
 
         // Update the parents of current children
         parents[c1] = next_parent;
@@ -154,7 +154,8 @@ fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
     let leaf_max = ancestry.len();
 
     // Extract the children (c1, c2) and ignore the parent from the ancestry tuple
-    let (c1, c2, _) = ancestry[p - leaf_max - 1];
+    let c1 = ancestry[p - leaf_max - 1][0];
+    let c2 = ancestry[p - leaf_max - 1][1];
 
     // Recursive calls for left and right children, checking if they are leaves or internal nodes
     let left = if c1 > leaf_max {
@@ -176,7 +177,7 @@ fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
 /// Build newick string from the ancestry matrix
 pub fn build_newick(ancestry: &Ancestry) -> String {
     // Get the root node, which is the parent value of the last ancestry element
-    let root = ancestry.last().unwrap().2;
+    let root = ancestry.last().unwrap()[2];
 
     // Build the Newick string starting from the root, and append a semicolon
     format!("{};", _build_newick_recursive_inner(root, ancestry))

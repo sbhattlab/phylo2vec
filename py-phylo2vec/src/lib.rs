@@ -12,8 +12,8 @@ fn to_newick(input_vector: Vec<usize>) -> PyResult<String> {
 }
 
 #[pyfunction]
-fn get_ancestry(input_vector: Vec<usize>) -> Vec<(usize, usize, usize)> {
-    let ancestry: Vec<(usize, usize, usize)> = ops::get_ancestry(&input_vector);
+fn get_ancestry(input_vector: Vec<usize>) -> Vec<[usize; 3]> {
+    let ancestry: Vec<[usize; 3]> = ops::get_ancestry(&input_vector);
 
     ancestry
 }
@@ -31,7 +31,7 @@ fn get_pairs_avl(input_vector: Vec<usize>) -> Vec<(usize, usize)> {
 }
 
 #[pyfunction]
-fn build_newick(input_ancestry: Vec<(usize, usize, usize)>) -> String {
+fn build_newick(input_ancestry: Vec<[usize; 3]>) -> String {
     let newick_string: String = ops::vector::build_newick(&input_ancestry);
     newick_string
 }
