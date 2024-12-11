@@ -8,7 +8,7 @@ MIN_N_LEAVES: Final = 5
 # Maximum number of leaves
 MAX_N_LEAVES: Final = 200
 
-# Numer of test repeats for a tree with n leaves
+# Number of test repeats for a tree with n leaves
 N_REPEATS: Final = 10
 
 # Number of tests

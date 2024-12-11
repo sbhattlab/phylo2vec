@@ -21,7 +21,7 @@ check = "cargo check"
 # it will compile with optimizations
 # This is why there are two different profiles: one for development,
 # when you want to rebuild quickly and often,
-# and another for building the final program 
+# and another for building the final program
 # and will run as fast as possible.
 # **If you’re benchmarking your code’s running time, be sure to run this build**
 build-release = "cargo build --release"
@@ -40,6 +40,7 @@ pkg-config = ">=0.29.2,<0.30"
 compilers = ">=1.7.0,<1.8"
 clang = ">=16.0.6,<17"
 rust-src = ">=1.81.0,<2"
+pre-commit = ">=4.0.1,<5"
 
 [target.linux-64.dependencies]
 gcc = "*"
@@ -57,7 +58,7 @@ python = "==3.10"
 pixi-kernel = ">=0.4.0,<0.5"
 pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
-jupyterlab = ">=4.3.0,<5"
+jupyterlab = ">=4.1,<4.2"
 
 [feature.python.tasks.build-python-wheel]
 cmd = "rm -rf dist && maturin build --release --out dist --find-interpreter"

@@ -186,3 +186,6 @@ trees/# pixi environments
 
 # Web
 *.html
+
+# Experimental notebooks folder
+notebooks/

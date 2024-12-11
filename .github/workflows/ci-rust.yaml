@@ -7,7 +7,7 @@ on:
       - dev
   pull_request:
 
-env: 
+env:
   CARGO_TERM_COLOR: always
 
 jobs:
