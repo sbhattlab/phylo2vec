@@ -50,7 +50,7 @@ class BaseOptimizer:
         v_opt : numpy.ndarray
             Optimized phylo2vec vector
         label_mapping : dict[int, str]
-            Mappping of leaf labels (integer) to taxa
+            Mapping of leaf labels (integer) to taxa
         losses : array-like
             List/Array of collected losses
         """

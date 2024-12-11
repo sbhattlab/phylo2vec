@@ -1,6 +1,7 @@
 # Phylo2Vec
 
-This repository contains an implementation of Phylo2Vec. It is distributed under the GNU Lesser General Public License v3.0 (LGPL).
+This repository contains an implementation of Phylo2Vec. It is distributed under
+the GNU Lesser General Public License v3.0 (LGPL).
 
 [![PyPI version](https://badge.fury.io/py/phylo2vec.svg)](https://pypi.org/project/phylo2vec/)
 
@@ -10,12 +11,12 @@ Link to the paper: <https://doi.org/10.1093/sysbio/syae030>
 
 ### Dependencies
 
-* python>=3.9
-* numba==0.56.4
-* numpy==1.23.5
-* biopython==1.80.0
-* joblib>=1.2.0
-* ete3==3.1.3
+- python>=3.9
+- numba==0.56.4
+- numpy==1.23.5
+- biopython==1.80.0
+- joblib>=1.2.0
+- ete3==3.1.3
 
 ### User installation
 
@@ -27,8 +28,9 @@ pip install phylo2vec
 
 #### Manual installation
 
-* We recommend to setup an isolated enviroment, using conda, mamba or virtualenv.
-* Clone the repository and install using ```pip```:
+- We recommend to setup an isolated environment, using conda, mamba or
+  virtualenv.
+- Clone the repository and install using `pip`:
 
 ```bash
 git clone https://github.com/Neclow/phylo2vec_dev.git
@@ -39,18 +41,19 @@ pip install -e .
 
 ### Additional test dependencies
 
-* pytest==7.4.2
-* six==1.16.0
+- pytest==7.4.2
+- six==1.16.0
 
 ### Testing
 
-After installation, you can launch the test suite from outside the source directory:
+After installation, you can launch the test suite from outside the source
+directory:
 
 ```bash
 pytest phylo2vec
 ```
 
-Warning! You might need to clear your ```__pycache__``` folders beforehand:
+Warning! You might need to clear your `__pycache__` folders beforehand:
 
 ```bash
 rm -rf phylo2vec/__pycache__/
@@ -61,7 +64,8 @@ rm -rf phylo2vec/base/__pycache__/
 
 ### Conversions
 
-* The ```base``` module contains elements to convert a Newick string (```to_vector```) to a Phylo2Vec vector and vice versa (```to_newick```)
+- The `base` module contains elements to convert a Newick string (`to_vector`)
+  to a Phylo2Vec vector and vice versa (`to_newick`)
 
 Example:
 
@@ -78,8 +82,9 @@ v_converted = to_vector(newick) # array([0, 1, 2, 3, 4], dtype=int16)
 
 ### Optimization
 
-* The ```opt``` module contains methods to perform phylogenetic inference using Phylo2Vec vectors
-* TODO: include GradME from <https://github.com/Neclow/GradME>
+- The `opt` module contains methods to perform phylogenetic inference using
+  Phylo2Vec vectors
+- TODO: include GradME from <https://github.com/Neclow/GradME>
 
 Example:
 
@@ -101,6 +106,8 @@ v_opt, taxa_dict, losses = hc.fit("/path/to/your_fasta_file.fa")
 }
 ```
 
-* Preprint repository (core functions are deprecated): <https://github.com/Neclow/phylo2vec_preprint>
-* C++ version (deprecated): <https://github.com/Neclow/phylo2vec_cpp>
-* GradME: <https://github.com/Neclow/GradME> = phylo2vec + minimum evolution + gradient descent
+- Preprint repository (core functions are deprecated):
+  <https://github.com/Neclow/phylo2vec_preprint>
+- C++ version (deprecated): <https://github.com/Neclow/phylo2vec_cpp>
+- GradME: <https://github.com/Neclow/GradME> = phylo2vec + minimum evolution +
+  gradient descent
