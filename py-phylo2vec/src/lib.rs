@@ -32,7 +32,7 @@ fn get_pairs_avl(input_vector: Vec<usize>) -> Vec<(usize, usize)> {
 
 #[pyfunction]
 fn build_newick(input_ancestry: Vec<[usize; 3]>) -> String {
-    let newick_string: String = ops::vector::build_newick(&input_ancestry);
+    let newick_string: String = ops::newick::build_newick(&input_ancestry);
     newick_string
 }
 

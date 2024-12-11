@@ -1,5 +1,4 @@
-// Node definition
-pub type Pair = (usize, usize);
+use crate::tree_vec::types::Pair;
 
 pub struct Node {
     value: Pair,

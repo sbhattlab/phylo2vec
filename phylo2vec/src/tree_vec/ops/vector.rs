@@ -1,12 +1,7 @@
-use crate::tree_vec::ops::avl::{AVLTree, Pair};
+use crate::tree_vec::ops::avl::AVLTree;
+use crate::tree_vec::types::{Ancestry, Pair, PairsVec};
 use crate::utils::is_unordered;
 use std::usize;
-
-/// A type alias for the Ancestry type, which is a vector of vectors representing [child1, child2, parent]
-pub type Ancestry = Vec<[usize; 3]>;
-
-/// A type alias for the PairsVec type, which is a vector of tuples representing (child1, child2)
-pub type PairsVec = Vec<Pair>;
 
 /// Get the pair of nodes from the Phylo2Vec vector
 /// using a vector data structure and for loops
@@ -148,45 +143,6 @@ pub fn get_ancestry(v: &Vec<usize>) -> Ancestry {
     }
 
     ancestry
-}
-
-// The recursive function that builds the Newick string
-fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
-    let leaf_max = ancestry.len();
-
-    // Extract the children (c1, c2) and ignore the parent from the ancestry tuple
-    let [c1, c2, _] = ancestry[p - leaf_max - 1];
-
-    // Recursive calls for left and right children, checking if they are leaves or internal nodes
-    let left = if c1 > leaf_max {
-        _build_newick_recursive_inner(c1, ancestry)
-    } else {
-        c1.to_string() // It's a leaf node, just convert to string
-    };
-
-    let right = if c2 > leaf_max {
-        _build_newick_recursive_inner(c2, ancestry)
-    } else {
-        c2.to_string() // It's a leaf node, just convert to string
-    };
-
-    // Create the Newick string in the form (left, right)p
-    format!("({},{}){}", left, right, p)
-}
-
-/// Build newick string from the ancestry matrix
-pub fn build_newick(ancestry: &Ancestry) -> String {
-    // Get the root node, which is the parent value of the last ancestry element
-    let root = ancestry.last().unwrap()[2];
-
-    // Build the Newick string starting from the root, and append a semicolon
-    format!("{};", _build_newick_recursive_inner(root, ancestry))
-}
-
-/// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
-pub fn to_newick(v: &Vec<usize>) -> String {
-    let ancestry: Ancestry = get_ancestry(&v);
-    build_newick(&ancestry)
 }
 
 pub fn find_coords_of_first_leaf(ancestry: &Ancestry, leaf: usize) -> (usize, usize) {

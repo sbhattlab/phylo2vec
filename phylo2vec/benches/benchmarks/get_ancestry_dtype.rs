@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use criterion::{criterion_group, BenchmarkId, Criterion};
 use phylo2vec::tree_vec::ops;
+use phylo2vec::tree_vec::types::PairsVec;
 use phylo2vec::utils::{is_unordered, sample};
 
 pub type AncestryTuple = Vec<(usize, usize, usize)>;
@@ -37,7 +38,7 @@ fn compare_get_ancestry_datatypes(c: &mut Criterion) {
 }
 
 pub fn get_ancestry_tuple(v: &Vec<usize>) -> AncestryTuple {
-    let pairs: ops::vector::PairsVec;
+    let pairs: PairsVec;
 
     // Determine the implementation to use
     // based on whether this is an ordered
@@ -83,7 +84,7 @@ pub fn get_ancestry_tuple(v: &Vec<usize>) -> AncestryTuple {
 }
 
 pub fn get_ancestry_vec(v: &Vec<usize>) -> AncestryVec {
-    let pairs: ops::vector::PairsVec;
+    let pairs: PairsVec;
 
     // Determine the implementation to use
     // based on whether this is an ordered
@@ -129,7 +130,7 @@ pub fn get_ancestry_vec(v: &Vec<usize>) -> AncestryVec {
 }
 
 pub fn get_ancestry_ndarray(v: &Vec<usize>) -> AncestryNDArray {
-    let pairs: ops::vector::PairsVec;
+    let pairs: PairsVec;
 
     // Determine the implementation to use
     // based on whether this is an ordered

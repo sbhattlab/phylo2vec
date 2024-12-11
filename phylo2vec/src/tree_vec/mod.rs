@@ -1,9 +1,10 @@
 use crate::utils::sample;
 
+// Import the types module
+pub mod types;
+
+// Import the operations modules
 pub mod ops;
-use ops::{
-    build_vector, find_coords_of_first_leaf, order_cherries, order_cherries_no_parents, Ancestry,
-};
 
 /// A vector representation of a phylogenetic tree
 ///
@@ -68,7 +69,7 @@ impl TreeVec {
     ///
     /// # Returns
     /// An `Ancestry` type containing parent-child relationships
-    pub fn get_ancestry(&self) -> Ancestry {
+    pub fn get_ancestry(&self) -> types::Ancestry {
         return ops::get_ancestry(&self.data);
     }
 
@@ -102,9 +103,9 @@ impl TreeVec {
 
         // ancestry_add[leaf_coords][leaf_col] = leaf as isize;
         // let ancestry_add_ref = &mut ancestry_add;
-        order_cherries(&mut ancestry_add);
-        order_cherries_no_parents(&mut ancestry_add);
-        self.data = build_vector(ancestry_add);
+        ops::order_cherries(&mut ancestry_add);
+        ops::order_cherries_no_parents(&mut ancestry_add);
+        self.data = ops::build_vector(ancestry_add);
     }
 
     /// Removes a leaf from the tree
@@ -119,7 +120,7 @@ impl TreeVec {
     /// Modifies the tree structure by removing the leaf and updating indices
     pub fn remove_leaf(&mut self, leaf: usize) -> usize {
         let ancestry = self.get_ancestry();
-        let leaf_coords = find_coords_of_first_leaf(&ancestry, leaf);
+        let leaf_coords = ops::find_coords_of_first_leaf(&ancestry, leaf);
         let leaf_row = leaf_coords.0;
         let leaf_col = leaf_coords.1;
 
@@ -159,9 +160,9 @@ impl TreeVec {
             ancestry_rm.push(new_row);
         }
 
-        order_cherries(&mut ancestry_rm);
-        order_cherries_no_parents(&mut ancestry_rm);
-        self.data = build_vector(ancestry_rm);
+        ops::order_cherries(&mut ancestry_rm);
+        ops::order_cherries_no_parents(&mut ancestry_rm);
+        self.data = ops::build_vector(ancestry_rm);
 
         return sister;
     }
@@ -232,7 +233,7 @@ mod tests {
     #[case(vec![0, 0, 1], vec![[1, 3, 4],
         [0, 2, 5],
         [5, 4, 6]])]
-    fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: Ancestry) {
+    fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: types::Ancestry) {
         let tree = TreeVec::new(v, None, None);
         let ancestry = tree.get_ancestry();
         assert_eq!(ancestry, expected);
