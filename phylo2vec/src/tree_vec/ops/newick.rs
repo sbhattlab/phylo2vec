@@ -1,5 +1,65 @@
 use crate::tree_vec::types::Ancestry;
 
+fn _get_cherries_recursive_inner(ancestry: &mut Ancestry, newick: &str, has_parents: bool) {
+    let mut open_idx: usize = 0;
+
+    for (i, ch) in newick.chars().enumerate() {
+        if ch == '(' {
+            open_idx = i + 1;
+        } else if ch == ')' {
+            let pairs: Vec<usize> = newick[open_idx..i]
+                .split(',')
+                .map(|x: &str| x.parse::<usize>().unwrap())
+                .collect();
+            let c1 = pairs[0];
+            let c2 = pairs[1];
+            let parent: usize;
+            let new_newick: String;
+            match has_parents {
+                // For case that the newick string has parents
+                true => {
+                    parent = newick[i + 1..]
+                        .split(',')
+                        .next()
+                        .unwrap_or("")
+                        .split(')')
+                        .next()
+                        .unwrap_or("")
+                        .parse::<usize>()
+                        .unwrap();
+                    new_newick = format!("{}{}", &newick[..open_idx - 1], &newick[i + 1..]);
+                }
+                // For case that the newick string does not have parents
+                false => {
+                    parent = std::cmp::max(c1, c2);
+                    new_newick = newick.replace(
+                        &newick[open_idx - 1..i + 1],
+                        &std::cmp::min(c1, c2).to_string(),
+                    );
+                }
+            }
+
+            ancestry.push([c1, c2, parent]);
+
+            return _get_cherries_recursive_inner(ancestry, &new_newick, has_parents);
+        }
+    }
+
+    // Extract the children
+}
+
+pub fn get_cherries(newick: &str) -> Ancestry {
+    let mut ancestry: Ancestry = Vec::new();
+    _get_cherries_recursive_inner(&mut ancestry, &newick[..newick.len() - 1], true);
+    ancestry
+}
+
+pub fn get_cherries_no_parents(newick: &str) -> Ancestry {
+    let mut ancestry: Ancestry = Vec::new();
+    _get_cherries_recursive_inner(&mut ancestry, &newick[..newick.len() - 1], false);
+    ancestry
+}
+
 // The recursive function that builds the Newick string
 fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
     let leaf_max = ancestry.len();

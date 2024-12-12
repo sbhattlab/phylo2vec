@@ -228,7 +228,7 @@ pub fn order_cherries_no_parents(ancestry: &mut Ancestry) {
     }
 }
 
-pub fn build_vector(cherries: Ancestry) -> Vec<usize> {
+pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     let num_cherries = cherries.len();
     let num_leaves = num_cherries + 1;
 

@@ -16,3 +16,63 @@ pub fn to_newick(v: &Vec<usize>) -> String {
     let ancestry: Ancestry = get_ancestry(&v);
     build_newick(&ancestry)
 }
+
+/// Recover a Phylo2Vec vector from a rooted tree (in Newick format)
+pub fn from_newick(newick: &str, has_parents: bool) -> Vec<usize> {
+    let mut ancestry: Ancestry;
+
+    match has_parents {
+        true => {
+            ancestry = newick::get_cherries(newick);
+            order_cherries(&mut ancestry);
+        }
+        false => {
+            ancestry = newick::get_cherries_no_parents(newick);
+            order_cherries_no_parents(&mut ancestry);
+        }
+    }
+
+    return build_vector(&ancestry);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::*;
+
+    /// Test the conversion of vector to Newick format
+    ///
+    /// Tests are using 5 or less leaf tree with different structures
+    #[rstest]
+    #[case(vec![0, 0, 0, 1, 3], "(((0,(3,5)6)8,2)9,(1,4)7)10;")]
+    #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)6)7)8)9)10;")]
+    #[case(vec![0, 0, 1], "((0,2)5,(1,3)4)6;")]
+    fn test_to_newick(#[case] v: Vec<usize>, #[case] expected: &str) {
+        let newick = to_newick(&v);
+        assert_eq!(newick, expected);
+    }
+
+    /// Test the conversion of a newick string to a vector
+    ///
+    /// Tests are using 5 or less leaf tree with different structures
+    #[rstest]
+    #[case(vec![0, 0, 0, 1, 3], "(((0,(3,5)6)8,2)9,(1,4)7)10;")]
+    #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)6)7)8)9)10;")]
+    #[case(vec![0, 0, 1], "((0,2)5,(1,3)4)6;")]
+    fn test_from_newick(#[case] expected: Vec<usize>, #[case] newick: &str) {
+        let vector = from_newick(&newick, true);
+        assert_eq!(vector, expected);
+    }
+
+    /// Test the conversion of a newick string without parents to a vector
+    ///
+    /// Tests are using 5 or less leaf tree with different structures
+    #[rstest]
+    #[case(vec![0, 0, 0, 1, 3], "(((0,(3,5)),2),(1,4));")]
+    #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)))));")]
+    #[case(vec![0, 0, 1], "((0,2),(1,3));")]
+    fn test_from_newick_no_parents(#[case] expected: Vec<usize>, #[case] newick: &str) {
+        let vector = from_newick(&newick, false);
+        assert_eq!(vector, expected);
+    }
+}

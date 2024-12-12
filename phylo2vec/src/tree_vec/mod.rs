@@ -105,7 +105,7 @@ impl TreeVec {
         // let ancestry_add_ref = &mut ancestry_add;
         ops::order_cherries(&mut ancestry_add);
         ops::order_cherries_no_parents(&mut ancestry_add);
-        self.data = ops::build_vector(ancestry_add);
+        self.data = ops::build_vector(&ancestry_add);
     }
 
     /// Removes a leaf from the tree
@@ -162,7 +162,7 @@ impl TreeVec {
 
         ops::order_cherries(&mut ancestry_rm);
         ops::order_cherries_no_parents(&mut ancestry_rm);
-        self.data = ops::build_vector(ancestry_rm);
+        self.data = ops::build_vector(&ancestry_rm);
 
         return sister;
     }
