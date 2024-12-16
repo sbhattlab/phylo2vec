@@ -1,5 +1,9 @@
 use crate::tree_vec::types::Ancestry;
 
+mod newick_patterns;
+
+pub use newick_patterns::NewickPatterns;
+
 fn _get_cherries_recursive_inner(ancestry: &mut Ancestry, newick: &str, has_parents: bool) {
     let mut open_idx: usize = 0;
 
@@ -84,6 +88,67 @@ fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
     format!("({},{}){}", left, right, p)
 }
 
+/// Remove parent labels from the Newick string
+///
+/// # Example
+///
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::remove_parent_labels;
+///
+/// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
+/// let result = remove_parent_labels(newick);
+/// assert_eq!(result, "(((0,(3,5)),2),(1,4));");
+/// ```
+pub fn remove_parent_labels(newick: &str) -> String {
+    let newick_patterns = NewickPatterns::new();
+    return newick_patterns.parents.replace_all(newick, ")").to_string();
+}
+
+/// Check if the Newick string has parent labels
+///
+/// # Example
+///
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::has_parents;
+///
+/// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
+/// let result = has_parents(newick);
+/// assert_eq!(result, true);
+///
+/// let newick_no_parents = "(((0,(3,5)),2),(1,4));";
+/// let result_no_parents = has_parents(newick_no_parents);
+/// assert_eq!(result_no_parents, false);
+/// ```
+pub fn has_parents(newick: &str) -> bool {
+    let newick_patterns = NewickPatterns::new();
+    return newick_patterns.parents.is_match(newick);
+}
+
+/// Find the number of leaves in the Newick string
+///
+/// # Example
+///
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::find_num_leaves;
+///
+/// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
+/// let result = find_num_leaves(newick);
+/// assert_eq!(result, 6);
+/// ```
+pub fn find_num_leaves(newick: &str) -> usize {
+    let newick_patterns = NewickPatterns::new();
+    let result: Vec<usize> = newick_patterns
+        .pairs
+        .captures_iter(newick)
+        .map(|caps| {
+            let (_, [_, node]) = caps.extract();
+            node.parse::<usize>().unwrap()
+        })
+        .collect();
+
+    return result.len();
+}
+
 /// Build newick string from the ancestry matrix
 pub fn build_newick(ancestry: &Ancestry) -> String {
     // Get the root node, which is the parent value of the last ancestry element
@@ -91,4 +156,49 @@ pub fn build_newick(ancestry: &Ancestry) -> String {
 
     // Build the Newick string starting from the root, and append a semicolon
     format!("{};", _build_newick_recursive_inner(root, ancestry))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tree_vec::ops::to_newick;
+    use crate::utils::sample;
+    use rstest::*;
+
+    #[rstest]
+    #[case("(((0,(3,5)6)8,2)9,(1,4)7)10;", "(((0,(3,5)),2),(1,4));")]
+    #[case("(0,(1,(2,(3,(4,5)6)7)8)9)10;", "(0,(1,(2,(3,(4,5)))));")]
+    #[case("((0,2)5,(1,3)4)6;", "((0,2),(1,3));")]
+    fn test_remove_parent_labels(#[case] newick: &str, #[case] expected: &str) {
+        let result = remove_parent_labels(&newick);
+        assert_eq!(result, expected);
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_has_parents(#[case] n_leaves: usize) {
+        let v = sample(n_leaves, false);
+        let newick = to_newick(&v);
+        // Check if the newick string has parents
+        let result = has_parents(&newick);
+        assert_eq!(result, true);
+
+        // Check if the newick string does not have parents
+        let result_no_parents = has_parents(&remove_parent_labels(&newick));
+        assert_eq!(result_no_parents, false);
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_find_num_leaves(#[case] n_leaves: usize) {
+        let v = sample(n_leaves, false);
+        let newick = to_newick(&v);
+        // Check if the newick string has parents
+        let result = find_num_leaves(&newick);
+        assert_eq!(result, n_leaves);
+    }
 }
