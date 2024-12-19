@@ -239,7 +239,7 @@ def _find_indices_of_first_leaf(ancestry, leaf):
                 return r, c
 
 
-@nb.njit(cache=True)
+
 def remove_leaf(v, leaf):
     """Remove a leaf from a Phylo2Vec v
 
@@ -302,7 +302,7 @@ def remove_leaf(v, leaf):
     return v_sub, sister
 
 
-@nb.njit(cache=True)
+
 def add_leaf(v, leaf, pos):
     """Add a leaf to a Phylo2Vec vector v
 
@@ -355,7 +355,7 @@ def add_leaf(v, leaf, pos):
     return v_add
 
 
-@nb.njit(cache=True)
+
 def get_ancestry_paths(v):
     """
     Get the ancestry paths for each node in the Phylo2Vec vector.
@@ -386,7 +386,7 @@ def get_ancestry_paths(v):
     return ancestry_paths
 
 
-@nb.njit(cache=True)
+
 def get_common_ancestor(v, node1, node2):
     """Get the first recent common ancestor between two nodes in a Phylo2Vec tree
 

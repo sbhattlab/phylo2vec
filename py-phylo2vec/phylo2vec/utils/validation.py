@@ -2,8 +2,10 @@
 
 import numpy as np
 
+from phylo2vec import _phylo2vec_core
 
-def check_v(v):
+
+def check_v(v: np.ndarray) -> None:
     """Input validation of a Phylo2Vec vector
 
     The input is checked to satisfy the Phylo2Vec constraints
@@ -13,8 +15,4 @@ def check_v(v):
     v : numpy.ndarray
         Phylo2Vec vector
     """
-    k = len(v)
-
-    v_max = 2 * np.arange(k)
-
-    assert np.all((0 <= v) & (v <= v_max)), print(v, v >= 0, v <= v_max)
+    _phylo2vec_core.check_v(v.tolist())
