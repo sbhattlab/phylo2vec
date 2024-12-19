@@ -5,7 +5,7 @@ import pytest
 
 from ete3 import Tree
 
-from phylo2vec.tests.config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
+from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
 from phylo2vec.base import to_newick, to_vector, to_vector_no_parents
 from phylo2vec.base.to_vector import (
     _find_cherries,

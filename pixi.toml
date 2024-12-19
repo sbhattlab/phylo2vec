@@ -54,20 +54,19 @@ clang = "*"
 # ======= py-phylo2vec ==========
 
 [feature.python.dependencies]
-python = "==3.10"
+python = "3.10.*"
 pixi-kernel = ">=0.4.0,<0.5"
 pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
 jupyterlab = ">=4.1,<4.2"
-
-[feature.python.tasks.build-python-wheel]
-cmd = "rm -rf dist && maturin build --release --out dist --find-interpreter"
-cwd = "py-phylo2vec"
+pytest = ">=8.3.4,<9"
 
 [feature.python.tasks.install-python]
-cmd = "pip install --force-reinstall dist/*.whl"
-cwd = "py-phylo2vec"
-depends-on = ["build-python-wheel"]
+cmd = "maturin develop --manifest-path ./py-phylo2vec/Cargo.toml"
+
+[feature.python.tasks.test]
+cmd = "pytest -vvv ./py-phylo2vec/tests"
+depends-on = ["install-python"]
 
 [feature.python.tasks.test-rust]
 cmd = "cargo test --lib"
