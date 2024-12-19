@@ -1,13 +1,13 @@
 """Tests for utility functions."""
 
-import random
+import secrets
 
 import numpy as np
 import pytest
 
 from ete3 import Tree
 
-from phylo2vec.tests.config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
+from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
 from phylo2vec.base import to_newick
 from phylo2vec.utils import (
     add_leaf,
@@ -91,7 +91,7 @@ def test_remove_and_add(n_leaves):
     for _ in range(N_REPEATS):
         v = sample(n_leaves)
 
-        leaf = random.randint(0, n_leaves - 1)
+        leaf = secrets.randbelow(n_leaves)
 
         v_sub, sis = remove_leaf(v, leaf)
 
