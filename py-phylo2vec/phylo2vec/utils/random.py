@@ -3,12 +3,11 @@
 import os
 import random
 
-import numba as nb
 import numpy as np
 
+from phylo2vec import _phylo2vec_core
 
-@nb.njit
-def sample(n_leaves, ordered=False):
+def sample(n_leaves: int, ordered: bool = False) -> np.ndarray:
     """Sample a random tree via Phylo2Vec
 
     Parameters
@@ -30,11 +29,8 @@ def sample(n_leaves, ordered=False):
         Phylo2Vec vector
     """
 
-    if ordered:
-        v_list = [np.random.randint(0, i + 1) for i in range(n_leaves - 1)]
-    else:
-        v_list = [np.random.randint(0, 2 * i + 1) for i in range(n_leaves - 1)]
-    return np.array(v_list, dtype=np.uint16)
+    v_list = _phylo2vec_core.sample(n_leaves, ordered)
+    return np.asarray(v_list)
 
 
 def seed_everything(seed):
