@@ -62,16 +62,11 @@ jupyterlab = ">=4.1,<4.2"
 pytest = ">=8.3.4,<9"
 
 [feature.python.tasks.install-python]
-cmd = "maturin develop --manifest-path ./py-phylo2vec/Cargo.toml"
+cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"
 
 [feature.python.tasks.test]
 cmd = "pytest -vvv ./py-phylo2vec/tests"
 depends-on = ["install-python"]
-
-[feature.python.tasks.test-rust]
-cmd = "cargo test --lib"
-cwd = "py-phylo2vec"
-
 
 # ======== r-phylo2vec ===========
 
