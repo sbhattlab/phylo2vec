@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Scheidwasser"
+    given-names: "Neil"
+title: "Phylo2Vec: a vector representation for binary trees"
+url: "https://phylo2vec.readthedocs.io"
+repository-code: "https://github.com/sbhattlab/phylo2vec"
+# -------------------------------
+# Zenodo DOI will be added after the first release
+# doi: 10.xxxx/zenodo.xxxxxxx
+# -------------------------------
+# Note for `version` and `date-released` meta below
+# Pointing to a specific release/version will
+# require having to update this file with each release
+# version: x.x.x
+# date-released: xxxx-xx-xx
+# -------------------------------
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Penn"
+    given-names: "Matthew J"
+  - family-names: "Scheidwasser"
+    given-names: "Neil"
+  - family-names: "Khurana"
+    given-names: "Mark P"
+  - family-names: "Duchêne"
+    given-names: "David A"
+  - family-names: "Donnelly"
+    given-names: "Christl A"
+  - family-names: "Bhatt"
+    given-names: "Samir"
+  journal: "arXiv preprint arXiv:2304.12693v4"
+  doi: https://doi.org/10.48550/arXiv.2304.12693
+  month: 11
+  title: "Phylo2Vec: a vector representation for binary trees"
+  year: 2024
