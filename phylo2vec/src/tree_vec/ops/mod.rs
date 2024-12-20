@@ -9,7 +9,7 @@ pub use vector::{
     order_cherries, order_cherries_no_parents,
 };
 
-pub use newick::build_newick;
+pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parents};
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
 pub fn to_newick(v: &Vec<usize>) -> String {
@@ -18,18 +18,15 @@ pub fn to_newick(v: &Vec<usize>) -> String {
 }
 
 /// Recover a Phylo2Vec vector from a rooted tree (in Newick format)
-pub fn from_newick(newick: &str, has_parents: bool) -> Vec<usize> {
+pub fn to_vector(newick: &str) -> Vec<usize> {
     let mut ancestry: Ancestry;
 
-    match has_parents {
-        true => {
-            ancestry = newick::get_cherries(newick);
-            order_cherries(&mut ancestry);
-        }
-        false => {
-            ancestry = newick::get_cherries_no_parents(newick);
-            order_cherries_no_parents(&mut ancestry);
-        }
+    if has_parents(&newick) {
+        ancestry = get_cherries(newick);
+        order_cherries(&mut ancestry);
+    } else {
+        ancestry = get_cherries_no_parents(newick);
+        order_cherries_no_parents(&mut ancestry);
     }
 
     return build_vector(&ancestry);
@@ -59,8 +56,8 @@ mod tests {
     #[case(vec![0, 0, 0, 1, 3], "(((0,(3,5)6)8,2)9,(1,4)7)10;")]
     #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)6)7)8)9)10;")]
     #[case(vec![0, 0, 1], "((0,2)5,(1,3)4)6;")]
-    fn test_from_newick(#[case] expected: Vec<usize>, #[case] newick: &str) {
-        let vector = from_newick(&newick, true);
+    fn test_to_vector(#[case] expected: Vec<usize>, #[case] newick: &str) {
+        let vector = to_vector(&newick);
         assert_eq!(vector, expected);
     }
 
@@ -71,8 +68,8 @@ mod tests {
     #[case(vec![0, 0, 0, 1, 3], "(((0,(3,5)),2),(1,4));")]
     #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)))));")]
     #[case(vec![0, 0, 1], "((0,2),(1,3));")]
-    fn test_from_newick_no_parents(#[case] expected: Vec<usize>, #[case] newick: &str) {
-        let vector = from_newick(&newick, false);
+    fn test_to_vector_no_parents(#[case] expected: Vec<usize>, #[case] newick: &str) {
+        let vector = to_vector(&newick);
         assert_eq!(vector, expected);
     }
 }
