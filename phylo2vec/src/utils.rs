@@ -93,15 +93,14 @@ fn _check_max(idx: usize, value: usize) -> () {
 /// assert_eq!(unordered, false);
 /// ```
 pub fn is_unordered(v: &Vec<usize>) -> bool {
-    let mut unordered = false;
     for i in 0..v.len() {
         _check_max(i, v[i]);
         if v[i] > i + 1 {
-            unordered = true;
+            return true;
         }
     }
 
-    unordered
+    false
 }
 
 #[cfg(test)]
