@@ -11,6 +11,12 @@ fn to_newick(input_vector: Vec<usize>) -> PyResult<String> {
 }
 
 #[pyfunction]
+fn to_vector(newick: &str) -> Vec<usize> {
+    let v = ops::to_vector(&newick);
+    v
+}
+
+#[pyfunction]
 fn get_ancestry(input_vector: Vec<usize>) -> Vec<[usize; 3]> {
     let ancestry: Vec<[usize; 3]> = ops::get_ancestry(&input_vector);
 
@@ -38,6 +44,7 @@ fn check_v(input_vector: Vec<usize>) {
 #[pymodule]
 fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(to_newick, m)?)?;
+    m.add_function(wrap_pyfunction!(to_vector, m)?)?;
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(sample, m)?)?;

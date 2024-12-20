@@ -12,7 +12,7 @@ from phylo2vec.base.to_vector import (
     _build_vector,
     _find_cherries,
     _order_cherries_no_parents,
-    to_vector_no_parents,
+    to_vector,
 )
 from phylo2vec.utils.validation import check_v
 
@@ -223,11 +223,11 @@ def reroot_at_random(v):
 
     newick = ete3_tree.write(format=9)
 
-    v_new = to_vector_no_parents(newick)
+    v_new = to_vector(newick)
 
     check_v(v_new)
 
-    return to_vector_no_parents(newick)
+    return to_vector(newick)
 
 
 # faster than np.nonzero

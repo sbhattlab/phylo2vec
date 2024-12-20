@@ -6,7 +6,7 @@ import pytest
 from ete3 import Tree
 
 from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
-from phylo2vec.base import to_newick, to_vector, to_vector_no_parents
+from phylo2vec.base import to_newick, to_vector
 from phylo2vec.base.to_vector import (
     _find_cherries,
     _order_cherries_no_parents,
@@ -39,7 +39,7 @@ def test_v2newick2v(n_leaves):
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
 def test_cherries_no_parents(n_leaves):
-    """Test that the functions of to_vector_no_parents and to_vector do the same thing
+    """Test that the functions of to_vector handles parents and without
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ def test_ladderize(n_leaves):
 
         nw_ladderized = tr.write(format=9)
 
-        assert np.array_equal(to_vector(nw), to_vector_no_parents(nw_ladderized))
+        assert np.array_equal(to_vector(nw), to_vector(nw_ladderized))
 
 
 if __name__ == "__main__":
