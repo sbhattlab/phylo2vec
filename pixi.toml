@@ -29,10 +29,27 @@ start-release = "cargo run --release"
 open-doc = "cargo doc --open"
 benchmark = "cargo bench"
 
+# ======= CI Environments ==========
 [environments]
-py-phylo2vec = {features = ["python"], solve-group = "default"}
-r-phylo2vec = {features = ["r"], solve-group = "default"}
+py310 = ["python", "py310"]
+py311 = ["python", "py311"]
+py312 = ["python", "py312"]
 
+# ======= py-phylo2vec ==========
+
+# Default Python Phylo2vec environment
+[environments.py-phylo2vec]
+features = ["pydocs", "pydev", "python", "py310"]
+solve-group = "default"
+
+# ======= r-phylo2vec ==========
+
+# Default R Phylo2vec environment
+[environments.r-phylo2vec]
+features = ["r"]
+solve-group = "default"
+
+# ====== Default Dependencies ======
 [dependencies]
 rust = ">=1.81.0,<2"
 openssl = ">=3.3.1,<3.4"
@@ -53,21 +70,33 @@ clang = "*"
 
 # ======= py-phylo2vec ==========
 
-[feature.python.dependencies]
+[feature.py310.dependencies]
 python = "3.10.*"
+
+[feature.py311.dependencies]
+python = "3.11.*"
+
+[feature.py312.dependencies]
+python = "3.12.*"
+
+[feature.pydev.dependencies]
 pixi-kernel = ">=0.4.0,<0.5"
+jupyterlab = ">=4.1,<4.2"
+
+[feature.pydocs.dependencies]
+jupyter-book = ">=0.11.0"
+
+[feature.pydocs.tasks.build-docs]
+cmd = "jupyter-book build docs"
+depends-on = ["install-python"]
+
+[feature.python.dependencies]
 pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
-jupyterlab = ">=4.1,<4.2"
 pytest = ">=8.3.4,<9"
-jupyter-book = ">=0.11.0"
 
 [feature.python.tasks.install-python]
 cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"
-
-[feature.python.tasks.build-docs]
-cmd = "jupyter-book build docs"
-depends-on = ["install-python"]
 
 [feature.python.tasks.test]
 cmd = "pytest -vvv ./py-phylo2vec/tests"
