@@ -11,16 +11,19 @@ permissions:
   contents: read
 
 env:
-  PIXI_PYTHON_ENV: py-phylo2vec
   PIXI_COLOR: always
 
 jobs:
   build_and_test:
-    name: Python project - latest
+    name: Python project - ${{ matrix.python-environment }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-environment: ['py310', 'py311', 'py312']
     steps:
       - uses: actions/checkout@v4
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          environments: ${{ env.PIXI_PYTHON_ENV }}
-      - run: pixi run -e ${{ env.PIXI_PYTHON_ENV }} test
+          environments: ${{ matrix.python-environment }}
+      - run: pixi run -e ${{ matrix.python-environment }} test
