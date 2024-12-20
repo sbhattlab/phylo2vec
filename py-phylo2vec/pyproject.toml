@@ -10,7 +10,7 @@ authors = [
   { name = "Neil Scheidwasser", email = "neil.clow@sund.ku.dk" }
 ]
 readme = "README.md"
-requires-python = ">=3.9,<3.11"
+requires-python = ">=3.10,<3.13"
 license = {file = "LICENSE"}
 classifiers = [
     "Development Status :: 3 - Alpha",
