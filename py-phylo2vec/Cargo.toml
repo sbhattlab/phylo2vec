@@ -1,7 +1,8 @@
 [package]
 name = "py-phylo2vec"
+# Python and binding version
+version = "0.1.12"
 edition.workspace = true
-version.workspace = true
 authors.workspace = true
 description.workspace = true
 license.workspace = true
@@ -20,7 +21,11 @@ crate-type = ["cdylib"]
 
 [dependencies]
 rand = "*"
-pyo3 = { version = "0.22.6", features = ["abi3-py310", "abi3-py39"] }
+pyo3 = { version = "0.23.3", features = [
+    "abi3-py312",
+    "abi3-py311",
+    "abi3-py310",
+] }
 phylo2vec = { workspace = true }
 
 [dev-dependencies]

@@ -49,5 +49,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(sample, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
+    // Metadata about the package bindings
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
