@@ -60,9 +60,14 @@ pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
 jupyterlab = ">=4.1,<4.2"
 pytest = ">=8.3.4,<9"
+jupyter-book = ">=0.11.0"
 
 [feature.python.tasks.install-python]
 cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"
+
+[feature.python.tasks.build-docs]
+cmd = "jupyter-book build docs"
+depends-on = ["install-python"]
 
 [feature.python.tasks.test]
 cmd = "pytest -vvv ./py-phylo2vec/tests"
