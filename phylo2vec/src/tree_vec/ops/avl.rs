@@ -44,11 +44,11 @@ impl AVLTree {
         }
     }
 
-    fn update_height(n: &mut Box<Node>) {
+    fn update_height(n: &mut Node) {
         n.height = 1 + usize::max(Self::get_height(&n.left), Self::get_height(&n.right));
     }
 
-    fn update_size(n: &mut Box<Node>) {
+    fn update_size(n: &mut Node) {
         n.size = 1 + Self::get_size(&n.left) + Self::get_size(&n.right);
     }
 
