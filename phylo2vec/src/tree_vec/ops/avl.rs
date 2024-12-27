@@ -151,7 +151,7 @@ impl AVLTree {
 
         Self::update_height(&mut n);
         Self::update_size(&mut n);
-        
+
         return Self::balance(&mut Some(n));
     }
 
