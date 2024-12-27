@@ -44,11 +44,8 @@ impl AVLTree {
         }
     }
 
-    fn update_height(n: &mut Node) {
+    fn update_height_and_size(n: &mut Node) {
         n.height = 1 + usize::max(Self::get_height(&n.left), Self::get_height(&n.right));
-    }
-
-    fn update_size(n: &mut Node) {
         n.size = 1 + Self::get_size(&n.left) + Self::get_size(&n.right);
     }
 
@@ -60,9 +57,9 @@ impl AVLTree {
                 x.right = Some(y_node);
                 x.right.as_mut().unwrap().left = t2;
 
-                // Update heights
-                Self::update_height(x.right.as_mut().unwrap());
-                Self::update_height(&mut x);
+                // Update height and size values
+                Self::update_height_and_size(x.right.as_mut().unwrap());
+                Self::update_height_and_size(&mut x);
 
                 return Some(x);
             } else {
@@ -83,9 +80,9 @@ impl AVLTree {
                 y.left = Some(x_node);
                 y.left.as_mut().unwrap().right = t2;
 
-                // Update heights
-                Self::update_height(y.left.as_mut().unwrap());
-                Self::update_height(&mut y);
+                // Update height and size values
+                Self::update_height_and_size(y.left.as_mut().unwrap());
+                Self::update_height_and_size(&mut y);
 
                 return Some(y);
             } else {
@@ -149,8 +146,7 @@ impl AVLTree {
             n.right = Self::insert_by_index(n.right.take(), value, index - left_size - 1);
         }
 
-        Self::update_height(&mut n);
-        Self::update_size(&mut n);
+        Self::update_height_and_size(&mut n);
 
         return Self::balance(&mut Some(n));
     }
