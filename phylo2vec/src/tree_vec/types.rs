@@ -1,4 +1,4 @@
-// A type alias for the Pair type, which is a tuple representing (child1, child2)
+/// A type alias for the Pair type, which is a tuple representing (child1, child2)
 pub type Pair = (usize, usize);
 
 /// A type alias for the Ancestry type, which is a vector of vectors representing [child1, child2, parent]

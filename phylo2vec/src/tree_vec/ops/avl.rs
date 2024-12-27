@@ -20,6 +20,7 @@ impl Node {
     }
 }
 
+/// An AVL tree is a self-balancing binary search tree.
 pub struct AVLTree {
     root: Option<Box<Node>>,
 }
@@ -43,8 +44,11 @@ impl AVLTree {
         }
     }
 
-    fn update(n: &mut Box<Node>) {
+    fn update_height(n: &mut Box<Node>) {
         n.height = 1 + usize::max(Self::get_height(&n.left), Self::get_height(&n.right));
+    }
+
+    fn update_size(n: &mut Box<Node>) {
         n.size = 1 + Self::get_size(&n.left) + Self::get_size(&n.right);
     }
 
@@ -57,8 +61,8 @@ impl AVLTree {
                 x.right.as_mut().unwrap().left = t2;
 
                 // Update heights
-                Self::update(x.right.as_mut().unwrap());
-                Self::update(&mut x);
+                Self::update_height(x.right.as_mut().unwrap());
+                Self::update_height(&mut x);
 
                 return Some(x);
             } else {
@@ -80,8 +84,8 @@ impl AVLTree {
                 y.left.as_mut().unwrap().right = t2;
 
                 // Update heights
-                Self::update(y.left.as_mut().unwrap());
-                Self::update(&mut y);
+                Self::update_height(y.left.as_mut().unwrap());
+                Self::update_height(&mut y);
 
                 return Some(y);
             } else {
@@ -94,7 +98,8 @@ impl AVLTree {
         }
     }
 
-    fn get_balance(node: &Option<Box<Node>>) -> isize {
+    fn get_balance_factor(node: &Option<Box<Node>>) -> isize {
+        // Balance factor is the difference between the height of the left subtree and the right subtree.
         match node {
             Some(ref n) => Self::get_height(&n.left) as isize - Self::get_height(&n.right) as isize,
             None => 0,
@@ -102,9 +107,9 @@ impl AVLTree {
     }
 
     fn balance(node: &mut Option<Box<Node>>) -> Option<Box<Node>> {
-        let balance = Self::get_balance(node);
-        if balance > 1 {
-            if Self::get_balance(&node.as_ref().unwrap().left) >= 0 {
+        let balance_factor = Self::get_balance_factor(node);
+        if balance_factor > 1 {
+            if Self::get_balance_factor(&node.as_ref().unwrap().left) >= 0 {
                 return Self::right_rotate(node);
             } else {
                 if let Some(ref mut n) = node {
@@ -113,8 +118,8 @@ impl AVLTree {
                 return Self::right_rotate(node);
             }
         }
-        if balance < -1 {
-            if Self::get_balance(&node.as_ref().unwrap().right) <= 0 {
+        if balance_factor < -1 {
+            if Self::get_balance_factor(&node.as_ref().unwrap().right) <= 0 {
                 return Self::left_rotate(node);
             } else {
                 if let Some(ref mut n) = node {
@@ -123,6 +128,7 @@ impl AVLTree {
                 return Self::left_rotate(node);
             }
         }
+        // An AVL tree is balanced if its balance factor is -1, 0, or 1.
         node.take()
     }
 
@@ -143,7 +149,9 @@ impl AVLTree {
             n.right = Self::insert_by_index(n.right.take(), value, index - left_size - 1);
         }
 
-        Self::update(&mut n);
+        Self::update_height(&mut n);
+        Self::update_size(&mut n);
+        
         return Self::balance(&mut Some(n));
     }
 
