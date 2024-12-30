@@ -2,7 +2,8 @@
 resolver = "2"
 members = [
     "phylo2vec",
-    "py-phylo2vec"
+    "py-phylo2vec",
+    "r-phylo2vec/src/rust",
 ]
 default-members = ["phylo2vec"]
 
