@@ -3,7 +3,7 @@
 **NOTE: This is currently in active development and APIs will change. Use at
 your own risk.**
 
-This directory contains the pylo2vec Python codebase, which includes Rust
+This directory contains the phylo2vec Python codebase, which includes Rust
 binding setup.
 
 To install this python package, simply run the following within the root
