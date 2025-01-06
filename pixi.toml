@@ -107,3 +107,9 @@ depends-on = ["install-python"]
 [feature.r.dependencies]
 r = "4.*"
 r-devtools = ">=2.4.5,<3"
+
+[feature.r.tasks.install-r]
+cmd = "Rscript ./r-phylo2vec/scripts/install-package.R"
+
+[feature.r.tasks.test]
+cmd = "Rscript ./r-phylo2vec/scripts/run-tests.R"

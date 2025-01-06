@@ -11,15 +11,19 @@
 NULL
 
 #' Sample a random tree via Phylo2Vec
+#' @export
 sample <- function(n_leaves, ordered) .Call(wrap__sample, n_leaves, ordered)
 
 #' Recover a rooted tree (in Newick format) from a Phylo2Vec v
+#' @export
 to_newick <- function(input_integers) .Call(wrap__to_newick, input_integers)
 
 #' Convert a newick string to a Phylo2Vec vector
+#' @export
 to_vector <- function(newick) .Call(wrap__to_vector, newick)
 
 #' Validate a Phylo2Vec vector
+#' @export
 check_v <- function(input_integers) invisible(.Call(wrap__check_v, input_integers))
 
 
