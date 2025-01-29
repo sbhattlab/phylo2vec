@@ -94,12 +94,17 @@ depends-on = ["install-python"]
 pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
 pytest = ">=8.3.4,<9"
+pytest-benchmark = ">=5.1.0,<6"
 
 [feature.python.tasks.install-python]
 cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"
 
 [feature.python.tasks.test]
 cmd = "pytest -vvv ./py-phylo2vec/tests"
+depends-on = ["install-python"]
+
+[feature.python.tasks.benchmark]
+cmd = "pytest ./py-phylo2vec/benchmarks --benchmark-group-by=func --benchmark-warmup=on"
 depends-on = ["install-python"]
 
 # ======== r-phylo2vec ===========
