@@ -260,7 +260,7 @@ pub fn cophenetic_distances(v: &Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
     if unrooted {
         let nrows = ancestry.len();
         let ncols = ancestry[0].len();
-        ancestry[nrows - 1][ncols - 1] = ancestry.iter().flatten().max().copied().unwrap();
+        ancestry[nrows - 1][ncols - 1] = ancestry.iter().flatten().max().unwrap() - 1;
     }
 
     let n_leaves = v.len() + 1;
