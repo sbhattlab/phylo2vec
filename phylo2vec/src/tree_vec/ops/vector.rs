@@ -254,6 +254,16 @@ pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     return v;
 }
 
+/// Get the cophenetic distances from the Phylo2Vec vector
+/// Output is a pairwise distance matrix of dimensions n x n
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::vector::cophenetic_distances;
+///
+/// let v = vec![0, 0, 0, 1, 3, 3, 1, 4, 4];
+/// let dist = cophenetic_distances(&v, false);
+/// ```
 pub fn cophenetic_distances(v: &Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
     let mut ancestry = get_ancestry(v);
 

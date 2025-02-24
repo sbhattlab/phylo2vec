@@ -1,8 +1,6 @@
-import numpy as np
-
-from phylo2vec.base.to_newick import _get_ancestry
-from phylo2vec.utils.validation import check_v
 from phylo2vec import _phylo2vec_core
+from phylo2vec.utils.validation import check_v
+
 
 def cophenetic_distances(v, unrooted=False):
     return _phylo2vec_core.cophenetic_distances(v, unrooted)
