@@ -268,6 +268,10 @@ pub fn cophenetic_distances(v: &Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
     let mut ancestry = get_ancestry(v);
 
     if unrooted {
+        // Base case for unrooted trees: Simply two nodes connected to each other by a single edge
+        if v.len() == 1 {
+            return vec![vec![0, 1], vec![1, 0]];
+        }
         let nrows = ancestry.len();
         let ncols = ancestry[0].len();
         ancestry[nrows - 1][ncols - 1] = ancestry.iter().flatten().max().unwrap() - 1;
