@@ -5,8 +5,8 @@ pub mod vector;
 use crate::tree_vec::types::Ancestry;
 
 pub use vector::{
-    build_vector, find_coords_of_first_leaf, get_ancestry, get_pairs, get_pairs_avl,
-    order_cherries, order_cherries_no_parents,
+    build_vector, cophenetic_distances, find_coords_of_first_leaf, get_ancestry, get_pairs,
+    get_pairs_avl, order_cherries, order_cherries_no_parents,
 };
 
 pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parents};
@@ -59,6 +59,21 @@ mod tests {
     fn test_to_vector(#[case] expected: Vec<usize>, #[case] newick: &str) {
         let vector = to_vector(&newick);
         assert_eq!(vector, expected);
+    }
+
+    #[rstest]
+    #[case(vec![0], false, vec![vec![0, 2], vec![2, 0]])]
+    #[case(vec![0], true, vec![vec![0, 1], vec![1, 0]])]
+    #[case(vec![0, 1, 2], false, vec![vec![0, 3, 4, 4], vec![3, 0, 3, 3], vec![4, 3, 0, 2], vec![4, 3, 2, 0]])]
+    #[case(vec![0, 1, 2], true, vec![vec![0, 2, 3, 3], vec![2, 0, 3, 3], vec![3, 3, 0, 2], vec![3, 3, 2, 0]])]
+    #[case(vec![0, 0, 1], false, vec![vec![0, 4, 2, 4], vec![4, 0, 4, 2], vec![2, 4, 0, 4], vec![4, 2, 4, 0]])]
+    #[case(vec![0, 0, 1], true, vec![vec![0, 3, 2, 3], vec![3, 0, 3, 2], vec![2, 3, 0, 3], vec![3, 2, 3, 0]])]
+    fn test_cophenetic_distances(
+        #[case] v: Vec<usize>,
+        #[case] unrooted: bool,
+        #[case] expected: Vec<Vec<usize>>,
+    ) {
+        assert_eq!(cophenetic_distances(&v, unrooted), expected);
     }
 
     /// Test the conversion of a newick string without parents to a vector

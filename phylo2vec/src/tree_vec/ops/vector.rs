@@ -253,3 +253,71 @@ pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     }
     return v;
 }
+
+/// Get the cophenetic distances from the Phylo2Vec vector
+/// Output is a pairwise distance matrix of dimensions n x n
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::vector::cophenetic_distances;
+///
+/// let v = vec![0, 0, 0, 1, 3, 3, 1, 4, 4];
+/// let dist = cophenetic_distances(&v, false);
+/// ```
+pub fn cophenetic_distances(v: &Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
+    let mut ancestry = get_ancestry(v);
+
+    if unrooted {
+        // Base case for unrooted trees: Simply two nodes connected to each other by a single edge
+        if v.len() == 1 {
+            return vec![vec![0, 1], vec![1, 0]];
+        }
+        let nrows = ancestry.len();
+        let ncols = ancestry[0].len();
+        ancestry[nrows - 1][ncols - 1] = ancestry.iter().flatten().max().unwrap() - 1;
+    }
+
+    let n_leaves = v.len() + 1;
+    let size = 2 * n_leaves - 1;
+    let mut dist: Vec<Vec<usize>> = vec![vec![0; size]; size];
+    let mut all_visited: Vec<usize> = Vec::new();
+
+    for i in 0..(n_leaves - 1) {
+        let [c1, c2, p] = ancestry[n_leaves - i - 2];
+
+        if all_visited.len() >= 1 {
+            // Iterate over all_visited except the last element
+            for &visited in &all_visited[0..all_visited.len() - 1] {
+                let dist_from_visited = dist[p][visited] + 1;
+                // c1 to visited
+                dist[c1][visited] = dist_from_visited;
+                dist[visited][c1] = dist_from_visited;
+                // c2 to visited
+                dist[c2][visited] = dist_from_visited;
+                dist[visited][c2] = dist_from_visited;
+            }
+        }
+        // c1 to c2: path length = 2
+        dist[c1][c2] = 2;
+        dist[c2][c1] = 2;
+        // c1 to parent: path length = 1
+        dist[c1][p] = 1;
+        dist[p][c1] = 1;
+        // c2 to parent: path length = 1
+        dist[c2][p] = 1;
+        dist[p][c2] = 1;
+
+        all_visited.push(c1);
+        all_visited.push(c2);
+        all_visited.push(p);
+    }
+
+    // Extract the top-left n_leaves x n_leaves submatrix
+    let mut result: Vec<Vec<usize>> = vec![vec![0; n_leaves]; n_leaves];
+    for i in 0..n_leaves {
+        for j in 0..n_leaves {
+            result[i][j] = dist[i][j];
+        }
+    }
+    result
+}

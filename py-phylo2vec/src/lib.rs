@@ -30,6 +30,12 @@ fn build_newick(input_ancestry: Vec<[usize; 3]>) -> String {
 }
 
 #[pyfunction]
+fn cophenetic_distances(input_vector: Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
+    let distances = ops::vector::cophenetic_distances(&input_vector, unrooted);
+    distances
+}
+
+#[pyfunction]
 fn sample(n_leaves: usize, ordered: bool) -> Vec<usize> {
     let v = utils::sample(n_leaves, ordered);
     v
@@ -47,6 +53,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(to_vector, m)?)?;
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
+    m.add_function(wrap_pyfunction!(cophenetic_distances, m)?)?;
     m.add_function(wrap_pyfunction!(sample, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
     // Metadata about the package bindings
