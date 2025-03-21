@@ -4,21 +4,86 @@ import secrets
 
 import numpy as np
 import pytest
-
 from ete3 import Tree
 
-from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
 from phylo2vec.base import to_newick
 from phylo2vec.utils import (
     add_leaf,
     apply_label_mapping,
-    create_label_mapping,
     check_v,
+    create_label_mapping,
     find_num_leaves,
     get_common_ancestor,
+    read_vector_csv,
+    read_newick_file,
+    read_newick_file_labeled,
     remove_leaf,
     sample,
+    write_vector_csv,
+    write_newick_file,
+    write_newick_file_labeled,
 )
+
+from .config import MAX_N_LEAVES, MIN_N_LEAVES, N_REPEATS
+
+
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES + 1])
+def test_read_write_newick(tmp_path, n_leaves):
+    """Test the read and write functions for Newick trees
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    v = sample(n_leaves)
+    newick = to_newick(v)
+    write_newick_file(newick, tmp_path / "test.newick")
+    newick2 = read_newick_file(tmp_path / "test.newick")
+    assert newick == newick2
+    write_newick_file(newick, tmp_path / "test.random")
+    with pytest.raises(Exception):
+        _ = read_newick_file(tmp_path / "test.random")
+
+
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES + 1])
+def test_read_write_csv(tmp_path, n_leaves):
+    """Test the read and write functions for CSV files
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    v = sample(n_leaves)
+    write_vector_csv(v, tmp_path / "test.csv")
+    v2 = read_vector_csv(tmp_path / "test.csv")
+    assert np.all(v == v2)
+    write_vector_csv(v, tmp_path / "test.random")
+    with pytest.raises(Exception):
+        _ = read_vector_csv(tmp_path / "test.random")
+
+
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES + 1])
+def test_read_write_newick_labeled(tmp_path, n_leaves):
+    """Test the read and write functions for labeled Newick trees
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    t = Tree()
+    t.populate(n_leaves)
+    # Random Newick string
+    newick_labeled = t.write(format=9)
+    newick_int, label_mapping = create_label_mapping(newick_labeled)
+    write_newick_file_labeled(newick_int, label_mapping, tmp_path / "test_labeled.newick")
+    newick_read, label_mapping_read = read_newick_file_labeled(
+        tmp_path / "test_labeled.newick"
+    )
+    assert newick_labeled == apply_label_mapping(newick_read, label_mapping_read)
+    assert label_mapping == label_mapping_read
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
