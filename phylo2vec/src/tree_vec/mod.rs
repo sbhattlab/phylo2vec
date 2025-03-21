@@ -79,33 +79,11 @@ impl TreeVec {
     /// * `leaf` - Index of the new leaf to add
     /// * `branch` - Index of the branch to attach the leaf to
     ///
-    /// # Side effects
+    /// # Result
     /// Modifies the tree structure by adding the new leaf and updating indices
     pub fn add_leaf(&mut self, leaf: usize, branch: usize) {
-        self.data.push(branch);
-
-        let mut ancestry_add = self.get_ancestry();
-
-        println!("{:?}", ancestry_add);
-        let mut found_first_leaf = false;
-        for r in 0..ancestry_add.len() {
-            for c in 0..3 {
-                if !found_first_leaf && ancestry_add[r][c] == self.data.len() {
-                    // Find the indices of the first leaf
-                    // and then set the value to the new leaf
-                    ancestry_add[r][c] = leaf;
-                    found_first_leaf = true;
-                } else if ancestry_add[r][c] >= leaf {
-                    ancestry_add[r][c] += 1;
-                }
-            }
-        }
-
-        // ancestry_add[leaf_coords][leaf_col] = leaf as isize;
-        // let ancestry_add_ref = &mut ancestry_add;
-        ops::order_cherries(&mut ancestry_add);
-        ops::order_cherries_no_parents(&mut ancestry_add);
-        self.data = ops::build_vector(&ancestry_add);
+        let mut vec = self.data.clone();
+        self.data = ops::add_leaf(&mut vec, leaf, branch);
     }
 
     /// Removes a leaf from the tree
@@ -119,52 +97,10 @@ impl TreeVec {
     /// # Side effects
     /// Modifies the tree structure by removing the leaf and updating indices
     pub fn remove_leaf(&mut self, leaf: usize) -> usize {
-        let ancestry = self.get_ancestry();
-        let leaf_coords = ops::find_coords_of_first_leaf(&ancestry, leaf);
-        let leaf_row = leaf_coords.0;
-        let leaf_col = leaf_coords.1;
-
-        // Find the parent of the leaf to remove
-        let parent = ancestry[leaf_row][2];
-        let sister = ancestry[leaf_row][1 - leaf_col];
-        let num_cherries = ancestry.len();
-
-        let mut ancestry_rm = Vec::with_capacity(num_cherries - 1);
-
-        for r in 0..num_cherries - 1 {
-            let mut new_row = if r < leaf_row {
-                ancestry[r].clone()
-            } else {
-                ancestry[r + 1].clone()
-            };
-
-            for c in 0..3 {
-                let mut node = new_row[c];
-
-                if node == parent {
-                    node = sister;
-                }
-
-                // Subtract 1 for leaves > "leaf"
-                // (so that the vector is still valid)
-                if node > leaf {
-                    node -= 1;
-                    if node >= parent {
-                        node -= 1;
-                    }
-                }
-
-                new_row[c] = node;
-            }
-
-            ancestry_rm.push(new_row);
-        }
-
-        ops::order_cherries(&mut ancestry_rm);
-        ops::order_cherries_no_parents(&mut ancestry_rm);
-        self.data = ops::build_vector(&ancestry_rm);
-
-        return sister;
+        let mut vec = self.data.clone();
+        let (data, sister_leaf) = ops::remove_leaf(&mut vec, leaf);
+        self.data = data;
+        return sister_leaf;
     }
 }
 
