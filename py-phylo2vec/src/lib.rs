@@ -46,6 +46,16 @@ fn check_v(input_vector: Vec<usize>) {
     utils::check_v(&input_vector);
 }
 
+#[pyfunction]
+fn add_leaf(mut input_vector: Vec<usize>, leaf: usize, branch: usize) -> Vec<usize> {
+    return ops::add_leaf(&mut input_vector, leaf, branch);
+}
+
+#[pyfunction]
+fn remove_leaf(mut input_vector: Vec<usize>, leaf: usize) -> (Vec<usize>, usize) {
+    return ops::remove_leaf(&mut input_vector, leaf);
+}
+
 /// This module is exposed to Python.
 #[pymodule]
 fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -56,6 +66,8 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(cophenetic_distances, m)?)?;
     m.add_function(wrap_pyfunction!(sample, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
+    m.add_function(wrap_pyfunction!(add_leaf, m)?)?;
+    m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;
     // Metadata about the package bindings
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
