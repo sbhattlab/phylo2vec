@@ -1,6 +1,6 @@
-use rand::Rng;
+use rand::{distributions::Uniform, prelude::Distribution, Rng};
 
-/// Sample a vector with `n_leaves - 1` elements.
+/// Sample a vector with `n_leaves` elements.
 ///
 /// If ordering is True, sample an ordered tree, by default ordering is False
 /// ordering=True: v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
@@ -9,12 +9,12 @@ use rand::Rng;
 /// # Examples
 ///
 /// ```
-/// use phylo2vec::utils::sample;
-/// let v = sample(10, false);
-/// let v2 = sample(5, true);
+/// use phylo2vec::utils::sample_vector;
+/// let v = sample_vector(10, false);
+/// let v2 = sample_vector(5, true);
 /// ```
-pub fn sample(n_leaves: usize, ordering: bool) -> Vec<usize> {
-    let mut v: Vec<usize> = Vec::with_capacity(n_leaves - 1);
+pub fn sample_vector(n_leaves: usize, ordering: bool) -> Vec<usize> {
+    let mut v: Vec<usize> = Vec::with_capacity(n_leaves);
     let mut rng = rand::thread_rng();
 
     match ordering {
@@ -31,6 +31,51 @@ pub fn sample(n_leaves: usize, ordering: bool) -> Vec<usize> {
     }
 
     v
+}
+
+/// Sample a matrix with `n_leaves` elements.
+///
+/// If ordering is True, sample an ordered tree, by default ordering is False
+/// ordering=True: v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
+/// ordering=False: v_i in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::utils::sample_matrix;
+/// let v = sample_matrix(10, false);
+/// let v2 = sample_matrix(5, true);
+/// ```
+pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
+    // Use the existing sample function to generate v
+    let v = sample_vector(n_leaves, ordered);
+    let bl_size = (v.len(), 2); // 2 columns for the branch lengths
+
+    // Generate the branch lengths using the uniform distribution in (0, 1)
+    let mut bls = Vec::with_capacity(bl_size.0);
+
+    let mut rng = rand::thread_rng();
+    let uniform_dist = Uniform::new(0.0, 1.0); // Uniform distribution in the range (0, 1)
+
+    for _ in 0..bl_size.0 {
+        let mut row = Vec::with_capacity(bl_size.1);
+        for _ in 0..bl_size.1 {
+            row.push(uniform_dist.sample(&mut rng) as f32);
+        }
+        bls.push(row);
+    }
+
+    // Combine `v` and `bls` into a matrix (Vec<Vec<f32>>)
+    let mut m: Vec<Vec<f32>> = Vec::with_capacity(v.len());
+    for i in 0..v.len() {
+        let mut row: Vec<f32> = Vec::with_capacity(3); // 3 columns: v + 2 branch lengths
+        row.push(v[i] as f32);
+        row.push(bls[i][0]);
+        row.push(bls[i][1]);
+        m.push(row);
+    }
+
+    m
 }
 
 /// Input validation of a Phylo2Vec vector
@@ -111,12 +156,40 @@ mod tests {
     #[rstest]
     #[case(50, true, 1)]
     #[case(50, false, 2)]
-    fn test_sample(#[case] n_leaves: usize, #[case] ordering: bool, #[case] scale: usize) {
-        let v = sample(n_leaves, ordering);
+    fn test_sample_vector(#[case] n_leaves: usize, #[case] ordering: bool, #[case] scale: usize) {
+        let v = sample_vector(n_leaves, ordering);
         assert_eq!(v.len(), n_leaves - 1);
         check_v(&v);
         for i in 0..(n_leaves - 1) {
             assert!(v[i] <= scale * i);
+        }
+    }
+
+    #[rstest]
+    #[case(50, true)]
+    #[case(50, false)]
+    fn test_sample_matrix(#[case] n_leaves: usize, #[case] ordering: bool) {
+        // Assuming sample_matrix generates a matrix
+        let matrix = sample_matrix(n_leaves, ordering);
+
+        // Check the number of rows in the matrix
+        assert_eq!(matrix.len(), n_leaves - 1);
+
+        // Check if the number of columns in the matrix is correct (e.g., 2)
+        let num_columns = matrix[0].len();
+        assert!(num_columns > 0, "Matrix should have at least one column.");
+
+        // Example check function for matrix values (values should be between min_val and max_val)
+        for i in 0..matrix.len() {
+            for j in 1..matrix[i].len() {
+                assert!(
+                    matrix[i][j] >= 0.0 && matrix[i][j] <= 1.0,
+                    "Matrix value out of bounds at ({}, {}): {}",
+                    i,
+                    j,
+                    matrix[i][j]
+                );
+            }
         }
     }
 

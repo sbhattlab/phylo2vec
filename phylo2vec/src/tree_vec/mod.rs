@@ -1,4 +1,4 @@
-use crate::utils::sample;
+use crate::utils::sample_vector;
 
 // Import the types module
 pub mod types;
@@ -53,7 +53,7 @@ impl TreeVec {
     /// # Returns
     /// A new randomly generated `TreeVec` instance
     pub fn from_sample(n_leaves: usize, ordering: bool) -> Self {
-        let v = sample(n_leaves, ordering);
+        let v = sample_vector(n_leaves, ordering);
         TreeVec::new(v, None, None)
     }
 

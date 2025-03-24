@@ -34,7 +34,7 @@ Utils
     utils.apply_label_mapping
     utils.remove_annotations
     utils.remove_parent_labels
-    utils.sample
+    utils.sample_vector
     utils.seed_everything
     utils.check_v
     utils.reorder_v

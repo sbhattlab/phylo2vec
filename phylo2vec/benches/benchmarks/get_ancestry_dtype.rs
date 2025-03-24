@@ -4,7 +4,7 @@ use std::time::Duration;
 use criterion::{criterion_group, BenchmarkId, Criterion};
 use phylo2vec::tree_vec::ops;
 use phylo2vec::tree_vec::types::PairsVec;
-use phylo2vec::utils::{is_unordered, sample};
+use phylo2vec::utils::{is_unordered, sample_vector};
 
 pub type AncestryTuple = Vec<(usize, usize, usize)>;
 pub type AncestryVec = Vec<[usize; 3]>;
@@ -17,7 +17,7 @@ fn compare_get_ancestry_datatypes(c: &mut Criterion) {
     // compare the three functions with three different data types
     for j in RANGE {
         let i = 2_i32.checked_pow(j).unwrap() as usize;
-        let v = sample(i, true);
+        let v = sample_vector(i, true);
         group.bench_with_input(BenchmarkId::new("tuple", i), &v, |b, v| {
             b.iter(|| {
                 get_ancestry_tuple(v);
