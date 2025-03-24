@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use criterion::{criterion_group, BenchmarkId, Criterion};
 use phylo2vec::tree_vec::ops;
-use phylo2vec::utils::sample;
+use phylo2vec::utils::sample_vector;
 
 const GET_PAIRS: &str = "get_pairs";
 const GET_PAIRS_AVL: &str = "get_pairs_avl";
@@ -11,7 +11,7 @@ const RANGE: Range<u32> = 8..18;
 
 /// Function to benchmark the get_pairs and get_pairs_avl functions
 fn run_get_pairs(func: &str, n_leaves: usize, ordering: bool) {
-    let v = sample(n_leaves, ordering);
+    let v = sample_vector(n_leaves, ordering);
     let _ = match func {
         GET_PAIRS => ops::get_pairs(&v),
         GET_PAIRS_AVL => ops::get_pairs_avl(&v),

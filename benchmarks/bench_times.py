@@ -23,7 +23,7 @@ from rpy2.robjects.packages import importr
 from benchmarks.plot import clear_axes, set_size
 from phylo2vec.base import to_newick
 from phylo2vec.metrics import cophenetic_distances
-from phylo2vec.utils import sample
+from phylo2vec.utils import sample_vector
 
 plt.rcParams.update(
     {
@@ -86,14 +86,14 @@ def sample_p2v(all_leaves):
 
     for i, n_leaves in enumerate(all_leaves):
         # Compile
-        _ = sample(n_leaves)
-        _ = to_newick(sample(n_leaves))
+        _ = sample_vector(n_leaves)
+        _ = to_newick(sample_vector(n_leaves))
 
         all_runs = np.array(
             timeit.repeat(
-                f"to_newick(sample({n_leaves}))",
+                f"to_newick(sample_vector({n_leaves}))",
                 "from phylo2vec.base import to_newick; from phylo2vec.utils import sample;"
-                f"v = sample({n_leaves}); nw = to_newick(sample({n_leaves}));",
+                f"v = sample_vector({n_leaves}); nw = to_newick(sample_vector({n_leaves}));",
                 number=N_TIMES,
                 repeat=N_REPEATS,
             )
@@ -169,14 +169,14 @@ def coph_p2v(all_leaves):
 
     for i, n_leaves in enumerate(all_leaves):
         # Compile
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
         _ = cophenetic_distances(v)
 
         all_runs = np.array(
             timeit.repeat(
-                f"cophenetic_distances(sample({n_leaves}))",
+                f"cophenetic_distances(sample_vector({n_leaves}))",
                 "from phylo2vec.metrics import cophenetic_distances; from phylo2vec.utils import sample;"
-                f"v = sample({n_leaves}); nw = cophenetic_distances(sample({n_leaves}));",
+                f"v = sample_vector({n_leaves}); nw = cophenetic_distances(sample_vector({n_leaves}));",
                 number=N_TIMES,
                 repeat=N_REPEATS,
             )

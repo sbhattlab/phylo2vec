@@ -29,7 +29,7 @@ def sample(n_leaves: int, ordered: bool = False) -> np.ndarray:
         Phylo2Vec vector
     """
 
-    v_list = _phylo2vec_core.sample(n_leaves, ordered)
+    v_list = _phylo2vec_core.sample_vector(n_leaves, ordered)
     return np.asarray(v_list)
 
 

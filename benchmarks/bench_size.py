@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from benchmarks.plot import clear_axes, set_size
 from phylo2vec.base import to_newick
-from phylo2vec.utils import sample
+from phylo2vec.utils import sample_vector
 
 MIN_LEAVES = 5
 MAX_LEAVES = 10000
@@ -65,7 +65,7 @@ def main():
 
     # Compute sizes
     for i, n_leaves in tqdm(enumerate(all_leaves), total=len(all_leaves)):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
         newick = to_newick(v)
 
         sizes["Phylo2Vec (int16)"][i] = sys.getsizeof(v)

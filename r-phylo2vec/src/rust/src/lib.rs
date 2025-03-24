@@ -7,7 +7,7 @@ use phylo2vec::utils;
 /// @export
 #[extendr]
 fn sample(n_leaves: usize, ordered: bool) -> Vec<i32> {
-    let v = utils::sample(n_leaves, ordered);
+    let v = utils::sample_vector(n_leaves, ordered);
     v.iter().map(|&x| x as i32).collect()
 }
 

@@ -1,4 +1,5 @@
 pub mod avl;
+pub mod matrix;
 pub mod newick;
 pub mod vector;
 
