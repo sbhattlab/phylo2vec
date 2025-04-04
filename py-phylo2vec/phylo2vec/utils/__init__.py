@@ -9,7 +9,7 @@ from .newick import (
     remove_annotations,
     remove_parent_labels,
 )
-from .random import sample, seed_everything
+from .random import sample_vector, seed_everything
 from .validation import check_v
 from .vector import (
     add_leaf,
@@ -40,7 +40,7 @@ __all__ = [
     "remove_parent_labels",
     "reorder_v",
     "reroot_at_random",
-    "sample",
+    "sample_vector",
     "seed_everything",
     "read_vector_csv",
     "write_vector_csv",

@@ -5,7 +5,7 @@ import random
 import numba as nb
 
 from phylo2vec.datasets import read_fasta
-from phylo2vec.utils import sample, seed_everything
+from phylo2vec.utils import sample_vector, seed_everything
 
 MAX_SEED = 42
 
@@ -63,7 +63,7 @@ class BaseOptimizer:
 
         n_leaves = len(label_mapping)
 
-        v_init = sample(n_leaves)
+        v_init = sample_vector(n_leaves)
 
         v_opt, label_mapping, losses = self._optimise(fasta_path, v_init, label_mapping)
 
