@@ -13,7 +13,7 @@ from phylo2vec.base.to_vector import (
     _reduce,
     _reduce_no_parents,
 )
-from phylo2vec.utils import sample
+from phylo2vec.utils import sample_vector
 
 
 MIN_N_LEAVES = 5
@@ -31,7 +31,7 @@ def test_v2newick2v(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
         newick = to_newick(v)
         v2 = to_vector(newick)
         assert np.all(v == v2)
@@ -47,7 +47,7 @@ def test_cherries_no_parents(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
         newick = to_newick(v)
         newick_no_parents = Tree(newick).write(format=9)
         cherries = _find_cherries(_reduce(newick))
@@ -82,7 +82,7 @@ def test_cherry_permutations(n_leaves):
         return newick
 
     for _ in range(N_REPEATS):
-        nw = to_newick(sample(n_leaves))
+        nw = to_newick(sample_vector(n_leaves))
         nw_perm = permutate_cherries(nw)
         assert np.array_equal(to_vector(nw), to_vector(nw_perm))
 
@@ -99,7 +99,7 @@ def test_ladderize(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        nw = to_newick(sample(n_leaves))
+        nw = to_newick(sample_vector(n_leaves))
         tr = Tree(nw)
 
         # Ladderize the tree and output a new Newick string

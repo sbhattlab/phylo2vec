@@ -18,7 +18,7 @@ from phylo2vec.utils import (
     read_newick_file,
     read_newick_file_labeled,
     remove_leaf,
-    sample,
+    sample_vector,
     write_vector_csv,
     write_newick_file,
     write_newick_file_labeled,
@@ -36,7 +36,7 @@ def test_read_write_newick(tmp_path, n_leaves):
     n_leaves : int
         Number of leaves
     """
-    v = sample(n_leaves)
+    v = sample_vector(n_leaves)
     newick = to_newick(v)
     write_newick_file(newick, tmp_path / "test.newick")
     newick2 = read_newick_file(tmp_path / "test.newick")
@@ -55,7 +55,7 @@ def test_read_write_csv(tmp_path, n_leaves):
     n_leaves : int
         Number of leaves
     """
-    v = sample(n_leaves)
+    v = sample_vector(n_leaves)
     write_vector_csv(v, tmp_path / "test.csv")
     v2 = read_vector_csv(tmp_path / "test.csv")
     assert np.all(v == v2)
@@ -96,7 +96,7 @@ def test_sample(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
         check_v(v)  # Asserts that v is valid
 
 
@@ -110,7 +110,7 @@ def test_find_num_leaves(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
         newick = to_newick(v)
         # Assert that find_num_leaves returns the true number of leaves in the the tree
         assert find_num_leaves(newick) == n_leaves
@@ -154,7 +154,7 @@ def test_remove_and_add(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
 
         leaf = secrets.randbelow(n_leaves)
 
@@ -172,7 +172,7 @@ def test_remove_and_add(n_leaves):
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
 def test_get_common_ancestor(n_leaves):
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
 
         node1, node2 = np.random.choice(np.arange(2 * (n_leaves - 1)), 2, replace=False)
 

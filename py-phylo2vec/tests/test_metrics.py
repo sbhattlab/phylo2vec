@@ -8,7 +8,7 @@ from ete3 import Tree
 from .config import MIN_N_LEAVES, N_REPEATS
 from phylo2vec.base import to_newick
 from phylo2vec.metrics import cophenetic_distances
-from phylo2vec.utils import sample
+from phylo2vec.utils import sample_vector
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, 51))
@@ -31,7 +31,7 @@ def test_cophenetic(n_leaves):
         return D + D.T
 
     for _ in range(N_REPEATS):
-        v = sample(n_leaves)
+        v = sample_vector(n_leaves)
 
         # tree with all branch lengths = 1
         tr = Tree(to_newick(v))

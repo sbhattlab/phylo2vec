@@ -7,8 +7,8 @@ import numpy as np
 
 from phylo2vec import _phylo2vec_core
 
-def sample(n_leaves: int, ordered: bool = False) -> np.ndarray:
-    """Sample a random tree via Phylo2Vec
+def sample_vector(n_leaves: int, ordered: bool = False) -> np.ndarray:
+    """Sample a random tree via Phylo2Vec, in vector form.
 
     Parameters
     ----------
@@ -31,6 +31,25 @@ def sample(n_leaves: int, ordered: bool = False) -> np.ndarray:
 
     v_list = _phylo2vec_core.sample_vector(n_leaves, ordered)
     return np.asarray(v_list)
+
+def sample_matrix(n_leaves: int, ordered: bool = False) -> np.ndarray:
+    """Sample a random tree via Phylo2Vec, in matrix form.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    ordered : bool, optional
+        If True, sample an ordered tree, by default False
+
+    Returns
+    -------
+    numpy.ndarray
+        Phylo2Vec matrix
+    """
+
+    matrix = _phylo2vec_core.sample_matrix(n_leaves, ordered)
+    return np.asarray(matrix)
 
 
 def seed_everything(seed):
