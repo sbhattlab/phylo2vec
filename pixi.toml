@@ -95,6 +95,7 @@ pip = ">=24.2,<25"
 maturin = ">=1.7.4,<2"
 pytest = ">=8.3.4,<9"
 pytest-benchmark = ">=5.1.0,<6"
+tomli = ">=2.0.0,<3"
 
 [feature.python.tasks.install-python]
 cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"
