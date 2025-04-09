@@ -1,0 +1,36 @@
+name: 'Determine Version'
+description: 'Determines and sets the package version based on event context'
+inputs:
+  event_name:
+    description: 'The name of the triggering event (e.g., push, release)'
+    required: true
+  github_ref:
+    description: 'The GitHub ref that triggered the workflow (for extracting tag version)'
+    required: true
+outputs:
+  version:
+    description: 'The determined version'
+    value: ${{ steps.set-version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      run: pip install tomli
+      shell: bash
+    - name: Determine and set version
+      id: set-version
+      shell: bash
+      run: |
+        if [ "${{ inputs.event_name }}" == "release" ]; then
+          # Extract version from tag (removing 'v' prefix if present)
+          TAG_VERSION="${{ inputs.github_ref }}"
+          TAG_VERSION=${TAG_VERSION#refs/tags/}
+          VERSION=${TAG_VERSION#v}
+          echo "Version from release tag: $VERSION"
+
+          # Use the update_python_version.py script with the release version
+          python resources/update_python_version.py $VERSION
+        else
+          # Run the script without parameters to use timestamp versioning
+          python resources/update_python_version.py
+        fi
