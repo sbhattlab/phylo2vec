@@ -261,6 +261,8 @@ jobs:
         run: echo "Publishing version ${{ needs.linux.outputs.version }} to TestPyPI"
       - name: Publish to TestPyPI
         uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_REPOSITORY: testpypi
         with:
           command: upload
-          args: --non-interactive --skip-existing --repository-url https://test.pypi.org/legacy/ wheels-*/*
+          args: --non-interactive --skip-existing wheels-*/*
