@@ -7,6 +7,10 @@ inputs:
   github_ref:
     description: 'The GitHub ref that triggered the workflow (for extracting tag version)'
     required: true
+  language:
+    description: 'The programming language package to update (python or r)'
+    required: true
+    default: 'python'
 outputs:
   version:
     description: 'The determined version'
@@ -14,6 +18,11 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Ensure pip is installed
+      run: |
+        python -m ensurepip --upgrade
+        python -m pip install --upgrade pip
+      shell: bash
     - name: Install dependencies
       run: pip install tomli
       shell: bash
@@ -28,9 +37,36 @@ runs:
           VERSION=${TAG_VERSION#v}
           echo "Version from release tag: $VERSION"
 
-          # Use the update_python_version.py script with the release version
-          python resources/update_python_version.py $VERSION
+          # Use the unified update script with the release version and language flag
+          if [ "${{ inputs.language }}" == "r" ]; then
+            python resources/update_version.py --r --version $VERSION
+            # Read the version from the DESCRIPTION file to ensure it's correct
+            ACTUAL_VERSION=$(python resources/update_version.py --r --extract-only | grep "Current R version" | sed 's/Current R version: //')
+            echo "R version set to: $ACTUAL_VERSION"
+            VERSION=$ACTUAL_VERSION
+          elif [ "${{ inputs.language }}" == "python" ]; then
+            python resources/update_version.py --python --version $VERSION
+            # Read the Python version to ensure it's correct
+            ACTUAL_VERSION=$(python resources/update_version.py --python --extract-only | grep "Current Python version" | sed 's/Current Python version: //')
+            echo "Python version set to: $ACTUAL_VERSION"
+            VERSION=$ACTUAL_VERSION
+          else
+            echo "Error: Invalid language specified. Must be 'python' or 'r'."
+            exit 1
+          fi
         else
-          # Run the script without parameters to use timestamp versioning
-          python resources/update_python_version.py
+          # Run the script without parameters to use auto-version with git distance
+          if [ "${{ inputs.language }}" == "r" ]; then
+            python resources/update_version.py --r
+            VERSION=$(python resources/update_version.py --r --extract-only | grep "Current R version" | sed 's/Current R version: //')
+          elif [ "${{ inputs.language }}" == "python" ]; then
+            python resources/update_version.py --python
+            VERSION=$(python resources/update_version.py --python --extract-only | grep "Current Python version" | sed 's/Current Python version: //')
+          else
+            echo "Error: Invalid language specified. Must be 'python' or 'r'."
+            exit 1
+          fi
         fi
+
+        # Set the version as an output that can be used by other steps
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
