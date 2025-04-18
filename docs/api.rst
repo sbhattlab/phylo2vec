@@ -10,7 +10,7 @@ Base
     :nosignatures:
     :toctree: generated/
 
-    base.to_newick
+    base.to_newick_from_vector
     base.to_vector
 
 Metrics

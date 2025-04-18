@@ -16,7 +16,7 @@ sample <- function(n_leaves, ordered) .Call(wrap__sample, n_leaves, ordered)
 
 #' Recover a rooted tree (in Newick format) from a Phylo2Vec v
 #' @export
-to_newick <- function(input_integers) .Call(wrap__to_newick, input_integers)
+to_newick_from_vector <- function(input_integers) .Call(wrap__to_newick_from_vector, input_integers)
 
 #' Convert a newick string to a Phylo2Vec vector
 #' @export

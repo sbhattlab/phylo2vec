@@ -21,7 +21,7 @@ from rpy2.robjects.conversion import localconverter
 from rpy2.robjects.packages import importr
 
 from benchmarks.plot import clear_axes, set_size
-from phylo2vec.base import to_newick
+from phylo2vec.base import to_newick_from_vector
 from phylo2vec.metrics import cophenetic_distances
 from phylo2vec.utils import sample_vector
 
@@ -87,13 +87,13 @@ def sample_p2v(all_leaves):
     for i, n_leaves in enumerate(all_leaves):
         # Compile
         _ = sample_vector(n_leaves)
-        _ = to_newick(sample_vector(n_leaves))
+        _ = to_newick_from_vector(sample_vector(n_leaves))
 
         all_runs = np.array(
             timeit.repeat(
-                f"to_newick(sample_vector({n_leaves}))",
-                "from phylo2vec.base import to_newick; from phylo2vec.utils import sample;"
-                f"v = sample_vector({n_leaves}); nw = to_newick(sample_vector({n_leaves}));",
+                f"to_newick_from_vector(sample_vector({n_leaves}))",
+                "from phylo2vec.base import to_newick_from_vector; from phylo2vec.utils import sample;"
+                f"v = sample_vector({n_leaves}); nw = to_newick_from_vector(sample_vector({n_leaves}));",
                 number=N_TIMES,
                 repeat=N_REPEATS,
             )

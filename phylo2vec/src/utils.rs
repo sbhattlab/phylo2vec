@@ -98,6 +98,41 @@ pub fn check_v(v: &Vec<usize>) -> () {
     }
 }
 
+/// Input validation of a Phylo2Vec matrix
+///
+/// The input is checked for the Phylo2Vec constraints on the vector part (first column)
+/// and positive branch lengths in the remaining columns.
+///
+/// # Panics
+///
+/// Panics if:
+/// - Any element of the vector (first column of matrix) fails the Phylo2Vec constraints.
+/// - Any branch length (columns 2 and 3) is not positive.
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::utils::{check_m};
+///
+/// check_m(&vec![
+/// vec![0.0, 0.0, 0.0],
+/// vec![0.0, 0.1, 0.2],
+/// vec![1.0, 0.5, 0.7],]);
+///
+pub fn check_m(matrix: &Vec<Vec<f32>>) -> () {
+    // Validate the vector part (first column)
+    let vector: Vec<usize> = matrix.iter().map(|row| row[0] as usize).collect();
+    check_v(&vector);
+
+    // Ensure all branch lengths (remaining columns) are non-negative
+    for row in matrix.iter() {
+        assert!(
+            row[1] >= 0.0 && row[2] >= 0.0,
+            "Branch lengths must be positive"
+        );
+    }
+}
+
 /// Validate the maximum value of a Phylo2Vec vector element
 ///
 /// # Panics

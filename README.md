@@ -75,7 +75,7 @@ from phylo2vec.base import to_newick, to_vector
 
 v = np.array([0, 1, 2, 3, 4])
 
-newick = to_newick(v) # '(0,(1,(2,(3,(4,5)6)7)8)9)10;'
+newick = to_newick_from_vector(v) # '(0,(1,(2,(3,(4,5)6)7)8)9)10;'
 
 v_converted = to_vector(newick) # array([0, 1, 2, 3, 4], dtype=int16)
 ```
