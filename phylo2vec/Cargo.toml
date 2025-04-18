@@ -16,6 +16,9 @@ rstest = "0.23.0"
 criterion = { version = "0.5", features = ["html_reports"] }
 ndarray = "*"
 
+[[bin]]
+name = "profile_main"
+path = "src/profile_main.rs"
 
 [[bench]]
 name = "bench_main"

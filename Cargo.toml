@@ -7,6 +7,10 @@ members = [
 ]
 default-members = ["phylo2vec"]
 
+[profile.profiling]
+inherits = "release"
+debug = true
+
 [workspace.package]
 edition = "2021"
 authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
