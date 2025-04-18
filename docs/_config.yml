@@ -8,7 +8,7 @@ author: Don Setiawan
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
 execute:
-  execute_notebooks: force
+  execute_notebooks: false
 
 # Define the name of the latex output file for PDF builds
 latex:
@@ -26,6 +26,7 @@ repository:
 html:
   use_issues_button: true
   use_repository_button: true
+  home_page_in_navbar: false
 
 
 sphinx:
