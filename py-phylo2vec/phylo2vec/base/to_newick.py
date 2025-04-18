@@ -79,4 +79,4 @@ def to_newick(v):
     newick : str
         Newick tree
     """
-    return _phylo2vec_core.to_newick(v)
+    return _phylo2vec_core.to_newick_from_vector(v)

@@ -1,6 +1,7 @@
 use std::num::IntErrorKind;
 
 use crate::tree_vec::types::Ancestry;
+use std::collections::HashMap;
 
 mod newick_patterns;
 
@@ -240,6 +241,70 @@ fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
     format!("({},{}){}", left, right, p)
 }
 
+/// Build newick string from the ancestry matrix and branch lengths
+pub fn build_newick_with_bls(ancestry: &Ancestry, branch_lengths: &Vec<[f32; 2]>) -> String {
+    let n_max = ancestry.len();
+
+    // Extract the last entry in ancestry and branch lengths
+    let [c1, c2, p] = ancestry[n_max - 1];
+    let [b1, b2] = branch_lengths[n_max - 1];
+
+    // Initialize the Newick string with the last entry
+    // .1 here specifies 1 decimal place in the Newick string result - this can be changed as needed.
+    let mut newick = format!("({}:{:.1},{}:{:.1}){};", c1, b1, c2, b2, p);
+
+    // Keep track of node indices for replacement
+    let mut node_idxs = HashMap::new();
+    node_idxs.insert(c1, 1);
+    node_idxs.insert(c2, 2 + format!("{}:{:.1}", c1, b1).len());
+
+    // Queue for processing nodes
+    let mut queue = Vec::new();
+
+    if c1 > n_max {
+        queue.push(c1);
+    }
+    if c2 > n_max {
+        queue.push(c2);
+    }
+
+    // Process the remaining entries in ancestry
+    for _ in 1..n_max {
+        if let Some(next_parent) = queue.pop() {
+            let idx = next_parent - n_max - 1;
+
+            let [c1, c2, p] = ancestry[idx];
+            let [b1, b2] = branch_lengths[idx];
+
+            // Build the sub-Newick string
+            let sub_newick = format!("({}:{:.1},{}:{:.1}){}", c1, b1, c2, b2, p);
+
+            // Replace the placeholder in the Newick string
+            if let Some(&start_idx) = node_idxs.get(&p) {
+                newick = format!(
+                    "{}{}{}",
+                    &newick[..start_idx],
+                    sub_newick,
+                    &newick[start_idx + format!("{}", p).len()..]
+                );
+            }
+
+            // Update node indices
+            node_idxs.insert(c1, node_idxs[&p] + 1);
+            node_idxs.insert(c2, node_idxs[&c1] + 1 + format!("{}:{:.1}", c1, b1).len());
+            // Add children to the queue if they are internal nodes
+            if c1 > n_max {
+                queue.push(c1);
+            }
+            if c2 > n_max {
+                queue.push(c2);
+            }
+        }
+    }
+
+    newick
+}
+
 /// Remove parent labels from the Newick string
 ///
 /// # Example
@@ -313,7 +378,7 @@ pub fn build_newick(ancestry: &Ancestry) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tree_vec::ops::to_newick;
+    use crate::tree_vec::ops::to_newick_from_vector;
     use crate::utils::sample_vector;
     use rstest::*;
 
@@ -332,14 +397,14 @@ mod tests {
     #[case(1000)]
     fn test_has_parents(#[case] n_leaves: usize) {
         let v = sample_vector(n_leaves, false);
-        let newick = to_newick(&v);
+        let newick = to_newick_from_vector(&v);
         // Check if the newick string has parents
         let result = has_parents(&newick);
-        assert_eq!(result, true);
+        assert_eq!(result, true); // skipcq: RS-W1024
 
         // Check if the newick string does not have parents
         let result_no_parents = has_parents(&remove_parent_labels(&newick));
-        assert_eq!(result_no_parents, false);
+        assert_eq!(result_no_parents, false); // skipcq: RS-W1024
     }
 
     #[rstest]
@@ -348,7 +413,7 @@ mod tests {
     #[case(1000)]
     fn test_find_num_leaves(#[case] n_leaves: usize) {
         let v = sample_vector(n_leaves, false);
-        let newick = to_newick(&v);
+        let newick = to_newick_from_vector(&v);
         // Check if the newick string has parents
         let result = find_num_leaves(&newick);
         assert_eq!(result, n_leaves);

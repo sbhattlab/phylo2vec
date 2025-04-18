@@ -62,7 +62,7 @@ impl TreeVec {
     /// # Returns
     /// A String containing the Newick representation of the tree
     pub fn to_newick(&self) -> String {
-        return ops::to_newick(&self.data);
+        return ops::to_newick_from_vector(&self.data);
     }
 
     /// Gets the ancestry matrix representation of the tree

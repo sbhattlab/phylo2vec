@@ -16,7 +16,7 @@ import seaborn as sns
 from tqdm import tqdm
 
 from benchmarks.plot import clear_axes, set_size
-from phylo2vec.base import to_newick
+from phylo2vec.base import to_newick_from_vector
 from phylo2vec.utils import sample_vector
 
 MIN_LEAVES = 5
@@ -66,7 +66,7 @@ def main():
     # Compute sizes
     for i, n_leaves in tqdm(enumerate(all_leaves), total=len(all_leaves)):
         v = sample_vector(n_leaves)
-        newick = to_newick(v)
+        newick = to_newick_from_vector(v)
 
         sizes["Phylo2Vec (int16)"][i] = sys.getsizeof(v)
         sizes["Phylo2Vec (int32)"][i] = sys.getsizeof(v.astype(np.int32))
