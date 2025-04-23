@@ -190,3 +190,6 @@ trees/# pixi environments
 
 # Experimental notebooks folder
 notebooks/
+
+# Benchmarks output files
+.benchmarks/

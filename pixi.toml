@@ -107,7 +107,7 @@ cmd = "pytest -vvv ./py-phylo2vec/tests"
 depends-on = ["install-python"]
 
 [feature.python.tasks.benchmark]
-cmd = "pytest ./py-phylo2vec/benchmarks --benchmark-group-by=func --benchmark-warmup=on"
+cmd = "pytest ./py-phylo2vec/benchmarks --benchmark-autosave --benchmark-group-by=func --benchmark-warmup=on"
 depends-on = ["install-python"]
 
 # ======== r-phylo2vec ===========
