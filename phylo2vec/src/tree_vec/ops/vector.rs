@@ -228,28 +228,60 @@ pub fn order_cherries_no_parents(ancestry: &mut Ancestry) {
     }
 }
 
+/// A Fenwick Tree (Binary Indexed Tree) for efficiently calculating prefix sums
+/// and updating values in logarithmic time complexity. See https://en.wikipedia.org/wiki/Fenwick_tree
+///
+/// Fenwick trees support two primary operations:
+/// - **update:** Increment the value at a specific position
+/// - **prefix_sum:** Calculate the cumulative sum up to a given position
+struct Fenwick {
+    n_leaves: usize,  // The number of leaves in the tree
+    data: Vec<usize>, // 1-indexed array implicitly representing the tree
+}
+
+impl Fenwick {
+    fn new(n: usize) -> Self {
+        Fenwick {
+            n_leaves: n,
+            data: vec![0; n + 1],
+        }
+    }
+
+    // Sum of [1..=i]
+    fn prefix_sum(&self, mut i: usize) -> usize {
+        let mut sum = 0;
+        while i > 0 {
+            sum += self.data[i];
+            i -= i & i.wrapping_neg(); // i -= i & -i
+        }
+        sum
+    }
+
+    // Add delta at index i (1..=n)
+    fn update(&mut self, mut i: usize, delta: usize) {
+        while i <= self.n_leaves {
+            self.data[i] += delta;
+            i += i & i.wrapping_neg(); // i += i & -i
+        }
+    }
+}
+
 pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     let num_cherries = cherries.len();
     let num_leaves = num_cherries + 1;
 
     let mut v = vec![0; num_cherries];
-    let mut idxs = vec![0; num_leaves];
+    let mut bit = Fenwick::new(num_leaves);
 
-    for i in 0..num_cherries {
-        let [c1, c2, c_max] = cherries[i];
+    for [c1, c2, c_max] in cherries.iter().copied() {
+        let idx = bit.prefix_sum(c_max - 1);
 
-        let mut idx = 0;
-
-        for j in 1..c_max {
-            idx += idxs[j];
-        }
-        // Reminder: v[i] = j --> branch i yields leaf j
         v[c_max - 1] = if idx == 0 {
             std::cmp::min(c1, c2)
         } else {
             c_max - 1 + idx
         };
-        idxs[c_max] = 1;
+        bit.update(c_max, 1);
     }
     return v;
 }
