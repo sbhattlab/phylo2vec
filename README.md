@@ -33,19 +33,7 @@ Link to the paper:
 
 ## Installation
 
-### Dependencies
-
-- python>=3.10
-- numba>=0.56.4
-- numpy>=1.22,<2.1
-- biopython>=1.84.0
-- joblib>=1.2.0
-- ete3==3.1.3
-- six>=1.16.0
-
-### User installation
-
-#### Pip
+### Pip
 
 The easiest way to install the Python package is using pip:
 
@@ -53,7 +41,7 @@ The easiest way to install the Python package is using pip:
 pip install phylo2vec
 ```
 
-#### Manual installation
+### Manual installation
 
 - We recommend setting up [pixi](https://pixi.sh/dev/) package management tool.
 - Clone the repository and install using `pixi`:
@@ -67,7 +55,7 @@ pixi run -e py-phylo2vec install-python
 This will compile and install the package as the core functionality is written
 in Rust.
 
-#### Installing R package
+### Installing R package
 
 To install the R package, first you need to retrieve one of the compiled file
 within the package [releases](https://github.com/sbhattlab/phylo2vec/releases).
