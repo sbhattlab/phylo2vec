@@ -1,6 +1,8 @@
 use crate::tree_vec::ops::avl::AVLTree;
 use crate::tree_vec::types::{Ancestry, Pair, PairsVec};
 use crate::utils::is_unordered;
+use core::num;
+use std::collections::HashMap;
 use std::usize;
 
 /// Get the pair of nodes from the Phylo2Vec vector
@@ -190,42 +192,82 @@ pub fn order_cherries(ancestry: &mut Ancestry) {
     }
 }
 
+/// Order cherries in an ancestry vector without parent labels.
+/// The goal of this function is to find indices for an argsort to sort the cherries
+/// We utilise the fact that the input contains certain local orders, but not the global order.
+/// Example:
+/// [[6 7 7]
+///  [6 9 9]
+///  [0 6 6]
+///  [0 3 3]
+///  [0 2 2]
+///  [0 8 8]
+///  [1 5 5]
+///  [1 4 4]
+///  [0 1 1]]
+/// (6, 7) will become before (6, 9). In Newick terms, one could write a partial Newick as such: ((6, 7), 9);
+/// In other words, (6, 7) will form a terminal cherry, and that 9 will be paired with the parent of 6 and 7
+///
+/// In a similar fashion, (0, 6) comes before (0, 3), (0, 2), (0, 8).
+/// And (1, 5) comes before (1, 4).
+///
+///
+/// So we apply the following rule for each cherry:
+///  * Determine the minimum (c_min) and maximum (c_max) cherry values.
+///  * if c_min was visited beforehand:
+///    * its "sorting index" will be the minimum of its previous sister node (visited[c_min]) and the current sister node (c_max)
+///  * otherwise, set it to c_max
+///
+/// We thus obtain a sorting index list (```leaves```) as such
+/// c1, c2, c_max, index
+/// 6,   7,     7, 7
+/// 6,   9,     9, 7 (will come after 7)
+/// 0,   6,     6, 6
+/// 0,   3,     3, 3
+/// 0,   2,     2, 2
+/// 0,   8,     8, 2
+/// 1,   5,     5, 5
+/// 1,   4,     4, 4
+/// 0,   1,     1, 1
+///
+/// To order the cherries, we sort (in descending order) the input according to the index.
+///
+/// In this example, we get:
+/// 6 7 7
+/// 6 9 9
+/// 0 6 6
+/// 1 5 5
+/// 1 4 4
+/// 0 3 3
+/// 0 2 2
+/// 0 8 8
+/// 0 1 1
 pub fn order_cherries_no_parents(ancestry: &mut Ancestry) {
     let num_cherries = ancestry.len();
+    let mut to_sort: Vec<usize> = Vec::with_capacity(num_cherries);
+    let mut visited: HashMap<usize, usize> = HashMap::new();
 
-    for i in 0..num_cherries {
-        // Find the next index to process:
-        // The goal is to find the row with the highest leaf
-        // where both leaves were previously un-visited
-        // why? If a leaf in a cherry already appeared in the ancestry,
-        // it means that leaf was already involved in a shallower cherry
-        let mut idx = usize::MAX;
+    for &[c1, c2, c_max] in ancestry.iter() {
+        let c_min = c1.min(c2);
+        let sister = match visited.get(&c_min) {
+            Some(&existing) if existing < c_max => existing,
+            _ => c_max,
+        };
 
-        // Initially, all cherries have not been processed
-        let mut unvisited = vec![true; num_cherries + 1];
-
-        // Temporary max leaf
-        let mut max_leaf = 0;
-
-        for j in i..num_cherries {
-            let [c1, c2, c_max] = ancestry[j];
-
-            if c_max > max_leaf {
-                if unvisited[c1] && unvisited[c2] {
-                    max_leaf = c_max;
-                    idx = j;
-                }
-            }
-
-            // c1 and c2 have been processed
-            unvisited[c1] = false;
-            unvisited[c2] = false;
-        }
-
-        if idx != i {
-            ancestry[i..idx + 1].rotate_right(1);
-        }
+        to_sort.push(sister);
+        visited.insert(c_min, sister);
     }
+
+    // argsort with descending order
+    let mut indices: Vec<usize> = (0..num_cherries).collect();
+    indices.sort_by_key(|&i| std::cmp::Reverse(to_sort[i]));
+
+    // Note: using a stable sort is important to keep the order of cherries
+    let mut temp = Ancestry::with_capacity(num_cherries);
+    for i in indices {
+        temp.push(ancestry[i]);
+    }
+    *ancestry = temp;
 }
 
 /// A Fenwick Tree (Binary Indexed Tree) for efficiently calculating prefix sums
