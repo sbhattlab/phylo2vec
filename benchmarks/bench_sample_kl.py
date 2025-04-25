@@ -22,8 +22,8 @@ from scipy import stats
 from tqdm import tqdm
 
 from benchmarks.plot import clear_axes, set_size
-from phylo2vec.base import to_vector_no_parents
-from phylo2vec.utils import sample
+from phylo2vec.base import to_vector
+from phylo2vec.utils import sample_vector
 
 plt.rcParams.update(
     {
@@ -120,7 +120,7 @@ def generate_samples(n_repeats, n_times, min_leaves, max_leaves, step_leaves):
             # Phylo2Vec integers
             for j in range(n_times):
                 # Sample vectors with Phylo2Vec
-                v = sample(n_leaves)
+                v = sample_vector(n_leaves)
 
                 all_ints_p2v[k, i, j] = to_integer(v)
 
@@ -149,7 +149,7 @@ def generate_samples(n_repeats, n_times, min_leaves, max_leaves, step_leaves):
             # ape integers
             for j, nw in enumerate(newicks):
                 # Convert to Phylo2Vec vector
-                v = to_vector_no_parents(nw)
+                v = to_vector(nw)
 
                 all_ints_ape[k, i, j] = to_integer(v)
 

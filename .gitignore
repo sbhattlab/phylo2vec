@@ -70,6 +70,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/generated/
 
 # PyBuilder
 .pybuilder/
@@ -177,4 +178,18 @@ drafts/
 drafts.ipynb
 
 # Temporary trees
-trees/
+trees/# pixi environments
+.pixi
+*.egg-info
+
+# MacOS
+.DS_Store
+
+# Web
+*.html
+
+# Experimental notebooks folder
+notebooks/
+
+# Benchmarks output files
+.benchmarks/

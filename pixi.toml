@@ -1,0 +1,123 @@
+[project]
+name = "phylo2vec"
+version = "0.1.0"
+description = "Phylo2Vec"
+authors = ["Don Setiawan"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+
+[tasks]
+# We can build a project using cargo build
+build = "cargo build"
+# We can build and run a project in one step using cargo run
+start = "cargo run"
+test = "cargo test"
+clean = "cargo clean"
+fmt = "cargo fmt"
+lint = { cmd = "cargo clippy", depends-on = ["fmt"] }
+# We can build a project without producing a binary to check for errors using cargo check
+check = "cargo check"
+# Create an executable in target/release instead of target/debug,
+# it will compile with optimizations
+# This is why there are two different profiles: one for development,
+# when you want to rebuild quickly and often,
+# and another for building the final program
+# and will run as fast as possible.
+# **If you’re benchmarking your code’s running time, be sure to run this build**
+build-release = "cargo build --release"
+start-release = "cargo run --release"
+open-doc = "cargo doc --open"
+benchmark = "cargo bench && open target/criterion/report/index.html"
+install-samply = "cargo install samply"
+profile = { cmd = "cargo build --profile profiling && samply record target/profiling/profile_main 100000", depends-on = ["install-samply"] }
+
+# ======= CI Environments ==========
+[environments]
+py310 = ["python", "py310"]
+py311 = ["python", "py311"]
+py312 = ["python", "py312"]
+
+# ======= py-phylo2vec ==========
+
+# Default Python Phylo2vec environment
+[environments.py-phylo2vec]
+features = ["pydocs", "pydev", "python", "py310"]
+solve-group = "default"
+
+# ======= r-phylo2vec ==========
+
+# Default R Phylo2vec environment
+[environments.r-phylo2vec]
+features = ["r"]
+solve-group = "default"
+
+# ====== Default Dependencies ======
+[dependencies]
+rust = ">=1.81.0,<2"
+openssl = ">=3.3.1,<3.4"
+pkg-config = ">=0.29.2,<0.30"
+compilers = ">=1.7.0,<1.8"
+clang = ">=16.0.6,<17"
+rust-src = ">=1.81.0,<2"
+pre-commit = ">=4.0.1,<5"
+
+[target.linux-64.dependencies]
+gcc = "*"
+
+[target.osx-64.dependencies]
+clang = "*"
+
+[target.osx-arm64.dependencies]
+clang = "*"
+
+# ======= py-phylo2vec ==========
+
+[feature.py310.dependencies]
+python = "3.10.*"
+
+[feature.py311.dependencies]
+python = "3.11.*"
+
+[feature.py312.dependencies]
+python = "3.12.*"
+
+[feature.pydev.dependencies]
+pixi-kernel = ">=0.4.0,<0.5"
+jupyterlab = ">=4.1,<4.2"
+
+[feature.pydocs.dependencies]
+jupyter-book = ">=0.11.0"
+
+[feature.pydocs.tasks.build-docs]
+cmd = "jupyter-book build docs"
+depends-on = ["install-python"]
+
+[feature.python.dependencies]
+pip = ">=24.2,<25"
+maturin = ">=1.7.4,<2"
+pytest = ">=8.3.4,<9"
+pytest-benchmark = ">=5.1.0,<6"
+tomli = ">=2.0.0,<3"
+
+[feature.python.tasks.install-python]
+cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"
+
+[feature.python.tasks.test]
+cmd = "pytest -vvv ./py-phylo2vec/tests"
+depends-on = ["install-python"]
+
+[feature.python.tasks.benchmark]
+cmd = "pytest ./py-phylo2vec/benchmarks --benchmark-autosave --benchmark-group-by=func --benchmark-warmup=on"
+depends-on = ["install-python"]
+
+# ======== r-phylo2vec ===========
+
+[feature.r.dependencies]
+r = "4.*"
+r-devtools = ">=2.4.5,<3"
+
+[feature.r.tasks.install-r]
+cmd = "Rscript ./r-phylo2vec/scripts/install-package.R"
+
+[feature.r.tasks.test]
+cmd = "Rscript ./r-phylo2vec/scripts/run-tests.R"

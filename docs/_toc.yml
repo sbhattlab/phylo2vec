@@ -1,0 +1,13 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: README.md
+parts:
+  - caption: Tutorials
+    chapters:
+      - file: demo.ipynb
+  - caption: Help and References
+    chapters:
+      - file: development.md
+      - file: api.rst

@@ -1,0 +1,26 @@
+name: CI R
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  PIXI_COLOR: always
+  R_ENV: r-phylo2vec
+
+jobs:
+  build_and_test:
+    name: R project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: ${{ env.R_ENV }}
+      - run: pixi run -e ${{ env.R_ENV }} test "./${{ env.R_ENV}}"

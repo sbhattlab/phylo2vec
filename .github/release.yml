@@ -1,0 +1,7 @@
+changelog:
+  exclude:
+    authors:
+      - deepsource-io
+      - dependabot
+      - pre-commit-ci
+      - Copilot

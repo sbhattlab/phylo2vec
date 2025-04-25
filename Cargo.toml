@@ -1,0 +1,21 @@
+[workspace]
+resolver = "2"
+members = [
+    "phylo2vec",
+    "py-phylo2vec",
+    "r-phylo2vec/src/rust",
+]
+default-members = ["phylo2vec"]
+
+[profile.profiling]
+inherits = "release"
+debug = true
+
+[workspace.package]
+edition = "2021"
+authors = ["Neil Scheidwasser <neil.clow@sund.ku.dk>"]
+description = "Phylo2Vec: integer vector representation of binary (phylogenetic) trees"
+license = "LGPL-3.0"
+
+[workspace.dependencies]
+phylo2vec = { path = "phylo2vec", default-features = false }
