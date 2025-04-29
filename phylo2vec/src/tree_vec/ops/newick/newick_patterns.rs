@@ -32,15 +32,21 @@ impl NewickPatterns {
         let _pairs = format!(r"({})|({})", _left_node, _right_node);
         NewickPatterns {
             // Pattern of an integer label on the left of a pair
-            left_node: regex::Regex::new(&_left_node).unwrap(),
+            left_node: regex::Regex::new(_left_node).unwrap(),
             // Pattern of an integer label on the right of a pair
-            right_node: regex::Regex::new(&_right_node).unwrap(),
+            right_node: regex::Regex::new(_right_node).unwrap(),
             // Pattern of a pair of integer labels
             pairs: regex::Regex::new(&_pairs).unwrap(),
             // Pattern of a branch length annotation
-            branch_lengths: regex::Regex::new(&_branch_lengths).unwrap(),
+            branch_lengths: regex::Regex::new(_branch_lengths).unwrap(),
             // Pattern of a parent label
-            parents: regex::Regex::new(&_parents).unwrap(),
+            parents: regex::Regex::new(_parents).unwrap(),
         }
+    }
+}
+
+impl Default for NewickPatterns {
+    fn default() -> Self {
+        Self::new()
     }
 }

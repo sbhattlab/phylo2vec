@@ -68,10 +68,7 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
     // Combine `v` and `bls` into a matrix (Vec<Vec<f32>>)
     let mut m: Vec<Vec<f32>> = Vec::with_capacity(v.len());
     for i in 0..v.len() {
-        let mut row: Vec<f32> = Vec::with_capacity(3); // 3 columns: v + 2 branch lengths
-        row.push(v[i] as f32);
-        row.push(bls[i][0]);
-        row.push(bls[i][1]);
+        let row: Vec<f32> = vec![v[i] as f32, bls[i][0], bls[i][1]];
         m.push(row);
     }
 
@@ -92,9 +89,9 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
 /// use phylo2vec::utils::check_v;
 /// check_v(&vec![0, 0, 1]);
 /// ```
-pub fn check_v(v: &Vec<usize>) -> () {
-    for i in 0..v.len() {
-        _check_max(i, v[i]);
+pub fn check_v(v: &[usize]) {
+    for (i, vi) in v.iter().enumerate() {
+        _check_max(i, *vi);
     }
 }
 
@@ -119,7 +116,7 @@ pub fn check_v(v: &Vec<usize>) -> () {
 /// vec![0.0, 0.1, 0.2],
 /// vec![1.0, 0.5, 0.7],]);
 ///
-pub fn check_m(matrix: &Vec<Vec<f32>>) -> () {
+pub fn check_m(matrix: &[Vec<f32>]) {
     // Validate the vector part (first column)
     let vector: Vec<usize> = matrix.iter().map(|row| row[0] as usize).collect();
     check_v(&vector);
@@ -138,7 +135,7 @@ pub fn check_m(matrix: &Vec<Vec<f32>>) -> () {
 /// # Panics
 ///
 /// Panics if the value is out of bounds (max = 2 * idx)
-fn _check_max(idx: usize, value: usize) -> () {
+fn _check_max(idx: usize, value: usize) {
     let absolute_max = 2 * idx;
     assert!(
         value <= absolute_max,
@@ -172,9 +169,9 @@ fn _check_max(idx: usize, value: usize) -> () {
 ///
 /// assert_eq!(unordered, false);
 /// ```
-pub fn is_unordered(v: &Vec<usize>) -> bool {
-    for i in 0..v.len() {
-        _check_max(i, v[i]);
+pub fn is_unordered(v: &[usize]) -> bool {
+    for (i, vi) in v.iter().enumerate() {
+        _check_max(i, *vi);
         if v[i] > i + 1 {
             return true;
         }
@@ -195,8 +192,8 @@ mod tests {
         let v = sample_vector(n_leaves, ordering);
         assert_eq!(v.len(), n_leaves - 1);
         check_v(&v);
-        for i in 0..(n_leaves - 1) {
-            assert!(v[i] <= scale * i);
+        for (i, vi) in v.iter().enumerate() {
+            assert!(*vi <= scale * i);
         }
     }
 
@@ -215,14 +212,14 @@ mod tests {
         assert!(num_columns > 0, "Matrix should have at least one column.");
 
         // Example check function for matrix values (values should be between min_val and max_val)
-        for i in 0..matrix.len() {
-            for j in 1..matrix[i].len() {
+        for (i, m_i) in matrix.iter().enumerate() {
+            for (j, m_ij) in m_i.iter().enumerate().skip(1) {
                 assert!(
-                    matrix[i][j] >= 0.0 && matrix[i][j] <= 1.0,
+                    (0.0..=1.0).contains(m_ij),
                     "Matrix value out of bounds at ({}, {}): {}",
                     i,
                     j,
-                    matrix[i][j]
+                    m_ij
                 );
             }
         }

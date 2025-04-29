@@ -242,7 +242,7 @@ fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
 }
 
 /// Build newick string from the ancestry matrix and branch lengths
-pub fn build_newick_with_bls(ancestry: &Ancestry, branch_lengths: &Vec<[f32; 2]>) -> String {
+pub fn build_newick_with_bls(ancestry: &Ancestry, branch_lengths: &[[f32; 2]]) -> String {
     let n_max = ancestry.len();
 
     // Extract the last entry in ancestry and branch lengths
@@ -338,7 +338,7 @@ pub fn remove_parent_labels(newick: &str) -> String {
 /// ```
 pub fn has_parents(newick: &str) -> bool {
     let newick_patterns = NewickPatterns::new();
-    return newick_patterns.parents.is_match(newick);
+    newick_patterns.parents.is_match(newick)
 }
 
 /// Find the number of leaves in the Newick string
@@ -363,7 +363,7 @@ pub fn find_num_leaves(newick: &str) -> usize {
         })
         .collect();
 
-    return result.len();
+    result.len()
 }
 
 /// Build newick string from the ancestry matrix
@@ -387,7 +387,7 @@ mod tests {
     #[case("(0,(1,(2,(3,(4,5)6)7)8)9)10;", "(0,(1,(2,(3,(4,5)))));")]
     #[case("((0,2)5,(1,3)4)6;", "((0,2),(1,3));")]
     fn test_remove_parent_labels(#[case] newick: &str, #[case] expected: &str) {
-        let result = remove_parent_labels(&newick);
+        let result = remove_parent_labels(newick);
         assert_eq!(result, expected);
     }
 
@@ -400,11 +400,11 @@ mod tests {
         let newick = to_newick_from_vector(&v);
         // Check if the newick string has parents
         let result = has_parents(&newick);
-        assert_eq!(result, true); // skipcq: RS-W1024
+        assert!(result); // skipcq: RS-W1024
 
         // Check if the newick string does not have parents
         let result_no_parents = has_parents(&remove_parent_labels(&newick));
-        assert_eq!(result_no_parents, false); // skipcq: RS-W1024
+        assert!(!result_no_parents); // skipcq: RS-W1024
     }
 
     #[rstest]
