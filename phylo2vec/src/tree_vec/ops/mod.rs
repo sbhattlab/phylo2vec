@@ -59,7 +59,6 @@ pub fn add_leaf(v: &mut Vec<usize>, leaf: usize, branch: usize) -> Vec<usize> {
 
     let mut ancestry_add = get_ancestry(v);
 
-    println!("{:?}", ancestry_add);
     let mut found_first_leaf = false;
     for row in ancestry_add.iter_mut() {
         for val in row.iter_mut() {
