@@ -36,11 +36,11 @@ impl TreeVec {
     ) -> Self {
         let n_leaf = data.len();
         TreeVec {
-            data: data,
-            n_leaf: n_leaf,
+            data,
+            n_leaf,
             is_rooted: true,
-            branch_lengths: branch_lengths,
-            taxa: taxa,
+            branch_lengths,
+            taxa,
         }
     }
 
@@ -62,7 +62,7 @@ impl TreeVec {
     /// # Returns
     /// A String containing the Newick representation of the tree
     pub fn to_newick(&self) -> String {
-        return ops::to_newick_from_vector(&self.data);
+        ops::to_newick_from_vector(&self.data)
     }
 
     /// Gets the ancestry matrix representation of the tree
@@ -70,7 +70,7 @@ impl TreeVec {
     /// # Returns
     /// An `Ancestry` type containing parent-child relationships
     pub fn get_ancestry(&self) -> types::Ancestry {
-        return ops::get_ancestry(&self.data);
+        ops::get_ancestry(&self.data)
     }
 
     /// Adds a new leaf to the tree
@@ -100,7 +100,7 @@ impl TreeVec {
         let mut vec = self.data.clone();
         let (data, sister_leaf) = ops::remove_leaf(&mut vec, leaf);
         self.data = data;
-        return sister_leaf;
+        sister_leaf
     }
 }
 
@@ -116,12 +116,12 @@ mod tests {
     #[case(vec![0, 0, 0, 1, 3, 3, 1, 4, 4])]
     #[case(vec![0, 0, 0, 3, 2, 9, 4, 1, 12])]
     fn test_new_tree(#[case] v: Vec<usize>) {
-        let expected_v = v.iter().map(|x| *x).collect::<Vec<usize>>();
+        let expected_v = v.to_vec();
         let tree = TreeVec::new(v, None, None);
 
         assert_eq!(tree.data, expected_v);
         assert_eq!(tree.n_leaf, 9);
-        assert_eq!(tree.is_rooted, true);
+        assert!(tree.is_rooted);
         assert_eq!(tree.branch_lengths, None);
         assert_eq!(tree.taxa, None);
     }
@@ -135,7 +135,7 @@ mod tests {
     fn test_new_tree_from_sample(#[case] n_leaves: usize, #[case] ordering: bool) {
         let tree = TreeVec::from_sample(n_leaves, ordering);
         assert_eq!(tree.n_leaf, n_leaves - 1);
-        assert_eq!(tree.is_rooted, true);
+        assert!(tree.is_rooted);
         assert_eq!(tree.branch_lengths, None);
         assert_eq!(tree.taxa, None);
     }

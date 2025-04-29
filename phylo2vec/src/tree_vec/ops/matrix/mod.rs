@@ -94,7 +94,7 @@ fn _get_sorted_indices(ancestry: &Ancestry) -> Vec<usize> {
 /// * A Vec<usize> - the tree's vector representation and
 /// * A Vec<[f32; 2]> - the vector's associated branch lengths
 ///
-pub fn parse_matrix(matrix: &Vec<Vec<f32>>) -> (Vec<usize>, Vec<[f32; 2]>) {
+pub fn parse_matrix(matrix: &[Vec<f32>]) -> (Vec<usize>, Vec<[f32; 2]>) {
     let mut vector = Vec::new();
     let mut branch_lengths = Vec::new();
 

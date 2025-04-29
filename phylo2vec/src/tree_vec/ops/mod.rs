@@ -9,23 +9,23 @@ use newick::build_newick_with_bls;
 
 pub use vector::{
     build_vector, cophenetic_distances, find_coords_of_first_leaf, get_ancestry, get_pairs,
-    get_pairs_avl, order_cherries, order_cherries_no_parents,
+    order_cherries, order_cherries_no_parents,
 };
 
 pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parents};
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
-pub fn to_newick_from_vector(v: &Vec<usize>) -> String {
-    let ancestry: Ancestry = get_ancestry(&v);
+pub fn to_newick_from_vector(v: &[usize]) -> String {
+    let ancestry: Ancestry = get_ancestry(v);
     build_newick(&ancestry)
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
-pub fn to_newick_from_matrix(m: &Vec<Vec<f32>>) -> String {
+pub fn to_newick_from_matrix(m: &[Vec<f32>]) -> String {
     // First, check the matrix structure for validity
     check_m(m);
 
-    let (v, bls) = parse_matrix(&m);
+    let (v, bls) = parse_matrix(m);
     let ancestry = get_ancestry(&v);
     build_newick_with_bls(&ancestry, &bls)
 }
@@ -34,7 +34,7 @@ pub fn to_newick_from_matrix(m: &Vec<Vec<f32>>) -> String {
 pub fn to_vector(newick: &str) -> Vec<usize> {
     let mut ancestry: Ancestry;
 
-    if has_parents(&newick) {
+    if has_parents(newick) {
         ancestry = get_cherries(newick);
         order_cherries(&mut ancestry);
     } else {
@@ -42,7 +42,7 @@ pub fn to_vector(newick: &str) -> Vec<usize> {
         order_cherries_no_parents(&mut ancestry);
     }
 
-    return build_vector(&ancestry);
+    build_vector(&ancestry)
 }
 
 /// Adds a new leaf to the tree
@@ -61,15 +61,15 @@ pub fn add_leaf(v: &mut Vec<usize>, leaf: usize, branch: usize) -> Vec<usize> {
 
     println!("{:?}", ancestry_add);
     let mut found_first_leaf = false;
-    for r in 0..ancestry_add.len() {
-        for c in 0..3 {
-            if !found_first_leaf && ancestry_add[r][c] == v.len() {
+    for row in ancestry_add.iter_mut() {
+        for val in row.iter_mut() {
+            if !found_first_leaf && *val == v.len() {
                 // Find the indices of the first leaf
                 // and then set the value to the new leaf
-                ancestry_add[r][c] = leaf;
+                *val = leaf;
                 found_first_leaf = true;
-            } else if ancestry_add[r][c] >= leaf {
-                ancestry_add[r][c] += 1;
+            } else if *val >= leaf {
+                *val += 1;
             }
         }
     }
@@ -78,9 +78,7 @@ pub fn add_leaf(v: &mut Vec<usize>, leaf: usize, branch: usize) -> Vec<usize> {
     // let ancestry_add_ref = &mut ancestry_add;
     order_cherries(&mut ancestry_add);
     order_cherries_no_parents(&mut ancestry_add);
-    let new_vec = build_vector(&ancestry_add);
-
-    new_vec
+    build_vector(&ancestry_add)
 }
 
 /// Removes a leaf from the tree
@@ -94,7 +92,7 @@ pub fn add_leaf(v: &mut Vec<usize>, leaf: usize, branch: usize) -> Vec<usize> {
 ///
 /// # Side effects
 /// Modifies the tree structure by removing the leaf and updating indices
-pub fn remove_leaf(v: &mut Vec<usize>, leaf: usize) -> (Vec<usize>, usize) {
+pub fn remove_leaf(v: &mut [usize], leaf: usize) -> (Vec<usize>, usize) {
     let ancestry = get_ancestry(v);
     let leaf_coords = find_coords_of_first_leaf(&ancestry, leaf);
     let leaf_row = leaf_coords.0;
@@ -109,28 +107,24 @@ pub fn remove_leaf(v: &mut Vec<usize>, leaf: usize) -> (Vec<usize>, usize) {
 
     for r in 0..num_cherries - 1 {
         let mut new_row = if r < leaf_row {
-            ancestry[r].clone()
+            ancestry[r]
         } else {
-            ancestry[r + 1].clone()
+            ancestry[r + 1]
         };
 
-        for c in 0..3 {
-            let mut node = new_row[c];
-
-            if node == parent {
-                node = sister;
+        for node in new_row.iter_mut() {
+            if *node == parent {
+                *node = sister;
             }
 
             // Subtract 1 for leaves > "leaf"
             // (so that the vector is still valid)
-            if node > leaf {
-                node -= 1;
-                if node >= parent {
-                    node -= 1;
+            if *node > leaf {
+                *node -= 1;
+                if *node >= parent {
+                    *node -= 1;
                 }
             }
-
-            new_row[c] = node;
         }
 
         ancestry_rm.push(new_row);
@@ -140,7 +134,7 @@ pub fn remove_leaf(v: &mut Vec<usize>, leaf: usize) -> (Vec<usize>, usize) {
     order_cherries_no_parents(&mut ancestry_rm);
     let new_vec = build_vector(&ancestry_rm);
 
-    return (new_vec, sister);
+    (new_vec, sister)
 }
 
 #[cfg(test)]
@@ -188,7 +182,7 @@ mod tests {
     #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)6)7)8)9)10;")]
     #[case(vec![0, 0, 1], "((0,2)5,(1,3)4)6;")]
     fn test_to_vector(#[case] expected: Vec<usize>, #[case] newick: &str) {
-        let vector = to_vector(&newick);
+        let vector = to_vector(newick);
         assert_eq!(vector, expected);
     }
 
@@ -215,7 +209,7 @@ mod tests {
     #[case(vec![0, 1, 2, 3, 4], "(0,(1,(2,(3,(4,5)))));")]
     #[case(vec![0, 0, 1], "((0,2),(1,3));")]
     fn test_to_vector_no_parents(#[case] expected: Vec<usize>, #[case] newick: &str) {
-        let vector = to_vector(&newick);
+        let vector = to_vector(newick);
         assert_eq!(vector, expected);
     }
 

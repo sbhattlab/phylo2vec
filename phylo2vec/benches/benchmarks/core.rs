@@ -25,7 +25,7 @@ fn bench_to_newick(c: &mut Criterion) {
             |b, &size| {
                 b.iter(|| {
                     let v = sample_vector(size, true);
-                    ops::to_newick(&v)
+                    ops::to_newick_from_vector(&v)
                 });
             },
         );
@@ -37,7 +37,7 @@ fn bench_to_newick(c: &mut Criterion) {
             |b, &size| {
                 b.iter(|| {
                     let v = sample_vector(size, false);
-                    ops::to_newick(&v)
+                    ops::to_newick_from_vector(&v)
                 });
             },
         );
@@ -60,7 +60,7 @@ fn bench_to_vector(c: &mut Criterion) {
             |b, &size| {
                 // Generate the Newick string once outside the benchmark loop
                 let v = sample_vector(size, true);
-                let newick = ops::to_newick(&v);
+                let newick = ops::to_newick_from_vector(&v);
 
                 // Benchmark only the to_vector operation
                 b.iter(|| ops::to_vector(&newick));

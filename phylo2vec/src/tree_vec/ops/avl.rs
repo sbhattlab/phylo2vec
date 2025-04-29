@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::tree_vec::types::Pair;
 
 pub struct Node {
@@ -61,7 +63,7 @@ impl AVLTree {
                 Self::update_height_and_size(x.right.as_mut().unwrap());
                 Self::update_height_and_size(&mut x);
 
-                return Some(x);
+                Some(x)
             } else {
                 // If no left child, revert the state and return `None`
                 *y = Some(y_node);
@@ -84,7 +86,7 @@ impl AVLTree {
                 Self::update_height_and_size(y.left.as_mut().unwrap());
                 Self::update_height_and_size(&mut y);
 
-                return Some(y);
+                Some(y)
             } else {
                 // If no right child, revert the state and return `None`
                 *x = Some(x_node);
@@ -148,7 +150,7 @@ impl AVLTree {
 
         Self::update_height_and_size(&mut n);
 
-        return Self::balance(&mut Some(n));
+        Self::balance(&mut Some(n))
     }
 
     pub fn lookup(&self, index: usize) -> Pair {
@@ -159,12 +161,10 @@ impl AVLTree {
         match node {
             Some(ref n) => {
                 let left_size = Self::get_size(&n.left);
-                if index < left_size {
-                    Self::lookup_node(&n.left, index)
-                } else if index == left_size {
-                    Some(n.value)
-                } else {
-                    Self::lookup_node(&n.right, index - left_size - 1)
+                match index.cmp(&left_size) {
+                    Ordering::Less => Self::lookup_node(&n.left, index),
+                    Ordering::Equal => Some(n.value),
+                    Ordering::Greater => Self::lookup_node(&n.right, index - left_size - 1),
                 }
             }
             None => None,
@@ -193,6 +193,12 @@ impl AVLTree {
 
     pub fn get_pairs(&self) -> Vec<Pair> {
         self.inorder_traversal()
+    }
+}
+
+impl Default for AVLTree {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -336,7 +342,7 @@ mod tests {
         if let Some(ref n) = node {
             let balance_factor = AVLTree::get_balance_factor(node);
             assert!(
-                balance_factor >= -1 && balance_factor <= 1,
+                (-1..=1).contains(&balance_factor),
                 "Node with value {:?} is unbalanced! Balance factor: {}",
                 n.value,
                 balance_factor

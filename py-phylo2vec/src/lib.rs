@@ -17,14 +17,12 @@ fn to_newick_from_matrix(input_matrix: Vec<Vec<f32>>) -> PyResult<String> {
 
 #[pyfunction]
 fn to_vector(newick: &str) -> Vec<usize> {
-    let v = ops::to_vector(&newick);
-    v
+    ops::to_vector(newick)
 }
 
 #[pyfunction]
 fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
-    let m = ops::matrix::to_matrix(&newick);
-    m
+    ops::matrix::to_matrix(newick)
 }
 
 #[pyfunction]
@@ -42,20 +40,17 @@ fn build_newick(input_ancestry: Vec<[usize; 3]>) -> String {
 
 #[pyfunction]
 fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
-    let v = utils::sample_vector(n_leaves, ordered);
-    v
+    utils::sample_vector(n_leaves, ordered)
 }
 
 #[pyfunction]
 fn cophenetic_distances(input_vector: Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
-    let distances = ops::vector::cophenetic_distances(&input_vector, unrooted);
-    distances
+    ops::vector::cophenetic_distances(&input_vector, unrooted)
 }
 
 #[pyfunction]
 fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
-    let m = utils::sample_matrix(n_leaves, ordered);
-    m
+    utils::sample_matrix(n_leaves, ordered)
 }
 
 #[pyfunction]
@@ -65,12 +60,12 @@ fn check_v(input_vector: Vec<usize>) {
 
 #[pyfunction]
 fn add_leaf(mut input_vector: Vec<usize>, leaf: usize, branch: usize) -> Vec<usize> {
-    return ops::add_leaf(&mut input_vector, leaf, branch);
+    ops::add_leaf(&mut input_vector, leaf, branch)
 }
 
 #[pyfunction]
 fn remove_leaf(mut input_vector: Vec<usize>, leaf: usize) -> (Vec<usize>, usize) {
-    return ops::remove_leaf(&mut input_vector, leaf);
+    ops::remove_leaf(&mut input_vector, leaf)
 }
 
 /// This module is exposed to Python.
