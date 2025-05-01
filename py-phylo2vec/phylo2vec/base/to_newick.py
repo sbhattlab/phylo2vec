@@ -1,9 +1,11 @@
 """
 Methods to convert a Phylo2Vec vector to a Newick-format string.
 """
+
 import numpy as np
 
 from phylo2vec import _phylo2vec_core
+
 
 def _get_ancestry(v: np.ndarray) -> np.ndarray:
     """
@@ -40,30 +42,6 @@ def _get_ancestry(v: np.ndarray) -> np.ndarray:
     """
     ancestry_list = _phylo2vec_core.get_ancestry(v)
     return np.asarray(ancestry_list)
-
-
-def _build_newick(ancestry: np.ndarray) -> str:
-    """Build a Newick string from an "ancestry" array
-
-    The input should always be 3-dimensional with the following format:
-    1st column: child 1
-    2nd column: child 2
-    3rd column: parent node
-
-    The matrix is processed such that we iteratively write a Newick string
-    to describe the tree.
-
-    Parameters
-    ----------
-    ancestry : numpy.ndarray
-        "Ancestry" array of size (n_leaves - 1, 3)
-
-    Returns
-    -------
-    newick : str
-        Newick string
-    """
-    return _phylo2vec_core.build_newick(ancestry)
 
 
 def to_newick(v):
