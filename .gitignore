@@ -193,3 +193,6 @@ notebooks/
 
 # Benchmarks output files
 .benchmarks/
+
+# Temporary files
+tmp/
