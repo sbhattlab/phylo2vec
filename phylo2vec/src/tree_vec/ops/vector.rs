@@ -136,10 +136,10 @@ pub fn get_ancestry(v: &[usize]) -> Ancestry {
 }
 
 pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
-    let mut ancestry_clone: Ancestry = ancestry.clone();
-    order_cherries(&mut ancestry_clone);
+    let mut ordered_ancestry: Ancestry = ancestry.clone();
+    order_cherries(&mut ordered_ancestry);
 
-    build_vector(&ancestry_clone)
+    build_vector(&ordered_ancestry)
 }
 
 pub fn find_coords_of_first_leaf(ancestry: &Ancestry, leaf: usize) -> (usize, usize) {
