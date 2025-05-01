@@ -3,9 +3,10 @@
 import random
 
 import numba as nb
+import numpy as np
 
 from phylo2vec.datasets import read_fasta
-from phylo2vec.utils import sample_vector, seed_everything
+from phylo2vec.utils.vector import sample_vector
 
 MAX_SEED = 42
 
@@ -24,7 +25,8 @@ class BaseOptimizer:
         self.random_seed = (
             random.randint(0, MAX_SEED) if random_seed is None else random_seed
         )
-        seed_everything(self.random_seed)
+        random.seed(self.random_seed)
+        np.random.seed(self.random_seed)
 
     @staticmethod
     def _make_label_mapping(records):

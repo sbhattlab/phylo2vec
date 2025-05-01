@@ -7,14 +7,48 @@ import numpy as np
 
 from ete3 import Tree
 
-from phylo2vec.base.to_newick import _get_ancestry, to_newick
-from phylo2vec.base.to_vector import (
-    _build_vector,
-    _find_cherries,
-    to_vector,
-)
-from phylo2vec.utils.validation import check_v
 from phylo2vec import _phylo2vec_core as core
+from phylo2vec.base.newick import from_newick, to_newick
+from phylo2vec.base.ancestry import from_ancestry, to_ancestry
+
+
+def check_vector(v: np.ndarray) -> None:
+    """Input validation of a Phylo2Vec vector
+
+    The input is checked to satisfy the Phylo2Vec constraints
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    """
+    core.check_v(v.tolist())
+
+
+def sample_vector(n_leaves: int, ordered: bool = False) -> np.ndarray:
+    """Sample a random tree via Phylo2Vec, in vector form.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    ordered : bool, optional
+        If True, sample an ordered tree, by default False
+
+        True:
+        v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
+
+        False:
+        v_i in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
+
+    Returns
+    -------
+    numpy.ndarray
+        Phylo2Vec vector
+    """
+
+    v_list = core.sample_vector(n_leaves, ordered)
+    return np.asarray(v_list)
 
 
 def remove_leaf(v, leaf):
@@ -62,6 +96,9 @@ def reorder_v(reorder_method, v_old, label_mapping_old):
 
     Current pipeline: get ancestry matrix --> reorder --> re-build vector
 
+    Note: reordering functions are not up to date.
+    They will be integrated in the Rust core in the future
+
     Parameters
     ----------
     reorder_fun : function
@@ -80,7 +117,7 @@ def reorder_v(reorder_method, v_old, label_mapping_old):
     """
     # TODO: make this function inplace?
     # Get ancestry
-    ancestry_old = _get_ancestry(v_old)
+    ancestry_old = to_ancestry(v_old)
 
     # Reorder M
     if reorder_method == "birth_death":
@@ -103,7 +140,7 @@ def reorder_v(reorder_method, v_old, label_mapping_old):
     )
 
     # Re-build v
-    v_new = _build_vector(_find_cherries(ancestry_new))
+    v_new = from_ancestry(ancestry_new)
 
     return v_new, label_mapping_new
 
@@ -263,20 +300,11 @@ def reroot_at_random(v):
 
     newick = ete3_tree.write(format=9)
 
-    v_new = to_vector(newick)
+    v_new = from_newick(newick)
 
-    check_v(v_new)
+    check_vector(v_new)
 
-    return to_vector(newick)
-
-
-# faster than np.nonzero
-@nb.njit(cache=True)
-def _find_indices_of_first_leaf(ancestry, leaf):
-    for r in range(ancestry.shape[0]):
-        for c in range(ancestry.shape[1]):
-            if ancestry[r, c] == leaf:
-                return r, c
+    return from_newick(newick)
 
 
 def get_ancestry_paths(v):
@@ -293,7 +321,7 @@ def get_ancestry_paths(v):
     ancestry_paths : list of list of int
         Ancestry paths for each node
     """
-    ancestry = _get_ancestry(v)
+    ancestry = to_ancestry(v)
     parent_vec = np.zeros(2 * len(v), dtype=np.uint64)
 
     for i in range(len(ancestry)):

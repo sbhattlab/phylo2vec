@@ -1,15 +1,34 @@
 """
-Methods to convert a Phylo2Vec vector to a Newick-format string.
+Methods to convert Phylo2Vec vectors to an ancestry object and vice versa.
 """
 
 import numpy as np
 
-from phylo2vec import _phylo2vec_core
+import phylo2vec._phylo2vec_core as core
 
 
-def _get_ancestry(v: np.ndarray) -> np.ndarray:
+def from_ancestry(ancestry: np.ndarray) -> np.ndarray:
+    """Convert an "ancestry matrix" to a vector
+
+    Parameters
+    ----------
+    ancestry : np.ndarray
+        Ancestry matrix
+        1st column: child 1
+        2nd column: child 2
+        3rd column: parent node
+
+    Returns
+    -------
+    np.ndarray
+        _description_
     """
-    Get the "ancestry" of v (see "Returns" paragraph)
+    v_list = core.from_ancestry(ancestry)
+    return np.asarray(v_list)
+
+
+def to_ancestry(v: np.ndarray) -> np.ndarray:
+    """Convert a Phylo2Vec vector to an ancestry matrix
 
     v[i] = which BRANCH we do the pairing from
 
@@ -40,21 +59,5 @@ def _get_ancestry(v: np.ndarray) -> np.ndarray:
         2nd column: child 2
         3rd column: parent node
     """
-    ancestry_list = _phylo2vec_core.get_ancestry(v)
+    ancestry_list = core.get_ancestry(v)
     return np.asarray(ancestry_list)
-
-
-def to_newick(v):
-    """Recover a rooted tree (in Newick format) from a Phylo2Vec v
-
-    Parameters
-    ----------
-    v : numpy.array
-        Phylo2Vec vector
-
-    Returns
-    -------
-    newick : str
-        Newick tree
-    """
-    return _phylo2vec_core.to_newick_from_vector(v)
