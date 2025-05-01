@@ -18,6 +18,7 @@ fn bench_to_newick(c: &mut Criterion) {
     );
 
     for i in SAMPLE_SIZES {
+        // Scale the sample size by 10000 to adjust the range for benchmarking purposes
         let sample_size = 10000 * i;
 
         // Benchmark ordered case
