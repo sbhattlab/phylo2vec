@@ -4,6 +4,9 @@ use phylo2vec::utils::sample_vector;
 use std::ops::RangeInclusive;
 use std::time::Duration;
 
+/// A range of multipliers used to generate benchmark sample sizes.
+/// Each value in this range is multiplied by 10,000 to produce sample sizes
+/// ranging from 10,000 to 100,000.
 const SAMPLE_SIZES: RangeInclusive<usize> = 1..=10;
 
 /// Benchmark to_newick with both ordered and unordered inputs
