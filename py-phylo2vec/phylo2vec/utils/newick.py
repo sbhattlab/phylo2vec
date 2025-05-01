@@ -27,7 +27,12 @@ def remove_branch_lengths(newick: str) -> str:
     Parameters
     ----------
     newick : str
-        Newick representation of a tree
+        Newick string
+
+    returns
+    ----------
+    newick : str
+        Newick string without branch lengths
     """
     return core.remove_branch_lengths(newick)
 
@@ -35,10 +40,17 @@ def remove_branch_lengths(newick: str) -> str:
 def remove_parent_labels(newick: str) -> str:
     """Remove parent labels from the Newick string
 
+    Example: "(((2,1)4,0)5,3)6;;" --> "(((2,1),0),3);"
+
     Parameters
     ----------
     newick : str
         Newick representation of a tree
+
+    returns
+    ----------
+    newick : str
+        Newick string without parental/internal labels
     """
     return core.remove_parent_labels(newick)
 
