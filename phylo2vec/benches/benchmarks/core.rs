@@ -1,11 +1,10 @@
 use criterion::{criterion_group, BenchmarkId, Criterion};
 use phylo2vec::tree_vec::ops;
 use phylo2vec::utils::sample_vector;
-use std::ops::Range;
+use std::ops::RangeInclusive;
 use std::time::Duration;
 
-/// Input sizes for benchmarks (powers of 2)
-const SAMPLE_SIZES: Range<u32> = 8..20; // 2^8 to 2^19 (256 to 524288)
+const SAMPLE_SIZES: RangeInclusive<usize> = 1..=10;
 
 /// Benchmark to_newick with both ordered and unordered inputs
 fn bench_to_newick(c: &mut Criterion) {
@@ -16,7 +15,7 @@ fn bench_to_newick(c: &mut Criterion) {
     );
 
     for i in SAMPLE_SIZES {
-        let sample_size = 2_i32.checked_pow(i).unwrap() as usize;
+        let sample_size = 10000 * i;
 
         // Benchmark ordered case
         group.bench_with_input(
@@ -53,7 +52,7 @@ fn bench_to_vector(c: &mut Criterion) {
         criterion::PlotConfiguration::default().summary_scale(criterion::AxisScale::Logarithmic),
     );
     for i in SAMPLE_SIZES {
-        let sample_size = 2_i32.checked_pow(i).unwrap() as usize;
+        let sample_size = 10000 * i;
         group.bench_with_input(
             BenchmarkId::from_parameter(sample_size),
             &sample_size,
@@ -73,7 +72,7 @@ fn bench_to_vector(c: &mut Criterion) {
 criterion_group! {
     name = core;
     config = Criterion::default()
-        .sample_size(10)
+        .sample_size(30)
         .warm_up_time(Duration::from_millis(1000));
     targets = bench_to_newick, bench_to_vector
 }
