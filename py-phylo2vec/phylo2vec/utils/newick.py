@@ -40,7 +40,7 @@ def remove_parent_labels(newick: str) -> str:
     newick : str
         Newick representation of a tree
     """
-    core.remove_parent_labels(newick)
+    return core.remove_parent_labels(newick)
 
 
 def create_label_mapping(newick):
