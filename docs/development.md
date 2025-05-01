@@ -212,5 +212,5 @@ devtools::load_all('./r-phylo2vec')
 
 # A small demo
 v = sample(5, FALSE)
-to_newick(v)
+to_newick_from_vector(v)
 ```
