@@ -15,7 +15,6 @@ __all__ = [
     "from_newick",
     "load",
     "load_newick",
-    "to_newick",
     "sample_matrix",
     "sample_vector",
     "save",
