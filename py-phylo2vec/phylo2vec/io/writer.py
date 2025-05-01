@@ -12,8 +12,8 @@ from ._validation import check_array_path, check_newick_path
 def save_newick(
     vector_or_matrix: np.ndarray,
     filepath: str,
-    labels: Optional[Dict[int, str]] = None,
-) -> str:
+    labels: Optional[Dict[str, str]] = None,
+) -> None:
     """Save a Phylo2Vec vector or matrix to Newick format into a file.
 
     Parameters
@@ -22,13 +22,8 @@ def save_newick(
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
     filepath : str
         Path to the output file
-    labels : Optional[dict], optional
-        A mapping of integer labels to , by default None
-
-    Returns
-    -------
-    str
-        _description_
+    labels : Optional[Dict[str, str]], optional
+        A mapping of integer labels (as string) to taxon names, by default None
     """
     check_newick_path(filepath)
     newick = to_newick(vector_or_matrix)

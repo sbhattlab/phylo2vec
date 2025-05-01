@@ -25,7 +25,7 @@ def check_array_path(filepath: str):
 
 
 def check_newick_path(filepath: str):
-    """Check if the file path has a valid extension for Newick fles.
+    """Check if the file path has a valid extension for Newick files.
 
     Parameters
     ----------
