@@ -20,8 +20,11 @@ def from_ancestry(ancestry: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
-        _description_
+    ancestry : numpy.array
+        Ancestry matrix
+        1st column: child 1
+        2nd column: child 2
+        3rd column: parent node
     """
     v_list = core.from_ancestry(ancestry)
     return np.asarray(v_list)

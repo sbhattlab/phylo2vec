@@ -37,7 +37,7 @@ def test_to_newick_unordered(benchmark, sample_size):
 
 @pytest.mark.parametrize("sample_size", BIG_RANGE)
 def test_to_vector(benchmark, sample_size):
-    """Benchmark the conversion of a vector to Newick format.
+    """Benchmark the conversion of a Newick string (without branch lengths) to vector format
 
     Parameters
     ----------
