@@ -39,6 +39,11 @@ fn from_ancestry(input_ancestry: Vec<[usize; 3]>) -> Vec<usize> {
 }
 
 #[pyfunction]
+fn get_pairs(input_vector: Vec<usize>) -> Vec<(usize, usize)> {
+    ops::get_pairs(&input_vector)
+}
+
+#[pyfunction]
 fn build_newick(input_pairs: Vec<(usize, usize)>) -> String {
     let newick_string: String = ops::newick::build_newick(&input_pairs);
     newick_string
@@ -117,6 +122,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(find_num_leaves, m)?)?;
     m.add_function(wrap_pyfunction!(from_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
+    m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;
     m.add_function(wrap_pyfunction!(remove_branch_lengths, m)?)?;
