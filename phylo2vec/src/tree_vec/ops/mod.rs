@@ -38,10 +38,10 @@ pub fn to_vector(newick: &str) -> Vec<usize> {
     let mut ancestry: Ancestry;
 
     if has_parents(newick) {
-        ancestry = get_cherries(newick);
+        ancestry = get_cherries(newick).expect("failed to get cherries");
         order_cherries(&mut ancestry);
     } else {
-        ancestry = get_cherries_no_parents(newick);
+        ancestry = get_cherries_no_parents(newick).expect("failed to get cherries with no parents");
         order_cherries_no_parents(&mut ancestry);
     }
 
