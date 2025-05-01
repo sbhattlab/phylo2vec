@@ -19,8 +19,11 @@ def from_newick(newick: str) -> np.ndarray:
         Phylo2Vec matrix is branch lengths are present, otherwise a vector
     """
     if core.has_branch_lengths(newick):
-        return core.to_matrix(newick)
-    return core.to_vector(newick)
+        arr = core.to_matrix(newick)
+    else:
+        arr = core.to_vector(newick)
+
+    return np.asarray(arr)
 
 
 def to_newick(vector_or_matrix: np.ndarray) -> str:

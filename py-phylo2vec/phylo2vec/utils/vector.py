@@ -68,7 +68,9 @@ def remove_leaf(v, leaf):
     sister : int
         Sister node of leaf
     """
-    return core.remove_leaf(v, leaf)
+    v_sub, sister = core.remove_leaf(v, leaf)
+
+    return np.asarray(v_sub), sister
 
 
 def add_leaf(v, leaf, pos):
