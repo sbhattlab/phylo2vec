@@ -1,7 +1,6 @@
 use std::num::IntErrorKind;
 
-use crate::tree_vec::types::Ancestry;
-use std::collections::HashMap;
+use crate::tree_vec::types::{Ancestry, Pairs};
 
 mod newick_patterns;
 
@@ -217,92 +216,75 @@ pub fn get_cherries_no_parents_with_bls(newick: &str) -> (Ancestry, Vec<[f32; 2]
     (ancestry, bls)
 }
 
-// The recursive function that builds the Newick string
-fn _build_newick_recursive_inner(p: usize, ancestry: &Ancestry) -> String {
-    let leaf_max = ancestry.len();
+/// Build newick string from a vector of pairs
+pub fn build_newick(pairs: &Pairs) -> String {
+    let num_leaves = pairs.len() + 1;
 
-    // Extract the children (c1, c2) and ignore the parent from the ancestry tuple
-    let [c1, c2, _] = ancestry[p - leaf_max - 1];
+    // Faster than map+collect for some reason
+    let mut cache: Vec<String> = Vec::with_capacity(num_leaves);
+    for i in 0..num_leaves {
+        cache.push(i.to_string());
+    }
 
-    // Recursive calls for left and right children, checking if they are leaves or internal nodes
-    let left = if c1 > leaf_max {
-        _build_newick_recursive_inner(c1, ancestry)
-    } else {
-        c1.to_string() // It's a leaf node, just convert to string
-    };
+    for (i, &(c1, c2)) in pairs.iter().enumerate() {
+        // std::mem::take helps efficient swapping of values like std::move in C++
+        let s1 = std::mem::take(&mut cache[c1]);
+        let s2 = std::mem::take(&mut cache[c2]);
+        // Parent node (not needed in theory, but left for legacy reasons)
+        let sp = (num_leaves + i).to_string();
 
-    let right = if c2 > leaf_max {
-        _build_newick_recursive_inner(c2, ancestry)
-    } else {
-        c2.to_string() // It's a leaf node, just convert to string
-    };
+        // https://github.com/hoodie/concatenation_benchmarks-rs
+        // 3 = 2 parentheses + 1 comma
+        let capacity = s1.len() + s2.len() + sp.len() + 3;
+        let mut sub_newick = String::with_capacity(capacity);
+        sub_newick.push('(');
+        sub_newick.push_str(&s1);
+        sub_newick.push(',');
+        sub_newick.push_str(&s2);
+        sub_newick.push(')');
+        sub_newick.push_str(&sp);
 
-    // Create the Newick string in the form (left, right)p
-    format!("({},{}){}", left, right, p)
+        cache[c1] = sub_newick;
+    }
+
+    cache[0].push(';');
+    cache[0].clone()
 }
 
 /// Build newick string from the ancestry matrix and branch lengths
-pub fn build_newick_with_bls(ancestry: &Ancestry, branch_lengths: &[[f32; 2]]) -> String {
-    let n_max = ancestry.len();
+pub fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> String {
+    let num_leaves = pairs.len() + 1;
 
-    // Extract the last entry in ancestry and branch lengths
-    let [c1, c2, p] = ancestry[n_max - 1];
-    let [b1, b2] = branch_lengths[n_max - 1];
-
-    // Initialize the Newick string with the last entry
-    // .1 here specifies 1 decimal place in the Newick string result - this can be changed as needed.
-    let mut newick = format!("({}:{:.1},{}:{:.1}){};", c1, b1, c2, b2, p);
-
-    // Keep track of node indices for replacement
-    let mut node_idxs = HashMap::new();
-    node_idxs.insert(c1, 1);
-    node_idxs.insert(c2, 2 + format!("{}:{:.1}", c1, b1).len());
-
-    // Queue for processing nodes
-    let mut queue = Vec::new();
-
-    if c1 > n_max {
-        queue.push(c1);
-    }
-    if c2 > n_max {
-        queue.push(c2);
+    // Faster than map+collect for some reason
+    let mut cache: Vec<String> = Vec::with_capacity(num_leaves);
+    for i in 0..num_leaves {
+        cache.push(i.to_string());
     }
 
-    // Process the remaining entries in ancestry
-    for _ in 1..n_max {
-        if let Some(next_parent) = queue.pop() {
-            let idx = next_parent - n_max - 1;
+    for (i, (&(c1, c2), &[bl1, bl2])) in pairs.iter().zip(branch_lengths.iter()).enumerate() {
+        let s1 = std::mem::take(&mut cache[c1]);
+        let s2 = std::mem::take(&mut cache[c2]);
+        let sp = (num_leaves + i).to_string();
+        let sb1 = bl1.to_string();
+        let sb2 = bl2.to_string();
 
-            let [c1, c2, p] = ancestry[idx];
-            let [b1, b2] = branch_lengths[idx];
-
-            // Build the sub-Newick string
-            let sub_newick = format!("({}:{:.1},{}:{:.1}){}", c1, b1, c2, b2, p);
-
-            // Replace the placeholder in the Newick string
-            if let Some(&start_idx) = node_idxs.get(&p) {
-                newick = format!(
-                    "{}{}{}",
-                    &newick[..start_idx],
-                    sub_newick,
-                    &newick[start_idx + format!("{}", p).len()..]
-                );
-            }
-
-            // Update node indices
-            node_idxs.insert(c1, node_idxs[&p] + 1);
-            node_idxs.insert(c2, node_idxs[&c1] + 1 + format!("{}:{:.1}", c1, b1).len());
-            // Add children to the queue if they are internal nodes
-            if c1 > n_max {
-                queue.push(c1);
-            }
-            if c2 > n_max {
-                queue.push(c2);
-            }
-        }
+        let capacity = s1.len() + s2.len() + sp.len() + sb1.len() + sb2.len() + 5;
+        let mut sub_newick = String::with_capacity(capacity);
+        sub_newick.push('(');
+        sub_newick.push_str(&s1);
+        sub_newick.push(':');
+        sub_newick.push_str(&sb1);
+        sub_newick.push(',');
+        sub_newick.push_str(&s2);
+        sub_newick.push(':');
+        sub_newick.push_str(&sb2);
+        sub_newick.push(')');
+        sub_newick.push_str(&sp);
+        cache[c1] = sub_newick;
     }
 
-    newick
+    cache[0].push(';');
+    cache[0].clone()
 }
 
 /// Remove parent labels from the Newick string
@@ -402,15 +384,6 @@ pub fn find_num_leaves(newick: &str) -> usize {
         .collect();
 
     result.len()
-}
-
-/// Build newick string from the ancestry matrix
-pub fn build_newick(ancestry: &Ancestry) -> String {
-    // Get the root node, which is the parent value of the last ancestry element
-    let root = ancestry.last().unwrap()[2];
-
-    // Build the Newick string starting from the root, and append a semicolon
-    format!("{};", _build_newick_recursive_inner(root, ancestry))
 }
 
 #[cfg(test)]

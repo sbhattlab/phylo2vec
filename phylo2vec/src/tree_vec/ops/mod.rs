@@ -3,7 +3,10 @@ pub mod matrix;
 pub mod newick;
 pub mod vector;
 
-use crate::{tree_vec::types::Ancestry, utils::check_m};
+use crate::{
+    tree_vec::types::{Ancestry, Pairs},
+    utils::check_m,
+};
 use matrix::parse_matrix;
 use newick::build_newick_with_bls;
 
@@ -16,8 +19,8 @@ pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parent
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
 pub fn to_newick_from_vector(v: &[usize]) -> String {
-    let ancestry: Ancestry = get_ancestry(v);
-    build_newick(&ancestry)
+    let pairs: Pairs = get_pairs(v);
+    build_newick(&pairs)
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
@@ -26,8 +29,8 @@ pub fn to_newick_from_matrix(m: &[Vec<f32>]) -> String {
     check_m(m);
 
     let (v, bls) = parse_matrix(m);
-    let ancestry = get_ancestry(&v);
-    build_newick_with_bls(&ancestry, &bls)
+    let pairs = get_pairs(&v);
+    build_newick_with_bls(&pairs, &bls)
 }
 
 /// Recover a Phylo2Vec vector from a rooted tree (in Newick format)
@@ -158,17 +161,17 @@ mod tests {
     #[rstest]
     #[case(vec![
         vec![0.0, 0.9, 0.4],
-        vec![0.0, 0.8, 3.0],
+        vec![0.0, 0.8, 3.12],
         vec![3.0, 0.4, 0.5],
-    ], "(((0:0.9,2:0.4)4:0.8,3:3.0)5:0.4,1:0.5)6;")]
+    ], "(((0:0.9,2:0.4)4:0.8,3:3.12)5:0.4,1:0.5)6;")]
     #[case(vec![
         vec![0.0, 0.1, 0.2],
     ], "(0:0.1,1:0.2)2;")]
     #[case(vec![
-        vec![0.0, 0.0, 0.0],
+        vec![0.0, 1.0, 3.0],
         vec![0.0, 0.1, 0.2],
         vec![1.0, 0.5, 0.7],
-    ], "((0:0.1,2:0.2)5:0.5,(1:0.0,3:0.0)4:0.7)6;")]
+    ], "((0:0.1,2:0.2)5:0.5,(1:1,3:3)4:0.7)6;")]
     fn test_to_newick_from_matrix(#[case] m: Vec<Vec<f32>>, #[case] expected: &str) {
         let newick = to_newick_from_matrix(&m);
         assert_eq!(newick, expected);
