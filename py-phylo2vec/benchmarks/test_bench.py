@@ -1,14 +1,25 @@
-from phylo2vec import _phylo2vec_core as p2v
+"""Benchmark of Python bindings for the Rust core of phylo2vec."""
+
 import pytest
 
-@pytest.mark.parametrize("sample_size", [2**8, 2**9, 2**10, 2**11, 2**12, 2**13, 2**14, 2**15, 2**16, 2**17, 2**18])
+from phylo2vec import _phylo2vec_core as core
+
+BIG_RANGE = range(10000, 110000, 10000)
+
+
+@pytest.mark.parametrize("sample_size", BIG_RANGE)
 def test_to_newick_ordered(benchmark, sample_size):
-    benchmark(p2v.to_newick_from_vector, p2v.sample_vector(sample_size, True))
+    benchmark(core.to_newick_from_vector, core.sample_vector(sample_size, True))
 
-@pytest.mark.parametrize("sample_size", [2**8, 2**9, 2**10, 2**11, 2**12, 2**13, 2**14, 2**15, 2**16, 2**17, 2**18])
+
+@pytest.mark.parametrize("sample_size", BIG_RANGE)
 def test_to_newick_unordered(benchmark, sample_size):
-    benchmark(p2v.to_newick_from_vector, p2v.sample_vector(sample_size, False))
+    benchmark(core.to_newick_from_vector, core.sample_vector(sample_size, False))
 
-@pytest.mark.parametrize("sample_size", [2**8, 2**9, 2**10, 2**11, 2**12, 2**13, 2**14, 2**15, 2**16, 2**17, 2**18])
+
+@pytest.mark.parametrize("sample_size", BIG_RANGE)
 def test_to_vector(benchmark, sample_size):
-    benchmark(p2v.to_vector, p2v.to_newick_from_vector(p2v.sample_vector(sample_size, True)))
+    benchmark(
+        core.to_vector,
+        core.to_newick_from_vector(core.sample_vector(sample_size, True)),
+    )
