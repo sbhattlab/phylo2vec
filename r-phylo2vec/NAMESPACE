@@ -2,6 +2,7 @@
 
 export(check_v)
 export(sample)
-export(to_newick)
+export(to_newick_from_matrix)
+export(to_newick_from_vector)
 export(to_vector)
 useDynLib(phylo2vec, .registration = TRUE)
