@@ -40,8 +40,7 @@ fn from_ancestry(input_ancestry: Vec<[usize; 3]>) -> Vec<usize> {
 
 #[pyfunction]
 fn get_pairs(input_vector: Vec<usize>) -> Vec<(usize, usize)> {
-    let pairs: Vec<(usize, usize)> = ops::get_pairs(&input_vector);
-    pairs
+    ops::get_pairs(&input_vector)
 }
 
 #[pyfunction]
