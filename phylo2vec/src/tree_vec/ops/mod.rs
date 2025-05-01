@@ -8,8 +8,8 @@ use matrix::parse_matrix;
 use newick::build_newick_with_bls;
 
 pub use vector::{
-    build_vector, cophenetic_distances, find_coords_of_first_leaf, get_ancestry, get_pairs,
-    order_cherries, order_cherries_no_parents,
+    build_vector, cophenetic_distances, find_coords_of_first_leaf, from_ancestry, get_ancestry,
+    get_pairs, order_cherries, order_cherries_no_parents,
 };
 
 pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parents};
@@ -139,6 +139,7 @@ pub fn remove_leaf(v: &mut [usize], leaf: usize) -> (Vec<usize>, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::sample_vector;
     use rstest::*;
 
     /// Test the conversion of vector to Newick format
@@ -245,5 +246,18 @@ mod tests {
         let (new_vec, sister) = remove_leaf(&mut v, leaf);
         assert_eq!(new_vec, expected);
         assert_eq!(sister, branch);
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_ancestry(#[case] num_leaves: usize) {
+        let v = sample_vector(num_leaves, false);
+
+        let ancestry = get_ancestry(&v);
+        let v2 = from_ancestry(&ancestry);
+
+        assert_eq!(v, v2);
     }
 }

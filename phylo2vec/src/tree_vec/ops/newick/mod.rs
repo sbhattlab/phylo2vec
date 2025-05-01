@@ -321,6 +321,25 @@ pub fn remove_parent_labels(newick: &str) -> String {
     return newick_patterns.parents.replace_all(newick, ")").to_string();
 }
 
+/// Remove branch length annotations from the Newick string
+///
+/// # Example
+///
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::remove_branch_lengths;
+///
+/// let newick = "((0:0.0194831,2:0.924941)5:0.18209481,(1:1,3:3)4:4)6;";
+/// let result = remove_branch_lengths(newick);
+/// assert_eq!(result, "((0,2)5,(1,3)4)6;");
+/// ```
+pub fn remove_branch_lengths(newick: &str) -> String {
+    let newick_patterns = NewickPatterns::new();
+    return newick_patterns
+        .branch_lengths
+        .replace_all(newick, "")
+        .to_string();
+}
+
 /// Check if the Newick string has parent labels
 ///
 /// # Example
@@ -339,6 +358,25 @@ pub fn remove_parent_labels(newick: &str) -> String {
 pub fn has_parents(newick: &str) -> bool {
     let newick_patterns = NewickPatterns::new();
     newick_patterns.parents.is_match(newick)
+}
+
+/// Check if the Newick string has branch lengths
+///
+/// # Example
+///
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::has_branch_lengths;
+/// let newick = "(((0:0.1,(3:0.1,5:0.1)6:0.1)8:0.1,2:0.1)9:0.1,(1:0.1,4:0.1)7:0.1)10;";
+/// let result = has_branch_lengths(newick);
+/// assert!(result);
+///
+/// let newick_no_bls = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
+/// let result_no_bls = has_branch_lengths(newick_no_bls);
+/// assert!(!result_no_bls);
+/// ```
+pub fn has_branch_lengths(newick: &str) -> bool {
+    let newick_patterns = NewickPatterns::new();
+    newick_patterns.branch_lengths.is_match(newick)
 }
 
 /// Find the number of leaves in the Newick string
@@ -378,8 +416,8 @@ pub fn build_newick(ancestry: &Ancestry) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tree_vec::ops::to_newick_from_vector;
-    use crate::utils::sample_vector;
+    use crate::tree_vec::ops::{parse_matrix, to_newick_from_matrix, to_newick_from_vector};
+    use crate::utils::{sample_matrix, sample_vector};
     use rstest::*;
 
     #[rstest]
@@ -388,6 +426,25 @@ mod tests {
     #[case("((0,2)5,(1,3)4)6;", "((0,2),(1,3));")]
     fn test_remove_parent_labels(#[case] newick: &str, #[case] expected: &str) {
         let result = remove_parent_labels(newick);
+        assert_eq!(result, expected);
+    }
+
+    #[rstest]
+    #[case(
+        "(((0:0.0,(3:0.3,5:0.5)6:0.6)8:0.8,2:0.2)9:0.9,(1:0.1,4:0.4)7:0.7)10;",
+        "(((0,(3,5)6)8,2)9,(1,4)7)10;"
+    )]
+    #[case(
+        "(0:0.0,(1:0.00001,(2:2,(3:3,(4:4,5:5.0)6:6)7:7)8:8)9:9)10;",
+        "(0,(1,(2,(3,(4,5)6)7)8)9)10;"
+    )]
+    #[case(
+        "((0:0.0194831,2:0.924941)5:0.18209481,(1:1,3:3)4:4)6;",
+        "((0,2)5,(1,3)4)6;"
+    )]
+    #[case("(((2:0.02,1:0.01),0:0.041),3:1.42);", "(((2,1),0),3);")]
+    fn test_remove_branch_lengths(#[case] newick: &str, #[case] expected: &str) {
+        let result = remove_branch_lengths(newick);
         assert_eq!(result, expected);
     }
 
@@ -405,6 +462,23 @@ mod tests {
         // Check if the newick string does not have parents
         let result_no_parents = has_parents(&remove_parent_labels(&newick));
         assert!(!result_no_parents); // skipcq: RS-W1024
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_has_branch_lengths(#[case] n_leaves: usize) {
+        let m = sample_matrix(n_leaves, false);
+        let newick = to_newick_from_matrix(&m);
+        // Check if the newick string has branch lengths
+        let result = has_branch_lengths(&newick);
+        assert!(result); // skipcq: RS-W1024
+
+        // Check if the newick string does not have branch lengths
+        let (v, _) = parse_matrix(&m);
+        let result_no_branch_lengths = has_branch_lengths(&to_newick_from_vector(&v));
+        assert!(!result_no_branch_lengths); // skipcq: RS-W1024
     }
 
     #[rstest]

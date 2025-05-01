@@ -135,6 +135,13 @@ pub fn get_ancestry(v: &[usize]) -> Ancestry {
     ancestry
 }
 
+pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
+    let mut ordered_ancestry: Ancestry = ancestry.clone();
+    order_cherries(&mut ordered_ancestry);
+
+    build_vector(&ordered_ancestry)
+}
+
 pub fn find_coords_of_first_leaf(ancestry: &Ancestry, leaf: usize) -> (usize, usize) {
     for (r, a_r) in ancestry.iter().enumerate() {
         for (c, a_rc) in a_r.iter().enumerate() {
