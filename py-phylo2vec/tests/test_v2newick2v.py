@@ -5,20 +5,9 @@ import pytest
 
 from ete3 import Tree
 
+from phylo2vec.base.newick import from_newick, to_newick
+from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
-from phylo2vec.base import to_newick, to_vector
-from phylo2vec.base.to_vector import (
-    _find_cherries,
-    _order_cherries_no_parents,
-    _reduce,
-    _reduce_no_parents,
-)
-from phylo2vec.utils import sample_vector
-
-
-MIN_N_LEAVES = 5
-MAX_N_LEAVES = 200
-N_REPEATS = 10
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
@@ -33,29 +22,8 @@ def test_v2newick2v(n_leaves):
     for _ in range(N_REPEATS):
         v = sample_vector(n_leaves)
         newick = to_newick(v)
-        v2 = to_vector(newick)
+        v2 = from_newick(newick)
         assert np.all(v == v2)
-
-
-@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
-def test_cherries_no_parents(n_leaves):
-    """Test that the functions of to_vector handles parents and without
-
-    Parameters
-    ----------
-    n_leaves : int
-        Number of leaves
-    """
-    for _ in range(N_REPEATS):
-        v = sample_vector(n_leaves)
-        newick = to_newick(v)
-        newick_no_parents = Tree(newick).write(format=9)
-        cherries = _find_cherries(_reduce(newick))
-        cherries_no_parents = _order_cherries_no_parents(
-            _reduce_no_parents(newick_no_parents)
-        )
-
-        assert np.array_equal(cherries, cherries_no_parents)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
@@ -84,7 +52,7 @@ def test_cherry_permutations(n_leaves):
     for _ in range(N_REPEATS):
         nw = to_newick(sample_vector(n_leaves))
         nw_perm = permutate_cherries(nw)
-        assert np.array_equal(to_vector(nw), to_vector(nw_perm))
+        assert np.array_equal(from_newick(nw), from_newick(nw_perm))
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
@@ -107,7 +75,7 @@ def test_ladderize(n_leaves):
 
         nw_ladderized = tr.write(format=9)
 
-        assert np.array_equal(to_vector(nw), to_vector(nw_ladderized))
+        assert np.array_equal(from_newick(nw), from_newick(nw_ladderized))
 
 
 if __name__ == "__main__":

@@ -74,20 +74,20 @@ install.packages("/path/to/package_file", repos = NULL, type = 'source')
 
 ```python
 import numpy as np
-from phylo2vec.base import to_newick, to_vector
+from phylo2vec import from_newick, to_newick
 
 # Convert a vector to Newick string
 v = np.array([0, 1, 2, 3, 4])
 newick = to_newick(v)  # '(0,(1,(2,(3,(4,5)6)7)8)9)10;'
 
 # Convert Newick string back to vector
-v_converted = to_vector(newick)  # array([0, 1, 2, 3, 4], dtype=int16)
+v_converted = from_newick(newick)  # array([0, 1, 2, 3, 4], dtype=int16)
 ```
 
 #### Tree Manipulation
 
 ```python
-from phylo2vec.utils import add_leaf, remove_leaf, reroot_at_random
+from phylo2vec.utils.vector import add_leaf, remove_leaf, reroot_at_random
 
 # Add a leaf to an existing tree
 v_new = add_leaf(v, 2)  # Add a leaf to the third position

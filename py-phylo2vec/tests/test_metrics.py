@@ -5,10 +5,10 @@ import pytest
 
 from ete3 import Tree
 
-from .config import MIN_N_LEAVES, N_REPEATS
-from phylo2vec.base import to_newick
+from phylo2vec.base.newick import to_newick
 from phylo2vec.metrics import cophenetic_distances
-from phylo2vec.utils import sample_vector
+from phylo2vec.utils.vector import sample_vector
+from .config import MIN_N_LEAVES, N_REPEATS
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, 51))
@@ -22,13 +22,13 @@ def test_cophenetic(n_leaves):
     """
 
     def coph_ete3(tr, n_leaves):
-        D = np.zeros((n_leaves, n_leaves))
+        dmat = np.zeros((n_leaves, n_leaves))
 
         for i in range(n_leaves):
             for j in range(i):
-                D[i, j] = tr.get_distance(f"{i}", f"{j}", topology_only=False)
+                dmat[i, j] = tr.get_distance(f"{i}", f"{j}", topology_only=False)
 
-        return D + D.T
+        return dmat + dmat.T
 
     for _ in range(N_REPEATS):
         v = sample_vector(n_leaves)
@@ -37,20 +37,20 @@ def test_cophenetic(n_leaves):
         tr = Tree(to_newick(v))
 
         # Our distance matrix
-        D_p2v = cophenetic_distances(v)
+        dmat_p2v = cophenetic_distances(v)
 
         # ete3 distance matrix
-        D_ete3 = coph_ete3(tr, n_leaves)
+        dmat_ete3 = coph_ete3(tr, n_leaves)
 
-        assert np.array_equal(D_p2v, D_ete3)
+        assert np.array_equal(dmat_p2v, dmat_ete3)
 
         # Test for unrooted trees
-        D_p2v_unr = cophenetic_distances(v, unrooted=True)
+        dmat_p2v_unr = cophenetic_distances(v, unrooted=True)
 
         tr.unroot()
-        D_ete3_unr = coph_ete3(tr, n_leaves)
+        dmat_ete3_unr = coph_ete3(tr, n_leaves)
 
-        assert np.array_equal(D_p2v_unr, D_ete3_unr)
+        assert np.array_equal(dmat_p2v_unr, dmat_ete3_unr)
 
 
 if __name__ == "__main__":
