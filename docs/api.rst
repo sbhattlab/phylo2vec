@@ -10,7 +10,7 @@ Base
     :nosignatures:
     :toctree: generated/
 
-    base.to_newick_from_vector
+    base.to_newick
     base.to_vector
 
 Metrics
@@ -32,7 +32,7 @@ Utils
     utils.find_num_leaves
     utils.create_label_mapping
     utils.apply_label_mapping
-    utils.remove_annotations
+    utils.remove_branch_lengths
     utils.remove_parent_labels
     utils.sample_vector
     utils.seed_everything

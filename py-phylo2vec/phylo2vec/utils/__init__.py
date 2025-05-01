@@ -6,7 +6,7 @@ from .newick import (
     apply_label_mapping,
     create_label_mapping,
     find_num_leaves,
-    remove_annotations,
+    remove_branch_lengths,
     remove_parent_labels,
 )
 from .random import sample_vector, seed_everything
@@ -35,7 +35,7 @@ __all__ = [
     "create_label_mapping",
     "find_num_leaves",
     "get_common_ancestor",
-    "remove_annotations",
+    "remove_branch_lengths",
     "remove_leaf",
     "remove_parent_labels",
     "reorder_v",

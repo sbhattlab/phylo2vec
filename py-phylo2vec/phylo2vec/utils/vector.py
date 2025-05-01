@@ -14,7 +14,47 @@ from phylo2vec.base.to_vector import (
     to_vector,
 )
 from phylo2vec.utils.validation import check_v
-from phylo2vec import _phylo2vec_core
+from phylo2vec import _phylo2vec_core as core
+
+
+def remove_leaf(v, leaf):
+    """Remove a leaf from a Phylo2Vec v
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    leaf : int
+        A leaf node to remove
+
+    Returns
+    -------
+    v_sub : numpy.ndarray
+        Phylo2Vec vector without `leaf`
+    sister : int
+        Sister node of leaf
+    """
+    return core.remove_leaf(v, leaf)
+
+
+def add_leaf(v, leaf, pos):
+    """Add a leaf to a Phylo2Vec vector v
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    leaf : int >= 0
+        A leaf node to add
+    pos : int >= 0
+        A branch from where the leaf will be added
+
+    Returns
+    -------
+    v_add : numpy.ndarray
+        Phylo2Vec vector including the new leaf
+    """
+    return core.add_leaf(v, leaf, pos)
 
 
 def reorder_v(reorder_method, v_old, label_mapping_old):
@@ -239,49 +279,6 @@ def _find_indices_of_first_leaf(ancestry, leaf):
                 return r, c
 
 
-
-def remove_leaf(v, leaf):
-    """Remove a leaf from a Phylo2Vec v
-
-    Parameters
-    ----------
-    v : numpy.ndarray
-        Phylo2Vec vector
-    leaf : int
-        A leaf node to remove
-
-    Returns
-    -------
-    v_sub : numpy.ndarray
-        Phylo2Vec vector without `leaf`
-    sister : int
-        Sister node of leaf
-    """
-    return _phylo2vec_core.remove_leaf(v, leaf)
-
-
-
-def add_leaf(v, leaf, pos):
-    """Add a leaf to a Phylo2Vec vector v
-
-    Parameters
-    ----------
-    v : numpy.ndarray
-        Phylo2Vec vector
-    leaf : int >= 0
-        A leaf node to add
-    pos : int >= 0
-        A branch from where the leaf will be added
-
-    Returns
-    -------
-    v_add : numpy.ndarray
-        Phylo2Vec vector including the new leaf
-    """
-    return _phylo2vec_core.add_leaf(v, leaf, pos)
-
-
-
 def get_ancestry_paths(v):
     """
     Get the ancestry paths for each node in the Phylo2Vec vector.
@@ -310,7 +307,6 @@ def get_ancestry_paths(v):
         ancestry_paths.append(path)
 
     return ancestry_paths
-
 
 
 def get_common_ancestor(v, node1, node2):
