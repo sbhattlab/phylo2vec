@@ -237,7 +237,7 @@ pub fn order_cherries(ancestry: &mut Ancestry) {
 /// 0 2 2
 /// 0 8 8
 /// 0 1 1
-pub fn order_cherries_no_parents(ancestry: &mut Ancestry) {
+pub fn order_cherries_no_parents(ancestry: &mut Ancestry) -> Vec<usize> {
     let num_cherries = ancestry.len();
     let mut to_sort: Vec<usize> = Vec::with_capacity(num_cherries);
     let mut visited: HashMap<usize, usize> = HashMap::new();
@@ -259,10 +259,12 @@ pub fn order_cherries_no_parents(ancestry: &mut Ancestry) {
 
     // Note: using a stable sort is important to keep the order of cherries
     let mut temp = Ancestry::with_capacity(num_cherries);
-    for i in indices {
-        temp.push(ancestry[i]);
+    for i in &indices {
+        temp.push(ancestry[*i]);
     }
     *ancestry = temp;
+
+    indices
 }
 
 /// A Fenwick Tree (Binary Indexed Tree) for efficiently calculating prefix sums
