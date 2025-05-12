@@ -1,0 +1,45 @@
+"""
+Methods to convert Phylo2Vec vectors to a list of edges and vice versa.
+"""
+
+import numpy as np
+
+import phylo2vec._phylo2vec_core as core
+
+
+def from_edges(edges: np.ndarray) -> np.ndarray:
+    """Convert a list of edges to a Phylo2Vec vector
+
+    Each edge is represented as a list of two nodes (child, parent)
+
+    Parameters
+    ----------
+    edges : numpy.array
+        List of (child, parent) edges
+
+    Returns
+    -------
+    v : numpy.array
+        Phylo2Vec vector
+    """
+    v = core.from_edges(edges)
+    return np.asarray(v)
+
+
+def to_edges(v: np.ndarray) -> np.ndarray:
+    """Convert a Phylo2Vec vector to an edge list
+
+    Each edge is represented as a list of two nodes (child, parent)
+
+    Parameters
+    ----------
+    v : numpy.array
+        Phylo2Vec vector
+
+    Returns
+    -------
+    edges : numpy.array
+        List of (child, parent) edges
+    """
+    edge_list = core.to_edges(v)
+    return np.asarray(edge_list)

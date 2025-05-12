@@ -73,6 +73,10 @@ impl TreeVec {
         ops::get_ancestry(&self.data)
     }
 
+    pub fn get_edges(&self) -> Vec<(usize, usize)> {
+        ops::get_edges(&self.data)
+    }
+
     /// Adds a new leaf to the tree
     ///
     /// # Arguments
@@ -172,6 +176,40 @@ mod tests {
     fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: types::Ancestry) {
         let tree = TreeVec::new(v, None, None);
         let ancestry = tree.get_ancestry();
+        assert_eq!(ancestry, expected);
+    }
+
+    #[rstest]
+    #[case(vec![0, 0, 0, 1, 3], vec![
+        (3, 6),
+        (5, 6),
+        (1, 7),
+        (4, 7),
+        (0, 8),
+        (6, 8),
+        (8, 9),
+        (2, 9),
+        (9, 10),
+        (7, 10)])]
+    #[case(vec![0, 1, 2, 3], vec![
+        (3, 5),
+        (4, 5),
+        (2, 6),
+        (5, 6),
+        (1, 7),
+        (6, 7),
+        (0, 8),
+        (7, 8)])]
+    #[case(vec![0, 0, 1], vec![
+        (1, 4),
+        (3, 4),
+        (0, 5),
+        (2, 5),
+        (5, 6),
+        (4, 6)])]
+    fn test_get_edges(#[case] v: Vec<usize>, #[case] expected: Vec<(usize, usize)>) {
+        let tree = TreeVec::new(v, None, None);
+        let ancestry = tree.get_edges();
         assert_eq!(ancestry, expected);
     }
 

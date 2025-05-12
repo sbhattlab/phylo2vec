@@ -105,27 +105,19 @@ pub fn get_pairs(v: &[usize]) -> Pairs {
 /// v[1] = 2 is somewhat similar: we create a new branch from R that yields leaf 2
 pub fn get_ancestry(v: &[usize]) -> Ancestry {
     let pairs: Pairs = get_pairs(v);
-    let num_of_leaves = v.len();
+    let k = v.len();
+
     // Initialize Ancestry with capacity `k`
-    let mut ancestry: Ancestry = Vec::with_capacity(num_of_leaves);
+    let mut ancestry: Ancestry = Vec::with_capacity(k);
+
     // Keep track of child->highest parent relationship
-    let mut parents: Vec<usize> = vec![usize::MAX; 2 * num_of_leaves + 1];
+    let mut parents: Vec<usize> = (0..=(2 * k + 1)).collect();
 
     for (i, &(c1, c2)) in pairs.iter().enumerate() {
-        let parent_of_child1 = if parents[c1] != usize::MAX {
-            parents[c1]
-        } else {
-            c1
-        };
-        let parent_of_child2 = if parents[c2] != usize::MAX {
-            parents[c2]
-        } else {
-            c2
-        };
+        let next_parent = k + 1 + i;
 
-        // Next parent
-        let next_parent = num_of_leaves + i + 1;
-        ancestry.push([parent_of_child1, parent_of_child2, next_parent]);
+        // Push the current cherry to ancestry
+        ancestry.push([parents[c1], parents[c2], next_parent]);
 
         // Update the parents of current children
         parents[c1] = next_parent;
@@ -140,6 +132,46 @@ pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
     order_cherries(&mut ordered_ancestry);
 
     build_vector(&ordered_ancestry)
+}
+
+pub fn get_edges_from_pairs(pairs: &Pairs) -> Vec<(usize, usize)> {
+    let k = pairs.len();
+
+    let mut edges: Vec<(usize, usize)> = Vec::with_capacity(2 * k);
+
+    // Keep track of child->highest parent relationship
+    let mut parents: Vec<usize> = (0..=(2 * k + 1)).collect();
+
+    for (i, &(c1, c2)) in pairs.iter().enumerate() {
+        let next_parent = k + 1 + i;
+
+        // Push current edges
+        edges.push((parents[c1], next_parent));
+        edges.push((parents[c2], next_parent));
+
+        // Update the parents of current children
+        parents[c1] = next_parent;
+        parents[c2] = next_parent;
+    }
+    edges
+}
+
+pub fn get_edges(v: &[usize]) -> Vec<(usize, usize)> {
+    let pairs: Pairs = get_pairs(v);
+
+    get_edges_from_pairs(&pairs)
+}
+
+pub fn from_edges(edges: &[(usize, usize)]) -> Vec<usize> {
+    let mut ancestry: Ancestry = Vec::with_capacity(edges.len() / 2);
+
+    for i in (0..edges.len()).step_by(2) {
+        ancestry.push([edges[i].0, edges[i + 1].0, edges[i].1]);
+    }
+
+    order_cherries(&mut ancestry);
+
+    build_vector(&ancestry)
 }
 
 pub fn find_coords_of_first_leaf(ancestry: &Ancestry, leaf: usize) -> (usize, usize) {
