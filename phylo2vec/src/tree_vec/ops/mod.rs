@@ -174,6 +174,7 @@ mod tests {
     ], "((0:0.1,2:0.2)5:0.5,(1:1,3:3)4:0.7)6;")]
     fn test_to_newick_from_matrix(#[case] m: Vec<Vec<f32>>, #[case] expected: &str) {
         let newick = to_newick_from_matrix(&m);
+        println!("Newick: {}", newick);
         assert_eq!(newick, expected);
     }
 

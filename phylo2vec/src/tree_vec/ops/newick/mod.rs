@@ -253,17 +253,19 @@ pub fn get_cherries_no_parents_with_bls(
     Ok((ancestry, bls))
 }
 
-pub fn prepare_cache(pairs: &Pairs) -> Vec<String> {
+/// Prepare the cache for building the Newick string
+fn prepare_cache(pairs: &Pairs) -> Vec<String> {
     let num_leaves = pairs.len() + 1;
 
     // Faster than map+collect for some reason
-    let mut cache: Vec<String> = Vec::with_capacity(num_leaves);
-    for i in 0..num_leaves {
-        cache.push(i.to_string());
-    }
+    let mut cache: Vec<String> = vec![String::new(); num_leaves];
 
     for &(c1, _) in pairs.iter() {
         cache[c1].push('(');
+    }
+
+    for (i, s) in cache.iter_mut().enumerate() {
+        s.push_str(&i.to_string());
     }
 
     cache
@@ -273,17 +275,7 @@ pub fn prepare_cache(pairs: &Pairs) -> Vec<String> {
 pub fn build_newick(pairs: &Pairs) -> String {
     let num_leaves = pairs.len() + 1;
 
-    let mut cache: Vec<String> = vec![String::new(); num_leaves];
-
-    // Prevents insert operations: c1 will always be preceded by a parenthesis
-    for &(c1, _) in pairs.iter() {
-        cache[c1].push('(');
-    }
-
-    // Push all leaves to the cache
-    for (j, s) in cache.iter_mut().enumerate() {
-        s.push_str(&j.to_string());
-    }
+    let mut cache: Vec<String> = prepare_cache(pairs);
 
     for (i, &(c1, c2)) in pairs.iter().enumerate() {
         // std::mem::take helps with efficient swapping of values like std::move in C++
@@ -306,36 +298,39 @@ pub fn build_newick(pairs: &Pairs) -> String {
 pub fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> String {
     let num_leaves = pairs.len() + 1;
 
-    // Faster than map+collect for some reason
-    let mut cache: Vec<String> = Vec::with_capacity(num_leaves);
-    for i in 0..num_leaves {
-        cache.push(i.to_string());
-    }
+    let mut cache = prepare_cache(pairs);
 
     for (i, (&(c1, c2), &[bl1, bl2])) in pairs.iter().zip(branch_lengths.iter()).enumerate() {
-        let s1 = std::mem::take(&mut cache[c1]);
+        // let s1 = std::mem::take(&mut cache[c1]);
         let s2 = std::mem::take(&mut cache[c2]);
         let sp = (num_leaves + i).to_string();
         let sb1 = bl1.to_string();
         let sb2 = bl2.to_string();
 
-        let capacity = s1.len() + s2.len() + sp.len() + sb1.len() + sb2.len() + 5;
-        let mut sub_newick = String::with_capacity(capacity);
-        sub_newick.push('(');
-        sub_newick.push_str(&s1);
-        sub_newick.push(':');
-        sub_newick.push_str(&sb1);
-        sub_newick.push(',');
-        sub_newick.push_str(&s2);
-        sub_newick.push(':');
-        sub_newick.push_str(&sb2);
-        sub_newick.push(')');
-        sub_newick.push_str(&sp);
-        cache[c1] = sub_newick;
+        // let capacity = s1.len() + s2.len() + sp.len() + sb1.len() + sb2.len() + 5;
+        // let mut sub_newick = String::with_capacity(capacity);
+        // sub_newick.push('(');
+        // sub_newick.push_str(&s1);
+        // sub_newick.push(':');
+        // sub_newick.push_str(&sb1);
+        // sub_newick.push(',');
+        // sub_newick.push_str(&s2);
+        // sub_newick.push(':');
+        // sub_newick.push_str(&sb2);
+        // sub_newick.push(')');
+        // sub_newick.push_str(&sp);
+
+        cache[c1].push(':');
+        cache[c1].push_str(&sb1);
+        cache[c1].push(',');
+        cache[c1].push_str(&s2);
+        cache[c1].push(':');
+        cache[c1].push_str(&sb2);
+        cache[c1].push(')');
+        cache[c1].push_str(&sp);
     }
 
-    cache[0].push(';');
-    cache[0].clone()
+    format!("{};", cache[0])
 }
 
 /// Remove parent labels from the Newick string
