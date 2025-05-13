@@ -11,8 +11,8 @@ use matrix::parse_matrix;
 use newick::build_newick_with_bls;
 
 pub use vector::{
-    build_vector, cophenetic_distances, find_coords_of_first_leaf, from_ancestry, get_ancestry,
-    get_pairs, order_cherries, order_cherries_no_parents,
+    build_vector, cophenetic_distances, find_coords_of_first_leaf, from_ancestry, from_edges,
+    get_ancestry, get_edges, get_pairs, order_cherries, order_cherries_no_parents,
 };
 
 pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parents};
@@ -260,6 +260,19 @@ mod tests {
 
         let ancestry = get_ancestry(&v);
         let v2 = from_ancestry(&ancestry);
+
+        assert_eq!(v, v2);
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_edges(#[case] num_leaves: usize) {
+        let v = sample_vector(num_leaves, false);
+
+        let edges = get_edges(&v);
+        let v2 = from_edges(&edges);
 
         assert_eq!(v, v2);
     }
