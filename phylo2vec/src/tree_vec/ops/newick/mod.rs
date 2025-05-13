@@ -253,8 +253,7 @@ pub fn get_cherries_no_parents_with_bls(
     Ok((ancestry, bls))
 }
 
-/// Build newick string from a vector of pairs
-pub fn build_newick(pairs: &Pairs) -> String {
+pub fn prepare_cache(pairs: &Pairs) -> Vec<String> {
     let num_leaves = pairs.len() + 1;
 
     // Faster than map+collect for some reason
@@ -263,29 +262,44 @@ pub fn build_newick(pairs: &Pairs) -> String {
         cache.push(i.to_string());
     }
 
+    for &(c1, _) in pairs.iter() {
+        cache[c1].push('(');
+    }
+
+    cache
+}
+
+/// Build newick string from a vector of pairs
+pub fn build_newick(pairs: &Pairs) -> String {
+    let num_leaves = pairs.len() + 1;
+
+    let mut cache: Vec<String> = vec![String::new(); num_leaves];
+
+    // Prevents insert operations: c1 will always be preceded by a parenthesis
+    for &(c1, _) in pairs.iter() {
+        cache[c1].push('(');
+    }
+
+    // Push all leaves to the cache
+    for (j, s) in cache.iter_mut().enumerate() {
+        s.push_str(&j.to_string());
+    }
+
     for (i, &(c1, c2)) in pairs.iter().enumerate() {
-        // std::mem::take helps efficient swapping of values like std::move in C++
-        let s1 = std::mem::take(&mut cache[c1]);
+        // std::mem::take helps with efficient swapping of values like std::move in C++
         let s2 = std::mem::take(&mut cache[c2]);
+
         // Parent node (not needed in theory, but left for legacy reasons)
         let sp = (num_leaves + i).to_string();
 
-        // https://github.com/hoodie/concatenation_benchmarks-rs
-        // 3 = 2 parentheses + 1 comma
-        let capacity = s1.len() + s2.len() + sp.len() + 3;
-        let mut sub_newick = String::with_capacity(capacity);
-        sub_newick.push('(');
-        sub_newick.push_str(&s1);
-        sub_newick.push(',');
-        sub_newick.push_str(&s2);
-        sub_newick.push(')');
-        sub_newick.push_str(&sp);
-
-        cache[c1] = sub_newick;
+        // sub-newick structure: (c1,c2)p
+        cache[c1].push(',');
+        cache[c1].push_str(&s2);
+        cache[c1].push(')');
+        cache[c1].push_str(&sp);
     }
 
-    cache[0].push(';');
-    cache[0].clone()
+    format!("{};", cache[0])
 }
 
 /// Build newick string from the ancestry matrix and branch lengths
