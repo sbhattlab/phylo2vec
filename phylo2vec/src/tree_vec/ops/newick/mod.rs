@@ -257,13 +257,15 @@ pub fn get_cherries_no_parents_with_bls(
 fn prepare_cache(pairs: &Pairs) -> Vec<String> {
     let num_leaves = pairs.len() + 1;
 
-    // Faster than map+collect for some reason
     let mut cache: Vec<String> = vec![String::new(); num_leaves];
 
+    // c1 will always be preceded by a left paren: (c1,c2)p
+    // So we add a left paren to the cache to avoid insert operations
     for &(c1, _) in pairs.iter() {
         cache[c1].push('(');
     }
 
+    // Add all leaf labels to the cache
     for (i, s) in cache.iter_mut().enumerate() {
         s.push_str(&i.to_string());
     }
@@ -306,19 +308,6 @@ pub fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> Stri
         let sp = (num_leaves + i).to_string();
         let sb1 = bl1.to_string();
         let sb2 = bl2.to_string();
-
-        // let capacity = s1.len() + s2.len() + sp.len() + sb1.len() + sb2.len() + 5;
-        // let mut sub_newick = String::with_capacity(capacity);
-        // sub_newick.push('(');
-        // sub_newick.push_str(&s1);
-        // sub_newick.push(':');
-        // sub_newick.push_str(&sb1);
-        // sub_newick.push(',');
-        // sub_newick.push_str(&s2);
-        // sub_newick.push(':');
-        // sub_newick.push_str(&sb2);
-        // sub_newick.push(')');
-        // sub_newick.push_str(&sp);
 
         cache[c1].push(':');
         cache[c1].push_str(&sb1);
