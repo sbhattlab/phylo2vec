@@ -26,10 +26,10 @@ fn bench_to_newick(c: &mut Criterion) {
             BenchmarkId::new("ordered", sample_size),
             &sample_size,
             |b, &size| {
-                b.iter(|| {
-                    let v = sample_vector(size, true);
-                    ops::to_newick_from_vector(&v)
-                });
+                let v = sample_vector(size, true);
+
+                // Benchmark only the to_newick operation
+                b.iter(|| ops::to_newick_from_vector(&v));
             },
         );
 
@@ -38,10 +38,10 @@ fn bench_to_newick(c: &mut Criterion) {
             BenchmarkId::new("unordered", sample_size),
             &sample_size,
             |b, &size| {
-                b.iter(|| {
-                    let v = sample_vector(size, false);
-                    ops::to_newick_from_vector(&v)
-                });
+                let v = sample_vector(size, false);
+
+                // Benchmark only the to_newick operation
+                b.iter(|| ops::to_newick_from_vector(&v));
             },
         );
     }
