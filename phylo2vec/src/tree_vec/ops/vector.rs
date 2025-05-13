@@ -163,11 +163,13 @@ pub fn get_edges(v: &[usize]) -> Vec<(usize, usize)> {
 }
 
 pub fn from_edges(edges: &[(usize, usize)]) -> Vec<usize> {
-    assert!(edges.len() % 2 == 0, "The length of edges must be even to form valid pairs.");
+    assert!(edges.len() % 2 == 0, "The number of edges must be even");
+
     let mut ancestry: Ancestry = Vec::with_capacity(edges.len() / 2);
 
     for i in (0..edges.len()).step_by(2) {
         ancestry.push([edges[i].0, edges[i + 1].0, edges[i].1]);
+    }
 
     order_cherries(&mut ancestry);
 
