@@ -18,13 +18,16 @@ phylo2Vec is a high-performance software package for encoding, manipulating, and
 analysing binary phylogenetic trees. At its core, the package contains
 representation of binary trees, which defines a bijection from any tree topology
 with 𝑛 leaves into an integer vector of size 𝑛 − 1. Compared to the traditional
-Newick format, phylo2vec was designed with fast sampling, fast conversion/compression from Newick-format trees to the Phylo2Vec format, and rapid tree comparison in mind.
+Newick format, phylo2vec was designed with fast sampling, fast
+conversion/compression from Newick-format trees to the Phylo2Vec format, and
+rapid tree comparison in mind.
 
 This current version features a core implementation in Rust, providing
 significant performance improvements and memory efficiency while remaining
-available in Python (superseding the version described in the [original paper](https://doi.org/10.1093/sysbio/syae030)) and R via
-dedicated wrappers, making it accessible to a broad audience in the
-bioinformatics community.
+available in Python (superseding the version described in the
+[original paper](https://doi.org/10.1093/sysbio/syae030)) and R via dedicated
+wrappers, making it accessible to a broad audience in the bioinformatics
+community.
 
 Link to the paper:
 [https://doi.org/10.1093/sysbio/syae030](https://doi.org/10.1093/sysbio/syae030)
