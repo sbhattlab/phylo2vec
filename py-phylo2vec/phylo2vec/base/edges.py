@@ -41,5 +41,5 @@ def to_edges(v: np.ndarray) -> np.ndarray:
     edges : numpy.array
         List of (child, parent) edges
     """
-    edge_list = core.to_edges(v)
+    edge_list = core.get_edges(v)
     return np.asarray(edge_list)
