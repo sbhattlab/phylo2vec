@@ -5,6 +5,8 @@ import pytest
 
 from ete3 import Tree
 
+from phylo2vec.base.ancestry import from_ancestry, to_ancestry
+from phylo2vec.base.edges import from_edges, to_edges
 from phylo2vec.base.newick import from_newick, to_newick
 from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
@@ -27,7 +29,7 @@ def test_v2newick2v(n_leaves):
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
-def test_cherry_permutations(n_leaves):
+def test_newick_cherry_permutations(n_leaves):
     """Simple way to check that permutation of leaf nodes does not change v
 
     Parameters
@@ -56,7 +58,7 @@ def test_cherry_permutations(n_leaves):
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
-def test_ladderize(n_leaves):
+def test_newick_ladderize(n_leaves):
     """Simple way to check that isomorphic Newick strings have the same v
 
     ete3's ladderize should create an isomorphism the original Newick string
@@ -76,6 +78,38 @@ def test_ladderize(n_leaves):
         nw_ladderized = tr.write(format=9)
 
         assert np.array_equal(from_newick(nw), from_newick(nw_ladderized))
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_v2edges2v(n_leaves):
+    """Test that v to edges to converted_v leads to v == converted_v
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+        edges = to_edges(v)
+        v2 = from_edges(edges)
+        assert np.array_equal(v, v2)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_v2ancestry2v(n_leaves):
+    """Test that v to ancestry to converted_v leads to v == converted_v
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+        ancestry = to_ancestry(v)
+        v2 = from_ancestry(ancestry)
+        assert np.array_equal(v, v2)
 
 
 if __name__ == "__main__":
