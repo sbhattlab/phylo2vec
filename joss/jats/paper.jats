@@ -222,10 +222,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
   leaves into an integer vector of size <inline-formula><alternatives>
   <tex-math><![CDATA[n-1]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>.
-  Compared to the traditional Newick format, phylo2vec was designed with
-  fast sampling and rapid tree comparison in mind. This release features
-  a core implementation in Rust, providing significant performance
-  improvements and memory efficiency
+  Compared to the traditional Newick format, phylo2vec (or Phylo2Vec)
+  was designed with fast sampling and rapid tree comparison in mind.
+  This release features a core implementation in Rust, providing
+  significant performance improvements and memory efficiency
   (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
   while remaining available in Python (superseding the release described
   in the original paper
@@ -233,7 +233,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   et al., 2024</xref>)) and R via dedicated wrappers, making it
   accessible to a broad audience in the bioinformatics community.</p>
   <fig>
-    <caption><p>Benchmark times for converting a phylo2Vec vector to a
+    <caption><p>Benchmark times for converting a phylo2vec vector to a
     Newick string (left) and vice versa (right). For each size, we
     evaluated the execution time for a minimum of 20 rounds using
     <monospace>pytest-benchmark</monospace>. We compare the execution

@@ -1,4 +1,4 @@
-# phylo2Vec
+# Phylo2Vec
 
 [![PyPI version](https://badge.fury.io/py/phylo2vec.svg)](https://pypi.org/project/phylo2vec/)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://phylo2vec.readthedocs.io)
@@ -14,8 +14,8 @@
 [![CI Rust](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-rust.yaml/badge.svg)](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-rust.yaml)
 [![CI R](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-R.yml/badge.svg)](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-R.yml)
 
-phylo2Vec is a high-performance software package for encoding, manipulating, and
-analysing binary phylogenetic trees. At its core, the package contains
+Phylo2Vec (or phylo2vec) is a high-performance software package for encoding, manipulating,
+and analysing binary phylogenetic trees. At its core, the package contains
 representation of binary trees, which defines a bijection from any tree topology
 with 𝑛 leaves into an integer vector of size 𝑛 − 1. Compared to the traditional
 Newick format, phylo2vec was designed with fast sampling, fast
