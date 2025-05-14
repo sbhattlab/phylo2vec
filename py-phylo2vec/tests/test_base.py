@@ -8,13 +8,16 @@ from ete3 import Tree
 from phylo2vec.base.ancestry import from_ancestry, to_ancestry
 from phylo2vec.base.edges import from_edges, to_edges
 from phylo2vec.base.newick import from_newick, to_newick
+from phylo2vec.utils.matrix import sample_matrix
+from phylo2vec.utils.newick import remove_parent_labels
 from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
 def test_v2newick2v(n_leaves):
-    """Test that v to newick to converted_v leads to v == converted_v
+    """Test that v to newick to converted_v
+    via `from_newick` leads to v == converted_v
 
     Parameters
     ----------
@@ -26,6 +29,28 @@ def test_v2newick2v(n_leaves):
         newick = to_newick(v)
         v2 = from_newick(newick)
         assert np.all(v == v2)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_m2newick2m(n_leaves):
+    """
+    Test that m to newick to converted_m
+    via `from_newick` leads to m == converted_m
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        newick = to_newick(m)
+        m2 = from_newick(newick)
+        assert np.allclose(m, m2, atol=1e-6)
+
+        newick_no_parents = remove_parent_labels(newick)
+        m3 = from_newick(newick_no_parents)
+        assert np.allclose(m, m3, atol=1e-6)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
