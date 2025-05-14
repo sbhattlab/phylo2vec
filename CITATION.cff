@@ -3,12 +3,13 @@ message: "If you use this software, please cite it as below."
 authors:
   - family-names: "Scheidwasser"
     given-names: "Neil"
-  - family-names: "Setiawan"
-    given-names: "Landung"
-    orcid: "https://orcid.org/0000-0002-1624-2667"
+    orcid: "https://orcid.org/0000-0001-9922-0289"
   - family-names: "Nag"
     given-names: "Ayush"
     orcid: "https://orcid.org/0009-0008-1790-597X"
+  - family-names: "Setiawan"
+    given-names: "Landung"
+    orcid: "https://orcid.org/0000-0002-1624-2667"
   - family-names: "Gordon"
     given-names: "Madeline"
     orcid: "https://orcid.org/0009-0003-6220-7218"
@@ -40,8 +41,8 @@ preferred-citation:
     given-names: "Christl A"
   - family-names: "Bhatt"
     given-names: "Samir"
-  journal: "arXiv preprint arXiv:2304.12693v4"
-  doi: https://doi.org/10.48550/arXiv.2304.12693
-  month: 11
+  journal: "Systematic Biology"
+  doi: https://doi.org/10.1093/sysbio/syae030
   title: "Phylo2Vec: a vector representation for binary trees"
-  year: 2024
+  month: 03
+  year: 2025

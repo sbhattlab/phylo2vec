@@ -14,19 +14,20 @@
 [![CI Rust](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-rust.yaml/badge.svg)](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-rust.yaml)
 [![CI R](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-R.yml/badge.svg)](https://github.com/sbhattlab/phylo2vec/actions/workflows/ci-R.yml)
 
-Phylo2Vec is a high-performance software package for encoding, manipulating, and
-analyzing binary phylogenetic trees. At its core, the package contains
-representation of binary trees, which defines a bijection from any tree topology
-with 𝑛 leaves into an integer vector of size 𝑛 − 1. Compared to the traditional
-Newick format, phylo2vec was designed with fast sampling and rapid tree
-comparison in mind.
+Phylo2Vec (or phylo2vec) is a high-performance software package for encoding,
+manipulating, and analysing binary phylogenetic trees. At its core, the package
+contains representation of binary trees, which defines a bijection from any tree
+topology with 𝑛 leaves into an integer vector of size 𝑛 − 1. Compared to the
+traditional Newick format, phylo2vec was designed with fast sampling, fast
+conversion/compression from Newick-format trees to the Phylo2Vec format, and
+rapid tree comparison in mind.
 
-This current 2.0 version features a core implementation in Rust, providing
+This current version features a core implementation in Rust, providing
 significant performance improvements and memory efficiency while remaining
-available in Python (superseding the version described in the original paper
-([Penn et al., 2024](https://doi.org/10.1093/sysbio/syae030))) and R via
-dedicated wrappers, making it accessible to a broad audience in the
-bioinformatics community.
+available in Python (superseding the version described in the
+[original paper](https://doi.org/10.1093/sysbio/syae030)) and R via dedicated
+wrappers, making it accessible to a broad audience in the bioinformatics
+community.
 
 Link to the paper:
 [https://doi.org/10.1093/sysbio/syae030](https://doi.org/10.1093/sysbio/syae030)
