@@ -16,7 +16,7 @@ def from_edges(edges: List[Tuple[int, int]]) -> np.ndarray:
 
     Parameters
     ----------
-    edges : numpy.array
+    edges : List[Tuple[int, int]]
         List of (child, parent) edges
 
     Returns
