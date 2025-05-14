@@ -129,10 +129,10 @@ College London, London, United Kingdom</institution>
 <author-notes>
 <corresp id="cor-1">* E-mail: <email></email></corresp>
 </author-notes>
-<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2024-03-24">
-<day>24</day>
-<month>3</month>
-<year>2024</year>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2025-05-14">
+<day>14</day>
+<month>5</month>
+<year>2025</year>
 </pub-date>
 <volume>¿VOL?</volume>
 <issue>¿ISSUE?</issue>
@@ -211,7 +211,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   et al., 2024</xref>).</p>
   <p>Here, we present the new release of
   <monospace>phylo2vec</monospace>, a high-performance software package
-  for encoding, manipulating, and analyzing binary phylogenetic trees.
+  for encoding, manipulating, and analysing binary phylogenetic trees.
   At its core, the package is based on the phylo2vec
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>) representation of binary trees, which defines a
@@ -359,7 +359,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   This avoids tight coupling, as it allows for the possibility of adding
   new languages to bind to the Rust API’s, without needing to change
   anything in the Rust project itself. Additionally, we have established
-  a robust continuous integration (CI) pipeline using Github Actions,
+  a robust continuous integration (CI) pipeline using GitHub Actions,
   which features:</p>
   <list list-type="bullet">
     <list-item>
@@ -380,10 +380,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
   </list>
   <p>Lastly, to complement Jupyter Notebook demos, comprehensive
   documentation is provided using
-  <ext-link ext-link-type="uri" xlink:href="https://jupyterbook.org">Jupyterbook</ext-link>
-  and
-  <ext-link ext-link-type="uri" xlink:href="https://doc.rust-lang.org/rustdoc/what-is-rustdoc.html">Rustdoc</ext-link>
-  for Python and Rust components, respectively.</p>
+  <ext-link ext-link-type="uri" xlink:href="https://jupyterbook.org">Jupyter
+  Book</ext-link> and
+  <ext-link ext-link-type="uri" xlink:href="https://about.readthedocs.com/">Read
+  The Docs</ext-link>.</p>
 </sec>
 <sec id="acknowledgements">
   <title>Acknowledgements</title>
@@ -394,7 +394,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   support from the Danish National Research Foundation via a chair grant
   (DNRF160) which also supports N.S. and M.P.K. S.B. acknowledges
   support from The Eric and Wendy Schmidt Fund For Strategic Innovation
-  via the Schmidt Polymath Award (G-22-63345) which also supports M.P.
+  via the Schmidt Polymath Award (G-22-63345) which also supports M.J.P.
   and F.M.A. S.B. acknowledges support from the Novo Nordisk Foundation
   via The Novo Nordisk Young Investigator Award (NNF20OC0059309). D.A.D.
   is supported by a Data Science - Emerging researcher award from Novo
