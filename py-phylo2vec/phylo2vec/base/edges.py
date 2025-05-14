@@ -28,7 +28,7 @@ def from_edges(edges: List[Tuple[int, int]]) -> np.ndarray:
     return np.asarray(v)
 
 
-def to_edges(v: np.ndarray) -> np.ndarray:
+def to_edges(v: np.ndarray) -> List[Tuple[int, int]]:
     """Convert a Phylo2Vec vector to an edge list
 
     Each edge is represented as a list of two nodes (child, parent)
