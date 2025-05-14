@@ -25,7 +25,8 @@ authors:
     orcid: 0009-0004-4071-3707
   - name: Mark P Khurana
     orcid: 0000-0002-1123-7674
-  - name: Don Setiawan
+  - name: Landung Setiawan
+    orcid: 0000-0002-1624-2667
     affiliation: 2
   - name: Madeline Gordon
     orcid: 0009-0003-6220-7218
