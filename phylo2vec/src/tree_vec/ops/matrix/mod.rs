@@ -1,4 +1,6 @@
-use crate::tree_vec::ops::newick::{get_cherries_no_parents_with_bls, get_cherries_with_bls};
+use crate::tree_vec::ops::newick::{
+    get_cherries_no_parents_with_bls, get_cherries_with_bls, has_parents,
+};
 use crate::tree_vec::ops::vector::{build_vector, order_cherries, order_cherries_no_parents};
 use crate::tree_vec::types::Ancestry;
 
@@ -24,44 +26,30 @@ use crate::tree_vec::types::Ancestry;
 ///
 /// Assumes a valid Newick string. Relies on helper functions for processing.
 pub fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
-    // Get the ancestry and branch lengths
-    let (mut ancestry, bls) =
-        get_cherries_with_bls(newick).expect("failed to get cherries with branch lengths");
-    let indices = _get_sorted_indices(&ancestry);
+    let (cherries, bls, idxs) = if has_parents(newick) {
+        // Case 1: Newick string with parent nodes
+        let (mut cherries, bls) =
+            get_cherries_with_bls(newick).expect("failed to get cherries with branch lengths");
+        let idxs = _get_sorted_indices(&cherries);
+        order_cherries(&mut cherries); // Order the cherries in the ancestry matrix based on parent values
+        (cherries, bls, idxs)
+    } else {
+        // Case 2: Newick string without parent nodes
+        let (mut cherries, bls) = get_cherries_no_parents_with_bls(newick)
+            .expect("failed to get cherries with branch lengths and no parents");
+        let idxs = order_cherries_no_parents(&mut cherries);
+        (cherries, bls, idxs)
+    };
 
-    order_cherries(&mut ancestry); // Order the cherries in the ancestry matrix based on parent values
-    let vector = build_vector(&ancestry); // Build the ordered  vector
+    // Build the ordered vector
+    let vector = build_vector(&cherries);
 
-    let reordered_bls: Vec<[f32; 2]> = indices
-        .iter()
-        .map(|&idx| bls[idx]) // Access each element of `bls` using the index from `indices`
-        .collect();
-
-    // Combine the vector with the branch lengths into a matrix
-    let mut matrix: Vec<Vec<f32>> = Vec::new();
-
-    for i in 0..vector.len() {
-        let row = vec![vector[i] as f32, reordered_bls[i][0], reordered_bls[i][1]];
-        matrix.push(row);
-    }
-
-    matrix
-}
-
-// Matrix construction for the "no parents" case
-pub fn to_matrix_no_parents(newick: &str) -> Vec<Vec<f32>> {
-    let (mut cherries, bls) = get_cherries_no_parents_with_bls(newick)
-        .expect("failed to get cherries with branch lengths and no parents");
-    let idxs = order_cherries_no_parents(&mut cherries);
-
-    // Extract branch lengths from the Newick string or ensure they are included in get_cherries
     let reordered_bls: Vec<[f32; 2]> = idxs
         .iter()
         .map(|&idx| bls[idx]) // Access each element of `bls` using the index from `indices`
         .collect();
 
-    let vector = build_vector(&cherries);
-
+    // Combine the vector with the branch lengths into a matrix
     let mut matrix: Vec<Vec<f32>> = Vec::new();
 
     for i in 0..vector.len() {
@@ -144,8 +132,7 @@ mod tests {
         assert_eq!(matrix, expected_matrix);
     }
 
-    // Test for the `to_matrix_no_parents` function
-    // Verifies correct matrix generation from a Newick string without parent nodes.
+    // Test for the `to_matrix` function for Newick strings without parent nodes
     #[rstest]
     #[case("(0:0.5,1:0.6);", vec![
         vec![0.0, 0.5, 0.6],
@@ -159,7 +146,7 @@ mod tests {
         #[case] newick_no_parents: String,
         #[case] expected_matrix: Vec<Vec<f32>>,
     ) {
-        let matrix = to_matrix_no_parents(&newick_no_parents);
+        let matrix = to_matrix(&newick_no_parents);
 
         // Check if the matrix matches the expected matrix
         assert_eq!(matrix, expected_matrix);
@@ -171,20 +158,6 @@ mod tests {
     #[case("".to_string(), vec![])]
     fn test_empty_newick_to_matrix(#[case] newick: String, #[case] expected_matrix: Vec<Vec<f32>>) {
         let matrix = to_matrix(&newick);
-
-        // Empty Newick should result in an empty matrix
-        assert_eq!(matrix, expected_matrix);
-    }
-
-    // Test for an empty Newick string in the `to_matrix_no_parents` function
-    // Ensures that an empty Newick string results in an empty matrix when no parents are considered.
-    #[rstest]
-    #[case("".to_string(), vec![])]
-    fn test_empty_newick_to_matrix_no_parents(
-        #[case] newick_no_parents: String,
-        #[case] expected_matrix: Vec<Vec<f32>>,
-    ) {
-        let matrix = to_matrix_no_parents(&newick_no_parents);
 
         // Empty Newick should result in an empty matrix
         assert_eq!(matrix, expected_matrix);
