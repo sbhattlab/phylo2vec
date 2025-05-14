@@ -211,9 +211,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>).</p>
   <p>Here, we present the new release of
-  <monospace>phylo2vec</monospace>, a high-performance software package
-  for encoding, manipulating, and analysing binary phylogenetic trees.
-  At its core, the package is based on the phylo2vec
+  <monospace>phylo2vec</monospace> (or Phylo2Vec), a high-performance
+  software package for encoding, manipulating, and analysing binary
+  phylogenetic trees. At its core, the package is based on the phylo2vec
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>) representation of binary trees, which defines a
   bijection from any tree topology with <inline-formula><alternatives>
@@ -222,10 +222,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
   leaves into an integer vector of size <inline-formula><alternatives>
   <tex-math><![CDATA[n-1]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>.
-  Compared to the traditional Newick format, phylo2vec (or Phylo2Vec)
-  was designed with fast sampling and rapid tree comparison in mind.
-  This release features a core implementation in Rust, providing
-  significant performance improvements and memory efficiency
+  Compared to the traditional Newick format, phylo2vec was designed with
+  fast sampling and rapid tree comparison in mind. This release features
+  a core implementation in Rust, providing significant performance
+  improvements and memory efficiency
   (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
   while remaining available in Python (superseding the release described
   in the original paper
@@ -245,7 +245,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
     et al., 2024</xref>), which make use of just-in-time (JIT)
     compilation of Python functions using Numba
     (<xref alt="Lam et al., 2015" rid="ref-lam2015" ref-type="bibr">Lam
-    et al., 2015</xref>)
+    et al., 2015</xref>). Execution times were benchmarked on an AMD
+    Ryzen Threadripper PRO 5995WX with a 64-core CPU @ 7 GHz and 256 GB
+    of RAM.
     <styled-content id="figU003Abenchmarks"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="fig1.pdf" />
   </fig>
