@@ -190,18 +190,18 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![0], false, vec![vec![0, 2], vec![2, 0]])]
-    #[case(vec![0], true, vec![vec![0, 1], vec![1, 0]])]
-    #[case(vec![0, 1, 2], false, vec![vec![0, 3, 4, 4], vec![3, 0, 3, 3], vec![4, 3, 0, 2], vec![4, 3, 2, 0]])]
-    #[case(vec![0, 1, 2], true, vec![vec![0, 2, 3, 3], vec![2, 0, 3, 3], vec![3, 3, 0, 2], vec![3, 3, 2, 0]])]
-    #[case(vec![0, 0, 1], false, vec![vec![0, 4, 2, 4], vec![4, 0, 4, 2], vec![2, 4, 0, 4], vec![4, 2, 4, 0]])]
-    #[case(vec![0, 0, 1], true, vec![vec![0, 3, 2, 3], vec![3, 0, 3, 2], vec![2, 3, 0, 3], vec![3, 2, 3, 0]])]
+    #[case(vec![0], vec![vec![0, 2], vec![2, 0]])]
+    // #[case(vec![0], true, vec![vec![0, 1], vec![1, 0]])]
+    #[case(vec![0, 1, 2], vec![vec![0, 3, 4, 4], vec![3, 0, 3, 3], vec![4, 3, 0, 2], vec![4, 3, 2, 0]])]
+    // #[case(vec![0, 1, 2], true, vec![vec![0, 2, 3, 3], vec![2, 0, 3, 3], vec![3, 3, 0, 2], vec![3, 3, 2, 0]])]
+    #[case(vec![0, 0, 1], vec![vec![0, 4, 2, 4], vec![4, 0, 4, 2], vec![2, 4, 0, 4], vec![4, 2, 4, 0]])]
+    // #[case(vec![0, 0, 1], true, vec![vec![0, 3, 2, 3], vec![3, 0, 3, 2], vec![2, 3, 0, 3], vec![3, 2, 3, 0]])]
     fn test_cophenetic_distances(
         #[case] v: Vec<usize>,
-        #[case] unrooted: bool,
+        // #[case] unrooted: bool,
         #[case] expected: Vec<Vec<usize>>,
     ) {
-        assert_eq!(cophenetic_distances(&v, unrooted), expected);
+        assert_eq!(cophenetic_distances(&v), expected);
     }
 
     /// Test the conversion of a Newick string without parents to a vector
