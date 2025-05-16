@@ -9,9 +9,11 @@ from phylo2vec.base.newick import to_newick
 from phylo2vec.metrics import cophenetic_distances
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
-from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
+from .config import MIN_N_LEAVES, N_REPEATS
 
-MAX_N_LEAVES_COPH = MAX_N_LEAVES // 4
+# Function is currently a bit slow for large trees,
+# so we limit the number of leaves to 50
+MAX_N_LEAVES_COPH = 50
 
 
 def _cophenetic(n_leaves, sample_fn):
@@ -43,7 +45,7 @@ def _cophenetic(n_leaves, sample_fn):
         assert np.allclose(dmat_p2v, dmat_ete3)
 
 
-@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH))
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1))
 def test_cophenetic_vector(n_leaves):
     """Test that v to newick to converted_v leads to v == converted_v
 
@@ -56,7 +58,7 @@ def test_cophenetic_vector(n_leaves):
     _cophenetic(n_leaves, sample_vector)
 
 
-@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH))
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1))
 def test_cophenetic_matrix(n_leaves):
     """Test that v to newick to converted_v leads to v == converted_v
 
