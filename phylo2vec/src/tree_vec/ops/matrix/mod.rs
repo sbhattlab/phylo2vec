@@ -1,7 +1,9 @@
 use crate::tree_vec::ops::newick::{
     get_cherries_no_parents_with_bls, get_cherries_with_bls, has_parents,
 };
-use crate::tree_vec::ops::vector::{build_vector, order_cherries, order_cherries_no_parents};
+use crate::tree_vec::ops::vector::{
+    _cophenetic_distances, build_vector, order_cherries, order_cherries_no_parents,
+};
 use crate::tree_vec::types::Ancestry;
 
 /// Converts a Newick string to a matrix representation.
@@ -99,6 +101,25 @@ pub fn parse_matrix(matrix: &[Vec<f32>]) -> (Vec<usize>, Vec<[f32; 2]>) {
     (vector, branch_lengths)
 }
 
+/// Get the cophenetic distances from a Phylo2Vec matrix.
+/// Output is a pairwise distance matrix of dimensions n x n
+/// where n = number of leaves.
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::matrix::cophenetic_distances_with_bls;
+/// let m = vec![
+///        vec![0.0, 0.4, 0.5],
+///        vec![2.0, 0.1, 0.2],
+///        vec![2.0, 0.3, 0.6],
+///    ];
+/// let dist = cophenetic_distances_with_bls(&m);
+/// ```
+pub fn cophenetic_distances_with_bls(m: &[Vec<f32>]) -> Vec<Vec<f32>> {
+    let (v, bls) = parse_matrix(m);
+    _cophenetic_distances(&v, Some(&bls))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -161,5 +182,89 @@ mod tests {
 
         // Empty Newick should result in an empty matrix
         assert_eq!(matrix, expected_matrix);
+    }
+
+    // Test cophenetic distances with branch lengths in the `cophenetic_distances_with_bls` function
+    // Verifies correct cophenetic distance calculation from a matrix with branch lengths.
+    #[rstest]
+    #[case(vec![vec![0.0, 1.0, 10.0]], vec![vec![0.0, 11.0], vec![11.0, 0.0]])]
+    #[case(vec![
+        vec![0.0, 0.4, 0.5],
+        vec![2.0, 0.1, 0.2],
+        vec![2.0, 0.3, 0.6],
+    ], vec![
+        vec![0.0, 0.3, 1.4, 1.5],
+        vec![0.3, 0.0, 1.5, 1.6],
+        vec![1.4, 1.5, 0.0, 0.9],
+        vec![1.5, 1.6, 0.9, 0.0]
+    ])]
+    #[case(vec![
+        vec![0.0, 0.6, 0.2],
+        vec![0.0, 0.1, 0.4],
+        vec![2.0, 0.2, 0.6],
+        vec![3.0, 0.8, 0.9],
+    ], vec![
+        vec![0.0, 1.9, 0.9, 1.8, 1.4],
+        vec![1.9, 0.0, 2.4, 3.3, 2.9],
+        vec![0.9, 2.4, 0.0, 1.1, 0.7],
+        vec![1.8, 3.3, 1.1, 0.0, 0.8],
+        vec![1.4, 2.9, 0.7, 0.8, 0.0]
+    ])]
+    #[case(vec![
+        vec![0.0, 1.0, 0.2],
+        vec![2.0, 0.9, 0.7],
+        vec![1.0, 0.1, 0.2],
+        vec![6.0, 0.8, 0.3]
+    ], vec![
+        vec![0.0, 2.6, 1.2, 1.8, 2.1],
+        vec![2.6, 0.0, 2.0, 1.2, 2.9],
+        vec![1.2, 2.0, 0.0, 1.2, 1.3],
+        vec![1.8, 1.2, 1.2, 0.0, 2.1],
+        vec![2.1, 2.9, 1.3, 2.1, 0.0]
+    ])]
+    #[case(
+        vec![
+            vec![0.0, 0.9, 0.9],
+            vec![1.0, 0.5, 0.6],
+            vec![0.0, 0.7, 0.9],
+            vec![4.0, 0.6, 0.7],
+            vec![4.0, 0.1, 0.1],
+            vec![2.0, 0.7, 0.6],
+            vec![6.0, 0.7, 0.3],
+        ],
+        vec![
+            vec![0.0, 2.4, 2.8, 1.3, 1.5, 1.7, 3.8, 3.8],
+            vec![2.4, 0.0, 1.8, 2.5, 2.5, 2.7, 2.8, 2.8],
+            vec![2.8, 1.8, 0.0, 2.9, 2.9, 3.1, 2.0, 2.0],
+            vec![1.3, 2.5, 2.9, 0.0, 1.6, 1.8, 3.9, 3.9],
+            vec![1.5, 2.5, 2.9, 1.6, 0.0, 1.6, 3.9, 3.9],
+            vec![1.7, 2.7, 3.1, 1.8, 1.6, 0.0, 4.1, 4.1],
+            vec![3.8, 2.8, 2.0, 3.9, 3.9, 4.1, 0.0, 1.8],
+            vec![3.8, 2.8, 2.0, 3.9, 3.9, 4.1, 1.8, 0.0],
+        ]
+    )]
+    fn test_cophenetic_distances_with_bls(
+        #[case] matrix: Vec<Vec<f32>>,
+        //#[case] unrooted: bool,
+        #[case] expected_distances: Vec<Vec<f32>>,
+    ) {
+        let distances = cophenetic_distances_with_bls(&matrix);
+
+        println!("Distances: {:?}", distances);
+        println!("Expected Distances: {:?}", expected_distances);
+
+        let rtol = 1e-5;
+        let atol = 1e-8;
+
+        // Check if the distances match the expected distances
+        // assert_eq!(distances, expected_distances);
+        let n_leaves = distances.len();
+        for i in 0..n_leaves {
+            for j in 0..n_leaves {
+                let diff = (distances[i][j] - expected_distances[i][j]).abs();
+
+                assert!(diff <= (atol + rtol * expected_distances[i][j].abs()));
+            }
+        }
     }
 }
