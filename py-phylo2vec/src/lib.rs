@@ -65,8 +65,13 @@ fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
 }
 
 #[pyfunction]
-fn cophenetic_distances(input_vector: Vec<usize>, unrooted: bool) -> Vec<Vec<usize>> {
-    ops::vector::cophenetic_distances(&input_vector, unrooted)
+fn cophenetic_distances(input_vector: Vec<usize>) -> Vec<Vec<usize>> {
+    ops::vector::cophenetic_distances(&input_vector)
+}
+
+#[pyfunction]
+fn cophenetic_distances_with_bls(input_matrix: Vec<Vec<f32>>) -> Vec<Vec<f32>> {
+    ops::matrix::cophenetic_distances_with_bls(&input_matrix)
 }
 
 #[pyfunction]
@@ -129,6 +134,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(check_m, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
     m.add_function(wrap_pyfunction!(cophenetic_distances, m)?)?;
+    m.add_function(wrap_pyfunction!(cophenetic_distances_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(find_num_leaves, m)?)?;
     m.add_function(wrap_pyfunction!(from_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(from_edges, m)?)?;

@@ -7,12 +7,46 @@ from ete3 import Tree
 
 from phylo2vec.base.newick import to_newick
 from phylo2vec.metrics import cophenetic_distances
+from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, N_REPEATS
 
+# Function is currently a bit slow for large trees,
+# so we limit the number of leaves to 50
+MAX_N_LEAVES_COPH = 50
 
-@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, 51))
-def test_cophenetic(n_leaves):
+
+def _cophenetic(n_leaves, sample_fn):
+    """Helper function to test cophenetic distances using a sample function."""
+
+    def coph_ete3(tr, n_leaves):
+        dmat = np.zeros((n_leaves, n_leaves))
+
+        for i in range(n_leaves):
+            for j in range(i):
+                dist = tr.get_distance(f"{i}", f"{j}", topology_only=False)
+                dmat[i, j] = dist
+                dmat[j, i] = dist
+
+        return dmat
+
+    for _ in range(N_REPEATS):
+        vector_or_matrix = sample_fn(n_leaves)
+
+        # tree with all branch lengths = 1
+        tr = Tree(to_newick(vector_or_matrix))
+
+        # Our distance matrix
+        dmat_p2v = cophenetic_distances(vector_or_matrix)
+
+        # ete3 distance matrix
+        dmat_ete3 = coph_ete3(tr, n_leaves)
+
+        assert np.allclose(dmat_p2v, dmat_ete3)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1))
+def test_cophenetic_vector(n_leaves):
     """Test that v to newick to converted_v leads to v == converted_v
 
     Parameters
@@ -21,36 +55,20 @@ def test_cophenetic(n_leaves):
         Number of leaves
     """
 
-    def coph_ete3(tr, n_leaves):
-        dmat = np.zeros((n_leaves, n_leaves))
+    _cophenetic(n_leaves, sample_vector)
 
-        for i in range(n_leaves):
-            for j in range(i):
-                dmat[i, j] = tr.get_distance(f"{i}", f"{j}", topology_only=False)
 
-        return dmat + dmat.T
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1))
+def test_cophenetic_matrix(n_leaves):
+    """Test that v to newick to converted_v leads to v == converted_v
 
-    for _ in range(N_REPEATS):
-        v = sample_vector(n_leaves)
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
 
-        # tree with all branch lengths = 1
-        tr = Tree(to_newick(v))
-
-        # Our distance matrix
-        dmat_p2v = cophenetic_distances(v)
-
-        # ete3 distance matrix
-        dmat_ete3 = coph_ete3(tr, n_leaves)
-
-        assert np.array_equal(dmat_p2v, dmat_ete3)
-
-        # Test for unrooted trees
-        dmat_p2v_unr = cophenetic_distances(v, unrooted=True)
-
-        tr.unroot()
-        dmat_ete3_unr = coph_ete3(tr, n_leaves)
-
-        assert np.array_equal(dmat_p2v_unr, dmat_ete3_unr)
+    _cophenetic(n_leaves, sample_matrix)
 
 
 if __name__ == "__main__":

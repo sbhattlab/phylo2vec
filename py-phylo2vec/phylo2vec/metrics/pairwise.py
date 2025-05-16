@@ -1,27 +1,46 @@
 """Pairwise distance metrics for nodes within phylogenetic trees."""
 
+import warnings
+import numpy as np
+
 from phylo2vec import _phylo2vec_core as core
 from phylo2vec.utils.vector import check_vector
 
 
-def cophenetic_distances(v, unrooted=False):
+def cophenetic_distances(vector_or_matrix, unrooted=False):
     """
     Compute the (topological) cophenetic distance matrix
     for tree nodes from a Phylo2Vec vector.
 
     Parameters
     ----------
-    v : numpy.ndarray
-        Phylo2Vec vector
-    unrooted : bool, optional
-        Whether to consider the tree as unrooted or not, by default False
+    vector_or_matrix : numpy.array
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
     -------
     numpy.ndarray
         Cophenetic distance matrix
     """
-    return core.cophenetic_distances(v, unrooted)
+    if unrooted:
+        warnings.warn(
+            (
+                "Argument `unrooted` is ignored. It is deprecated and "
+                "will be removed in future versions. When ensuring "
+                "compatibility with `ape` and `ete` (mode='keep'), the "
+                "argument becomes unnecessary. "
+            ),
+            FutureWarning,
+        )
+    if vector_or_matrix.ndim == 2:
+        coph = core.cophenetic_distances_with_bls(vector_or_matrix)
+    elif vector_or_matrix.ndim == 1:
+        coph = core.cophenetic_distances(vector_or_matrix)
+    else:
+        raise ValueError(
+            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
+        )
+    return np.asarray(coph)
 
 
 PAIRWISE_DISTANCES = {"cophenetic": cophenetic_distances}
