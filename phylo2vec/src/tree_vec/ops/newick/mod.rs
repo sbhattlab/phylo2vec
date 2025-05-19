@@ -335,7 +335,7 @@ pub fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> Stri
 /// ```
 pub fn remove_parent_labels(newick: &str) -> String {
     let newick_patterns = NewickPatterns::new();
-    return newick_patterns.parents.replace_all(newick, ")").to_string();
+    newick_patterns.parents.replace_all(newick, ")").to_string()
 }
 
 /// Remove branch length annotations from the Newick string
@@ -351,10 +351,10 @@ pub fn remove_parent_labels(newick: &str) -> String {
 /// ```
 pub fn remove_branch_lengths(newick: &str) -> String {
     let newick_patterns = NewickPatterns::new();
-    return newick_patterns
+    newick_patterns
         .branch_lengths
         .replace_all(newick, "")
-        .to_string();
+        .to_string()
 }
 
 /// Check if the Newick string has parent labels

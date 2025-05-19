@@ -3,9 +3,13 @@ use crate::tree_vec::types::{Ancestry, Pair, Pairs};
 use crate::utils::is_unordered;
 use std::collections::HashMap;
 
-/// Get the pair of nodes from the Phylo2Vec vector
-/// using a vector data structure and for loops
-/// implementation.
+/// Get all "pairs" from the Phylo2Vec vector
+/// using a for loop implementation.
+/// Pair = (B, L)
+/// B = branch leading to leaf L
+/// Best case is O(n) for ordered trees.
+/// Average case is O(n^1.5)
+/// Worst case is O(n^2) for unordered trees.
 fn get_pairs_loop(v: &[usize]) -> Pairs {
     let num_of_leaves: usize = v.len();
     let mut pairs: Pairs = Vec::with_capacity(num_of_leaves);
@@ -45,12 +49,9 @@ fn get_pairs_loop(v: &[usize]) -> Pairs {
     pairs
 }
 
-/// Get the pair of nodes from the Phylo2Vec vector
-/// using an AVL tree data structure implementation.
-fn get_pairs_avl(v: &[usize]) -> Pairs {
-    // AVL tree implementation of get_pairs
-    let k = v.len();
+pub fn make_tree(v: &[usize]) -> AVLTree {
     let mut avl_tree = AVLTree::new();
+    let k = v.len();
     avl_tree.insert(0, (0, 1));
 
     for (i, &vi) in v.iter().enumerate().take(k).skip(1) {
@@ -64,7 +65,29 @@ fn get_pairs_avl(v: &[usize]) -> Pairs {
         }
     }
 
-    avl_tree.get_pairs()
+    avl_tree
+}
+
+/// Get all node pairs from the Phylo2Vec vector
+/// using an AVL tree implementation.
+/// Pair = (B, L)
+/// B = branch leading to leaf L
+/// Complexity: O(n log n) for all trees
+fn get_pairs_avl(v: &[usize]) -> Pairs {
+    let avl_tree: AVLTree = make_tree(v);
+
+    avl_tree.inorder_traversal()
+}
+
+pub fn from_pairs(pairs: &Pairs) -> Vec<usize> {
+    let mut cherries: Ancestry = Vec::with_capacity(pairs.len());
+    for &(c1, c2) in pairs.iter() {
+        cherries.push([c1, c2, std::cmp::max(c1, c2)]);
+    }
+
+    order_cherries_no_parents(&mut cherries);
+
+    build_vector(&cherries)
 }
 
 /// Get the pair of nodes from the Phylo2Vec vector
