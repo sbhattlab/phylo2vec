@@ -5,6 +5,7 @@ from phylo2vec._phylo2vec_core import __version__  # pylint: disable=no-name-in-
 from phylo2vec.base.ancestry import from_ancestry, to_ancestry
 from phylo2vec.base.edges import from_edges, to_edges
 from phylo2vec.base.newick import from_newick, to_newick
+from phylo2vec.base.pairs import from_pairs, to_pairs
 from phylo2vec.io.reader import load, load_newick
 from phylo2vec.io.writer import save, save_newick
 from phylo2vec.utils.matrix import sample_matrix
@@ -15,6 +16,7 @@ __all__ = [
     "from_ancestry",
     "from_edges",
     "from_newick",
+    "from_pairs",
     "load",
     "load_newick",
     "sample_matrix",
@@ -24,4 +26,5 @@ __all__ = [
     "to_ancestry",
     "to_edges",
     "to_newick",
+    "to_pairs",
 ]

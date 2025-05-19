@@ -90,7 +90,8 @@ def add_leaf(v, leaf, pos):
     v_add : numpy.ndarray
         Phylo2Vec vector including the new leaf
     """
-    return core.add_leaf(v, leaf, pos)
+    v_add = core.add_leaf(v, leaf, pos)
+    return np.asarray(v_add)
 
 
 def reorder_v(reorder_method, v_old, label_mapping_old):

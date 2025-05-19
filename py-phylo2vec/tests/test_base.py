@@ -8,6 +8,7 @@ from ete3 import Tree
 from phylo2vec.base.ancestry import from_ancestry, to_ancestry
 from phylo2vec.base.edges import from_edges, to_edges
 from phylo2vec.base.newick import from_newick, to_newick
+from phylo2vec.base.pairs import from_pairs, to_pairs
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.newick import remove_parent_labels
 from phylo2vec.utils.vector import sample_vector
@@ -134,6 +135,22 @@ def test_v2ancestry2v(n_leaves):
         v = sample_vector(n_leaves)
         ancestry = to_ancestry(v)
         v2 = from_ancestry(ancestry)
+        assert np.array_equal(v, v2)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_v2pairs2v(n_leaves):
+    """Test that v to pairs to converted_v leads to v == converted_v
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+        pairs = to_pairs(v)
+        v2 = from_pairs(pairs)
         assert np.array_equal(v, v2)
 
 
