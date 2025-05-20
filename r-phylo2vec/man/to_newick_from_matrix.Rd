@@ -4,7 +4,7 @@
 \alias{to_newick_from_matrix}
 \title{Recover a rooted tree (in Newick format) from a Phylo2Vec matrix}
 \usage{
-to_newick_from_matrix(input_integers)
+to_newick_from_matrix(matrix)
 }
 \description{
 Recover a rooted tree (in Newick format) from a Phylo2Vec matrix

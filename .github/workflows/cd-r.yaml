@@ -182,4 +182,4 @@ jobs:
       - name: Install and test package
         run: |
           Rscript -e "pkg_file <- list.files('r-package-linux', full.names = TRUE)[1]; install.packages(pkg_file, repos = NULL, type = 'source')"
-          Rscript -e "library(phylo2vec); sample(5, FALSE); print('Package loaded successfully')"
+          Rscript -e "library(phylo2vec); sample_vector(5, FALSE); print('Package loaded successfully')"
