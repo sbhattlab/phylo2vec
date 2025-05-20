@@ -4,7 +4,7 @@
 \alias{check_v}
 \title{Validate a Phylo2Vec vector}
 \usage{
-check_v(input_integers)
+check_v(vector)
 }
 \description{
 Validate a Phylo2Vec vector
