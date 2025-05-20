@@ -196,3 +196,14 @@ notebooks/
 
 # Temporary files
 tmp/
+
+### R ###
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+
+# Output files from R CMD build
+*.tar.gz
