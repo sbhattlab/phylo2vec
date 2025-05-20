@@ -10,29 +10,37 @@
 #' @useDynLib phylo2vec, .registration = TRUE
 NULL
 
-#' Sample a random tree via Phylo2Vec
-#' @export
-sample_vector <- function(n_leaves, ordered) .Call(wrap__sample_vector, n_leaves, ordered)
-
 #' Add a leaf to a Phylo2Vec vector
 #' @export
 add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, branch)
+
+#' Validate a Phylo2Vec vector
+#' @export
+check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
 
 #' Get the topological cophenetic distance matrix of a Phylo2Vec vector
 #' @export
 cophenetic_distances <- function(vector) .Call(wrap__cophenetic_distances, vector)
 
-#' Convert an edge list to a Phylo2Vec vector
-#' @export
-from_edges <- function(edges) .Call(wrap__from_edges, edges)
-
 #' Convert an ancestry matrix to a Phylo2Vec vector
 #' @export
 from_ancestry <- function(matrix) .Call(wrap__from_ancestry, matrix)
 
+#' Convert an edge list to a Phylo2Vec vector
+#' @export
+from_edges <- function(edges) .Call(wrap__from_edges, edges)
+
+#' Convert a pairs matrix to a Phylo2Vec vector
+#' @export
+from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
+
 #' Remove a leaf from a Phylo2Vec vector
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
+
+#' Sample a random tree via Phylo2Vec
+#' @export
+sample_vector <- function(n_leaves, ordered) .Call(wrap__sample_vector, n_leaves, ordered)
 
 #' Get the ancestry matrix of a Phylo2Vec vector
 #' @export
@@ -42,21 +50,21 @@ to_ancestry <- function(vector) .Call(wrap__to_ancestry, vector)
 #' @export
 to_edges <- function(vector) .Call(wrap__to_edges, vector)
 
-#' Recover a rooted tree (in Newick format) from a Phylo2Vec vector
-#' @export
-to_newick_from_vector <- function(vector) .Call(wrap__to_newick_from_vector, vector)
-
 #' Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
 #' @export
 to_newick_from_matrix <- function(matrix) .Call(wrap__to_newick_from_matrix, matrix)
 
+#' Recover a rooted tree (in Newick format) from a Phylo2Vec vector
+#' @export
+to_newick_from_vector <- function(vector) .Call(wrap__to_newick_from_vector, vector)
+
+#' Get pairs from a Phylo2Vec vector
+#' @export
+to_pairs <- function(vector) .Call(wrap__to_pairs, vector)
+
 #' Convert a newick string to a Phylo2Vec vector
 #' @export
 to_vector <- function(newick) .Call(wrap__to_vector, newick)
-
-#' Validate a Phylo2Vec vector
-#' @export
-check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
 
 
 # nolint end

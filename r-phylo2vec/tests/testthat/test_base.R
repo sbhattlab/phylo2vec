@@ -29,6 +29,21 @@ test_that(desc = "v2ancestry2v", {
   }
 })
 
+test_that(desc = "v2pairs2v", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+    for (j in seq_len(N_REPEATS)) {
+      # Generate a random vector
+      v <- sample_vector(n_leaves, FALSE)
+
+      # Convert to ancestry and back
+      pairs <- to_pairs(v)
+      v2 <- from_pairs(pairs)
+      expect_equal(v, v2)
+    }
+  }
+})
+
+
 test_that(desc = "v2edges2v", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
     for (j in seq_len(N_REPEATS)) {

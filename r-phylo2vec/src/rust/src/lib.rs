@@ -106,6 +106,33 @@ fn from_ancestry(matrix: RMatrix<i32>) -> Vec<i32> {
     as_i32(v)
 }
 
+/// Get pairs from a Phylo2Vec vector
+/// @export
+#[extendr]
+fn to_pairs(vector: Vec<i32>) -> RMatrix<i32> {
+    let v_usize: Vec<usize> = as_usize(vector);
+    let k = v_usize.len();
+    let pairs = ops::get_pairs(&v_usize);
+    RMatrix::new_matrix(k, 2, |r, c| match c {
+        0 => pairs[r].0 as i32,
+        1 => pairs[r].1 as i32,
+        _ => unreachable!(),
+    })
+}
+
+/// Convert a pairs matrix to a Phylo2Vec vector
+/// @export
+#[extendr]
+fn from_pairs(pairs: RMatrix<i32>) -> Vec<i32> {
+    let data = pairs.data();
+    let nrows = pairs.nrows();
+    let pairs_usize: Vec<(usize, usize)> = (0..nrows)
+        .map(|r| (data[r] as usize, data[nrows + r] as usize))
+        .collect();
+    let v = ops::from_pairs(&pairs_usize);
+    as_i32(v)
+}
+
 /// Get the edge list of a Phylo2Vec vector
 /// @export
 #[extendr]
@@ -170,16 +197,18 @@ fn cophenetic_distances(vector: Vec<i32>) -> RMatrix<i32> {
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod phylo2vec;
-    fn sample_vector;
     fn add_leaf;
+    fn check_v;
     fn cophenetic_distances;
-    fn from_edges;
     fn from_ancestry;
+    fn from_edges;
+    fn from_pairs;
     fn remove_leaf;
+    fn sample_vector;
     fn to_ancestry;
     fn to_edges;
-    fn to_newick_from_vector;
     fn to_newick_from_matrix;
+    fn to_newick_from_vector;
+    fn to_pairs;
     fn to_vector;
-    fn check_v;
 }
