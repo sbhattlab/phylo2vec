@@ -144,7 +144,7 @@ In the R terminal, you can then import the `phylo2vec` library:
 library(phylo2vec)
 
 # A small demo
-v = sample(10, FALSE)
+v = sample_vector(10, FALSE)
 to_newick(v)
 ```
 
@@ -211,6 +211,6 @@ Once in R, you can run the following to load and use the package:
 devtools::load_all('./r-phylo2vec')
 
 # A small demo
-v = sample(5, FALSE)
+v = sample_vector(5, FALSE)
 to_newick_from_vector(v)
 ```
