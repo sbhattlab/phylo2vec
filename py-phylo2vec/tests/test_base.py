@@ -54,6 +54,20 @@ def test_m2newick2m(n_leaves):
         assert np.allclose(m, m3, atol=1e-6)
 
 
+def permutate_cherries(newick):
+    for i, char in enumerate(newick):
+        if char == "(":
+            open_idx = i + 1
+        elif char == ")" and open_idx != -1:
+            child1, child2 = newick[open_idx:i].split(",", 2)
+
+            # Switch the cherries
+            newick = newick.replace(f"({child1},{child2})", f"({child2},{child1})")
+
+            open_idx = -1
+    return newick
+
+
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
 def test_newick_cherry_permutations(n_leaves):
     """Simple way to check that permutation of leaf nodes does not change v
@@ -64,30 +78,40 @@ def test_newick_cherry_permutations(n_leaves):
         Number of leaves
     """
 
-    def permutate_cherries(newick):
-        for i, char in enumerate(newick):
-            if char == "(":
-                open_idx = i + 1
-            elif char == ")" and open_idx != -1:
-                child1, child2 = newick[open_idx:i].split(",", 2)
-
-                # Switch the cherries
-                newick = newick.replace(f"({child1},{child2})", f"({child2},{child1})")
-
-                open_idx = -1
-        return newick
-
     for _ in range(N_REPEATS):
-        nw = to_newick(sample_vector(n_leaves))
+        v = sample_vector(n_leaves)
+        nw = to_newick(v)
         nw_perm = permutate_cherries(nw)
-        assert np.array_equal(from_newick(nw), from_newick(nw_perm))
+        v_perm = from_newick(nw_perm)
+        assert np.array_equal(v, v_perm)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
-def test_newick_ladderize(n_leaves):
-    """Simple way to check that isomorphic Newick strings have the same v
+def test_newick_cherry_permutations_matrix(n_leaves):
+    """Simple way to check that permutation of leaf nodes does not change v
 
-    ete3's ladderize should create an isomorphism the original Newick string
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        nw = to_newick(m)
+        nw_perm = permutate_cherries(nw)
+        m_perm = from_newick(nw_perm)
+        assert np.allclose(m, m_perm)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_newick_ladderize_vector(n_leaves):
+    """
+    Simple way to check that isomorphic Newick strings
+    without branch lengths have the same v
+
+    ete3's ladderize should create an isomorphism
+    of the original Newick string
 
     Parameters
     ----------
@@ -95,15 +119,45 @@ def test_newick_ladderize(n_leaves):
         Number of leaves
     """
     for _ in range(N_REPEATS):
-        nw = to_newick(sample_vector(n_leaves))
+        v = sample_vector(n_leaves)
+        nw = to_newick(v)
         tr = Tree(nw)
 
         # Ladderize the tree and output a new Newick string
         tr.ladderize()
-
         nw_ladderized = tr.write(format=9)
 
-        assert np.array_equal(from_newick(nw), from_newick(nw_ladderized))
+        v2 = from_newick(nw_ladderized)
+
+        assert np.array_equal(v, v2)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_newick_ladderize_matrix(n_leaves):
+    """
+    Simple way to check that isomorphic Newick strings
+    with branch lengths have the same matrix
+
+    ete3's ladderize should create an isomorphism
+    of the original Newick string
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        nw = to_newick(m)
+        tr = Tree(nw)
+
+        # Ladderize the tree and output a new Newick string
+        tr.ladderize()
+        nw_ladderized = tr.write(format=1, dist_formatter="%0.8g")
+
+        m2 = from_newick(nw_ladderized)
+
+        assert np.allclose(m, m2)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))

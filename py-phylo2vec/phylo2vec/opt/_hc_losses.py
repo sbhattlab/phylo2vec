@@ -7,7 +7,7 @@ import sys
 
 from pathlib import PurePosixPath
 
-from phylo2vec.base import to_newick
+from phylo2vec.base.newick import to_newick
 
 # Regex for a negative float
 NEG_FLOAT_PATTERN = re.compile(r"-\d+.\d+")

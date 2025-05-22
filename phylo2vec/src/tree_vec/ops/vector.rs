@@ -210,7 +210,14 @@ pub fn find_coords_of_first_leaf(ancestry: &Ancestry, leaf: usize) -> (usize, us
     panic!("Leaf not found in ancestry");
 }
 
-pub fn order_cherries(ancestry: &mut Ancestry) -> Vec<usize> {
+/// Order cherries in an ancestry vector.
+/// The goal of this function is to find indices for an argsort to sort the cherries
+/// We utilise the parent nodes to sort the cherries.
+/// Returns two vectors:
+/// 1. `row_idxs`: the indices of the sorted cherries
+/// 2. `bl_rows_to_swap`: the indices of the cherries that need to swap their branch lengths
+///    The latter is important to ensure bijectivity of the matrix object.
+pub fn order_cherries(ancestry: &mut Ancestry) -> (Vec<usize>, Vec<usize>) {
     let num_cherries = ancestry.len();
     let num_nodes = 2 * num_cherries + 2;
 
@@ -226,7 +233,9 @@ pub fn order_cherries(ancestry: &mut Ancestry) -> Vec<usize> {
     }
     *ancestry = new_ancestry;
 
-    for cherry in ancestry.iter_mut() {
+    let mut bl_rows_to_swap: Vec<usize> = Vec::with_capacity(num_cherries);
+
+    for (i, cherry) in ancestry.iter_mut().enumerate() {
         let [c1, c2, p] = *cherry;
         // Get the minimum descendant of c1 and c2 (if they exist)
         // min_desc[child_x] doesn't exist, min_desc_x --> child_x
@@ -241,21 +250,36 @@ pub fn order_cherries(ancestry: &mut Ancestry) -> Vec<usize> {
             c2
         };
 
-        // Collect the minimum descendant and allocate it to min_desc[parent]
-        let desc_min = std::cmp::min(min_desc1, min_desc2);
+        let (desc_min, desc_max) = if min_desc1 < min_desc2 {
+            (min_desc1, min_desc2)
+        } else {
+            // Swap the branch lengths if min_desc1 > min_desc2
+            // This is important to make the matrix formulation
+            // invariant to cherry permutations
+            // Ex: ((1:0.1,2:0.2)3:0.3); and ((2:0.2,1:0.1)3:0.3)
+            // should yield the same matrix
+            bl_rows_to_swap.push(row_idxs[i]);
+            (min_desc2, min_desc1)
+        };
+
+        // Allocate the smallest descendant to min_desc[parent}
         min_desc[p] = desc_min;
 
-        // Instead of the parent, we collect the max node
-        let desc_max = std::cmp::max(min_desc1, min_desc2);
+        // Allocate the largest descendant as the "parent"
         *cherry = [min_desc1, min_desc2, desc_max];
     }
 
-    row_idxs
+    (row_idxs, bl_rows_to_swap)
 }
 
 /// Order cherries in an ancestry vector without parent labels.
 /// The goal of this function is to find indices for an argsort to sort the cherries
 /// We utilise the fact that the input contains certain local orders, but not the global order.
+/// Returns two vectors:
+/// 1. `row_idxs`: the indices of the sorted cherries
+/// 2. `bl_rows_to_swap`: the indices of the cherries that need to swap their branch lengths
+///    The latter is important to ensure bijectivity of the matrix object.
+///
 /// Example:
 /// [[6 7 7]
 ///  [6 9 9]
@@ -303,10 +327,12 @@ pub fn order_cherries(ancestry: &mut Ancestry) -> Vec<usize> {
 /// 0 2 2
 /// 0 8 8
 /// 0 1 1
-pub fn order_cherries_no_parents(ancestry: &mut Ancestry) -> Vec<usize> {
+pub fn order_cherries_no_parents(ancestry: &mut Ancestry) -> (Vec<usize>, Vec<usize>) {
     let num_cherries = ancestry.len();
     let mut to_sort: Vec<usize> = Vec::with_capacity(num_cherries);
     let mut visited: HashMap<usize, usize> = HashMap::new();
+
+    let mut bl_rows_to_swap: Vec<usize> = Vec::with_capacity(num_cherries);
 
     for &[c1, c2, c_max] in ancestry.iter() {
         let c_min = c1.min(c2);
@@ -326,11 +352,20 @@ pub fn order_cherries_no_parents(ancestry: &mut Ancestry) -> Vec<usize> {
     // Note: using a stable sort is important to keep the order of cherries
     let mut temp = Ancestry::with_capacity(num_cherries);
     for i in &row_idxs {
+        // Swap the branch lengths if c1 > c2
+        // This is important to make the matrix formulation
+        // invariant to cherry permutations
+        // Ex: ((1:0.1,2:0.2):0.3); and ((2:0.2,1:0.1):0.3)
+        // should yield the same matrix
+        let [c1, c2, _] = ancestry[*i];
+        if c1 > c2 {
+            bl_rows_to_swap.push(*i);
+        }
         temp.push(ancestry[*i]);
     }
     *ancestry = temp;
 
-    row_idxs
+    (row_idxs, bl_rows_to_swap)
 }
 
 /// A Fenwick Tree (Binary Indexed Tree) for efficiently calculating prefix sums

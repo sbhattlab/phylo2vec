@@ -9,8 +9,8 @@ from phylo2vec.utils.vector import check_vector
 
 def cophenetic_distances(vector_or_matrix, unrooted=False):
     """
-    Compute the (topological) cophenetic distance matrix
-    for tree nodes from a Phylo2Vec vector.
+    Compute the cophenetic distance matrix of a Phylo2Vec
+    vector (topological) or matrix (from branch lengths).
 
     Parameters
     ----------
