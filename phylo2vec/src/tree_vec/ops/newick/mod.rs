@@ -303,7 +303,6 @@ pub fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> Stri
     let mut cache = prepare_cache(pairs);
 
     for (i, (&(c1, c2), &[bl1, bl2])) in pairs.iter().zip(branch_lengths.iter()).enumerate() {
-        // let s1 = std::mem::take(&mut cache[c1]);
         let s2 = std::mem::take(&mut cache[c2]);
         let sp = (num_leaves + i).to_string();
         let sb1 = bl1.to_string();

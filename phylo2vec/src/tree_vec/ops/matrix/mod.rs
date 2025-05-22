@@ -4,7 +4,6 @@ use crate::tree_vec::ops::newick::{
 use crate::tree_vec::ops::vector::{
     _cophenetic_distances, build_vector, order_cherries, order_cherries_no_parents,
 };
-use crate::tree_vec::types::Ancestry;
 
 /// Converts a Newick string to a matrix representation.
 ///
@@ -32,15 +31,15 @@ pub fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
         // Case 1: Newick string with parent nodes
         let (mut cherries, bls) =
             get_cherries_with_bls(newick).expect("failed to get cherries with branch lengths");
-        let idxs = _get_sorted_indices(&cherries);
-        order_cherries(&mut cherries); // Order the cherries in the ancestry matrix based on parent values
-        (cherries, bls, idxs)
+        // let idxs = _get_sorted_indices(&cherries);
+        let row_idxs = order_cherries(&mut cherries); // Order the cherries in the ancestry matrix based on parent values
+        (cherries, bls, row_idxs)
     } else {
         // Case 2: Newick string without parent nodes
         let (mut cherries, bls) = get_cherries_no_parents_with_bls(newick)
             .expect("failed to get cherries with branch lengths and no parents");
-        let idxs = order_cherries_no_parents(&mut cherries);
-        (cherries, bls, idxs)
+        let row_idxs = order_cherries_no_parents(&mut cherries);
+        (cherries, bls, row_idxs)
     };
 
     // Build the ordered vector
@@ -60,19 +59,6 @@ pub fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
     }
 
     matrix
-}
-
-// Helper function that takes an ancestry array, and returns an array of indices,
-//sorted by the parent values in the ancestry array.
-fn _get_sorted_indices(ancestry: &Ancestry) -> Vec<usize> {
-    let num_cherries = ancestry.len();
-
-    // Create a vector of indices from 0 to num_cherries - 1
-    let mut indices: Vec<usize> = (0..num_cherries).collect();
-
-    // Sort the indices based on the parent value (ancestry[i][2])
-    indices.sort_by_key(|&i| ancestry[i][2]);
-    indices
 }
 
 /// Parses a matrix into its vector and branch length components.
