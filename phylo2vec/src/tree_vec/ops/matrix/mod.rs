@@ -4,7 +4,6 @@ use crate::tree_vec::ops::newick::{
 use crate::tree_vec::ops::vector::{
     _cophenetic_distances, build_vector, order_cherries, order_cherries_no_parents,
 };
-use crate::tree_vec::types::Ancestry;
 
 /// Converts a Newick string to a matrix representation.
 ///
