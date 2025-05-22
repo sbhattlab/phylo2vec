@@ -210,14 +210,21 @@ pub fn find_coords_of_first_leaf(ancestry: &Ancestry, leaf: usize) -> (usize, us
     panic!("Leaf not found in ancestry");
 }
 
-pub fn order_cherries(ancestry: &mut Ancestry) {
+pub fn order_cherries(ancestry: &mut Ancestry) -> Vec<usize> {
     let num_cherries = ancestry.len();
     let num_nodes = 2 * num_cherries + 2;
 
     let mut min_desc = vec![usize::MAX; num_nodes];
 
+    let mut row_idxs: Vec<usize> = (0..num_cherries).collect();
+    row_idxs.sort_by_key(|&i| ancestry[i][2]);
+
     // Sort by the parent node (ascending order)
-    ancestry.sort_by_key(|x| x[2]);
+    let mut new_ancestry: Ancestry = Vec::with_capacity(num_cherries);
+    for i in &row_idxs {
+        new_ancestry.push(ancestry[*i]);
+    }
+    *ancestry = new_ancestry;
 
     for cherry in ancestry.iter_mut() {
         let [c1, c2, p] = *cherry;
@@ -242,6 +249,8 @@ pub fn order_cherries(ancestry: &mut Ancestry) {
         let desc_max = std::cmp::max(min_desc1, min_desc2);
         *cherry = [min_desc1, min_desc2, desc_max];
     }
+
+    row_idxs
 }
 
 /// Order cherries in an ancestry vector without parent labels.
@@ -311,17 +320,17 @@ pub fn order_cherries_no_parents(ancestry: &mut Ancestry) -> Vec<usize> {
     }
 
     // argsort with descending order
-    let mut indices: Vec<usize> = (0..num_cherries).collect();
-    indices.sort_by_key(|&i| std::cmp::Reverse(to_sort[i]));
+    let mut row_idxs: Vec<usize> = (0..num_cherries).collect();
+    row_idxs.sort_by_key(|&i| std::cmp::Reverse(to_sort[i]));
 
     // Note: using a stable sort is important to keep the order of cherries
     let mut temp = Ancestry::with_capacity(num_cherries);
-    for i in &indices {
+    for i in &row_idxs {
         temp.push(ancestry[*i]);
     }
     *ancestry = temp;
 
-    indices
+    row_idxs
 }
 
 /// A Fenwick Tree (Binary Indexed Tree) for efficiently calculating prefix sums
