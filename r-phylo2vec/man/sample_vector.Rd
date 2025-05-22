@@ -2,10 +2,10 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{sample_vector}
 \alias{sample_vector}
-\title{Sample a random tree via Phylo2Vec}
+\title{Sample a random tree topoloy via Phylo2Vec}
 \usage{
 sample_vector(n_leaves, ordered)
 }
 \description{
-Sample a random tree via Phylo2Vec
+Sample a random tree topoloy via Phylo2Vec
 }

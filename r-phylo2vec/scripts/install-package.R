@@ -10,9 +10,7 @@ if (length(args) == 0) {
 
 devtools::document(args[1])
 
-fn <- devtools::build(args[1], binary = TRUE, args = c("--preclean"))
-
-devtools::install_local(fn, force = TRUE)
+devtools::install(args[1], build = FALSE)
 
 if (file.exists(fn)) {
   file.remove(fn)

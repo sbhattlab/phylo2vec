@@ -1,6 +1,6 @@
 source("config.R")
 
-test_that(desc = "sample", {
+test_that(desc = "sample_vector", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
     for (j in seq_len(N_REPEATS)) {
       # Generate a random vector
@@ -12,9 +12,21 @@ test_that(desc = "sample", {
   }
 })
 
+test_that(desc = "sample_matrix", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+    for (j in seq_len(N_REPEATS)) {
+      # Generate a random matrix
+      m <- sample_matrix(n_leaves, FALSE)
+
+      # Check that the matrix is valid
+      expect_no_error(check_m(m))
+    }
+  }
+})
+
 test_that(desc = "remove_and_add", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
-    for (j in seq_len(2)) {
+    for (j in seq_len(N_REPEATS)) {
       # Generate a random vector
       v <- sample_vector(n_leaves, FALSE)
 
