@@ -27,25 +27,39 @@ use crate::tree_vec::ops::vector::{
 ///
 /// Assumes a valid Newick string. Relies on helper functions for processing.
 pub fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
-    let (cherries, bls, idxs) = if has_parents(newick) {
+    let (cherries, mut bls, row_idxs, bl_rows_to_swap) = if has_parents(newick) {
         // Case 1: Newick string with parent nodes
+
+        // Get the cherries and branch lengths
         let (mut cherries, bls) =
             get_cherries_with_bls(newick).expect("failed to get cherries with branch lengths");
-        // let idxs = _get_sorted_indices(&cherries);
-        let row_idxs = order_cherries(&mut cherries); // Order the cherries in the ancestry matrix based on parent values
-        (cherries, bls, row_idxs)
+
+        // Order the cherries in the ancestry matrix
+        let (row_idxs, bl_rows_to_swap) = order_cherries(&mut cherries);
+        (cherries, bls, row_idxs, bl_rows_to_swap)
     } else {
         // Case 2: Newick string without parent nodes
+
+        // Get the cherries and branch lengths
         let (mut cherries, bls) = get_cherries_no_parents_with_bls(newick)
             .expect("failed to get cherries with branch lengths and no parents");
-        let row_idxs = order_cherries_no_parents(&mut cherries);
-        (cherries, bls, row_idxs)
+
+        // Order the cherries in the ancestry matrix
+        let (row_idxs, bl_rows_to_swap) = order_cherries_no_parents(&mut cherries);
+        (cherries, bls, row_idxs, bl_rows_to_swap)
     };
 
-    // Build the ordered vector
+    // Build the vector
     let vector = build_vector(&cherries);
 
-    let reordered_bls: Vec<[f32; 2]> = idxs
+    // Swap the branch lengths for the specified rows
+    // See `order_cherries` and `order_cherries_no_parents` for details
+    for i in bl_rows_to_swap {
+        bls[i] = [bls[i][1], bls[i][0]];
+    }
+
+    // Reorder the branch lengths based on the sorted indices
+    let reordered_bls: Vec<[f32; 2]> = row_idxs
         .iter()
         .map(|&idx| bls[idx]) // Access each element of `bls` using the index from `indices`
         .collect();
