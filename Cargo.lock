@@ -626,7 +626,7 @@ dependencies = [
 
 [[package]]
 name = "r-phylo2vec"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "extendr-api",
  "phylo2vec",
