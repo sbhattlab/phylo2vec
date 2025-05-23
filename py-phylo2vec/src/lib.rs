@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 use phylo2vec::tree_vec::ops;
 use phylo2vec::utils;
+use std::collections::HashMap;
 
 #[pyfunction]
 fn to_newick_from_vector(input_vector: Vec<usize>) -> PyResult<String> {
@@ -110,13 +111,13 @@ fn has_parents(newick: &str) -> bool {
 }
 
 #[pyfunction]
-fn remove_branch_lengths(newick: &str) -> String {
-    ops::newick::remove_branch_lengths(newick)
+fn remove_branch_lengths(newick: &str) -> PyResult<String> {
+    Ok(ops::newick::remove_branch_lengths(newick))
 }
 
 #[pyfunction]
-fn remove_parent_labels(newick: &str) -> String {
-    ops::newick::remove_parent_labels(newick)
+fn remove_parent_labels(newick: &str) -> PyResult<String> {
+    Ok(ops::newick::remove_parent_labels(newick))
 }
 
 #[pyfunction]
@@ -129,17 +130,37 @@ fn remove_leaf(mut input_vector: Vec<usize>, leaf: usize) -> (Vec<usize>, usize)
     ops::remove_leaf(&mut input_vector, leaf)
 }
 
+#[pyfunction]
+fn apply_label_mapping(newick: String, label_mapping: HashMap<usize, String>) -> PyResult<String> {
+    let result = ops::newick::apply_label_mapping(&newick, &label_mapping);
+
+    // Map the potential NewickError to a PyValueErr
+    // https://pyo3.rs/v0.22.3/function/error-handling#foreign-rust-error-types
+    let newick_int = result.map_err(|e| {
+        PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Label mapping failed: {}", e))
+    })?;
+
+    Ok(newick_int)
+}
+
+#[pyfunction]
+fn create_label_mapping(newick: String) -> PyResult<(String, HashMap<usize, String>)> {
+    Ok(ops::newick::create_label_mapping(&newick))
+}
+
 /// This module is exposed to Python.
 /// The line below raises an issue in DeepSource stating that this function's cyclomatic complexity is higher than threshold
 /// the analyzer does not understand that this is an API exposure function, hence the comment above to skip over this occurrence.
 #[pymodule]
 fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(add_leaf, m)?)?;
+    m.add_function(wrap_pyfunction!(apply_label_mapping, m)?)?;
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(check_m, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
     m.add_function(wrap_pyfunction!(cophenetic_distances, m)?)?;
     m.add_function(wrap_pyfunction!(cophenetic_distances_with_bls, m)?)?;
+    m.add_function(wrap_pyfunction!(create_label_mapping, m)?)?;
     m.add_function(wrap_pyfunction!(find_num_leaves, m)?)?;
     m.add_function(wrap_pyfunction!(from_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(from_edges, m)?)?;
