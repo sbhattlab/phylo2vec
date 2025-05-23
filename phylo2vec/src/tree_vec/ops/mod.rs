@@ -15,7 +15,7 @@ pub use vector::{
     from_pairs, get_ancestry, get_edges, get_pairs, order_cherries, order_cherries_no_parents,
 };
 
-pub use newick::{build_newick, get_cherries, get_cherries_no_parents, has_parents};
+pub use newick::{build_newick, get_cherries, has_parents};
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
 pub fn to_newick_from_vector(v: &[usize]) -> String {
@@ -35,13 +35,11 @@ pub fn to_newick_from_matrix(m: &[Vec<f32>]) -> String {
 
 /// Recover a Phylo2Vec vector from a rooted tree (in Newick format)
 pub fn to_vector(newick: &str) -> Vec<usize> {
-    let mut ancestry: Ancestry;
+    let mut ancestry: Ancestry = get_cherries(newick).expect("failed to get cherries");
 
     if has_parents(newick) {
-        ancestry = get_cherries(newick).expect("failed to get cherries");
         order_cherries(&mut ancestry);
     } else {
-        ancestry = get_cherries_no_parents(newick).expect("failed to get cherries with no parents");
         order_cherries_no_parents(&mut ancestry);
     }
 
