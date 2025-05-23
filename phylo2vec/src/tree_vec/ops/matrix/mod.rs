@@ -1,6 +1,4 @@
-use crate::tree_vec::ops::newick::{
-    get_cherries_no_parents_with_bls, get_cherries_with_bls, has_parents,
-};
+use crate::tree_vec::ops::newick::{get_cherries_with_bls, has_parents};
 use crate::tree_vec::ops::vector::{
     _cophenetic_distances, build_vector, order_cherries, order_cherries_no_parents,
 };
@@ -41,7 +39,7 @@ pub fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
         // Case 2: Newick string without parent nodes
 
         // Get the cherries and branch lengths
-        let (mut cherries, bls) = get_cherries_no_parents_with_bls(newick)
+        let (mut cherries, bls) = get_cherries_with_bls(newick)
             .expect("failed to get cherries with branch lengths and no parents");
 
         // Order the cherries in the ancestry matrix
