@@ -1,5 +1,6 @@
 source("config.R")
 
+library(ape)
 
 test_that(desc = "v2newick2v", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
@@ -11,6 +12,20 @@ test_that(desc = "v2newick2v", {
       newick <- to_newick_from_vector(v)
       v2 <- to_vector(newick)
       expect_equal(v, v2)
+    }
+  }
+})
+
+test_that(desc = "m2newick2m", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+    for (j in seq_len(N_REPEATS)) {
+      # Generate a random vector
+      m <- sample_matrix(n_leaves, FALSE)
+
+      # Convert to Newick and back
+      newick <- to_newick_from_matrix(m)
+      m2 <- to_matrix(newick)
+      expect_equal(m, m2)
     }
   }
 })

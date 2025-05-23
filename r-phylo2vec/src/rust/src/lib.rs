@@ -29,12 +29,22 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Vec<Vec<f32>>, &'static str> {
         .collect())
 }
 
-/// Sample a random tree via Phylo2Vec
+/// Sample a random tree topoloy via Phylo2Vec
 /// @export
 #[extendr]
 fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<i32> {
     let v = utils::sample_vector(n_leaves, ordered);
     as_i32(v)
+}
+
+/// Sample a random tree with branch lengths via Phylo2Vec
+/// @export
+#[extendr]
+fn sample_matrix(n_leaves: usize, ordered: bool) -> RMatrix<f64> {
+    let matrix = utils::sample_matrix(n_leaves, ordered);
+    let nrows = matrix.len();
+    let ncols = matrix[0].len();
+    RMatrix::new_matrix(nrows, ncols, |r, c| matrix[r][c] as f64)
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
@@ -48,7 +58,7 @@ fn to_newick_from_vector(vector: Vec<i32>) -> String {
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
 /// @export
 #[extendr]
-fn to_newick_from_matrix(matrix: Robj) -> String {
+fn to_newick_from_matrix(matrix: RMatrix<f64>) -> String {
     let matrix = convert_from_rmatrix(&matrix).unwrap();
     ops::to_newick_from_matrix(&matrix)
 }
@@ -61,12 +71,31 @@ fn to_vector(newick: &str) -> Vec<i32> {
     as_i32(v)
 }
 
+/// Convert a newick string to a Phylo2Vec vector
+/// @export
+#[extendr]
+fn to_matrix(newick: &str) -> RMatrix<f64> {
+    let matrix = ops::matrix::to_matrix(newick);
+    let nrows = matrix.len();
+    let ncols = matrix[0].len();
+    RMatrix::new_matrix(nrows, ncols, |r, c| matrix[r][c] as f64)
+}
+
 /// Validate a Phylo2Vec vector
 /// @export
 #[extendr]
 fn check_v(vector: Vec<i32>) {
     let v_usize = as_usize(vector);
     utils::check_v(&v_usize);
+}
+
+/// Validate a Phylo2Vec vector
+/// @export
+#[extendr]
+fn check_m(vector: RMatrix<f64>) {
+    let matrix = convert_from_rmatrix(&vector).unwrap();
+
+    utils::check_m(&matrix);
 }
 
 /// Get the ancestry matrix of a Phylo2Vec vector
@@ -181,15 +210,36 @@ fn remove_leaf(vector: Vec<i32>, leaf: i32) -> Robj {
 /// Get the topological cophenetic distance matrix of a Phylo2Vec vector
 /// @export
 #[extendr]
-fn cophenetic_distances(vector: Vec<i32>) -> RMatrix<i32> {
+fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
     let v_usize: Vec<usize> = as_usize(vector);
     let k = v_usize.len();
-    let distances = ops::cophenetic_distances(&v_usize);
-    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| distances[r][c] as i32);
+    let coph_usize = ops::cophenetic_distances(&v_usize);
+    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_usize[r][c] as i32);
     let dimnames = (0..k + 1).map(|x| x as i32).collect::<Vec<i32>>();
     coph.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
 
     coph
+}
+
+/// Get the cophenetic distance matrix of a Phylo2Vec matrix
+/// @export
+#[extendr]
+fn cophenetic_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
+    let matrix_f32 = convert_from_rmatrix(&matrix).unwrap();
+    let k = matrix_f32.len();
+    let coph_f32 = ops::matrix::cophenetic_distances_with_bls(&matrix_f32);
+    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_f32[r][c] as f64);
+    let dimnames = (0..k + 1).map(|x| x as i32).collect::<Vec<i32>>();
+    coph.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    coph
+}
+
+/// Check if a newick string has branch lengths
+/// @export
+#[extendr]
+fn has_branch_lengths(newick: &str) -> bool {
+    ops::newick::has_branch_lengths(newick)
 }
 
 // Macro to generate exports.
@@ -198,17 +248,22 @@ fn cophenetic_distances(vector: Vec<i32>) -> RMatrix<i32> {
 extendr_module! {
     mod phylo2vec;
     fn add_leaf;
+    fn check_m;
     fn check_v;
-    fn cophenetic_distances;
+    fn cophenetic_from_matrix;
+    fn cophenetic_from_vector;
     fn from_ancestry;
     fn from_edges;
     fn from_pairs;
+    fn has_branch_lengths;
     fn remove_leaf;
+    fn sample_matrix;
     fn sample_vector;
     fn to_ancestry;
     fn to_edges;
     fn to_newick_from_matrix;
     fn to_newick_from_vector;
     fn to_pairs;
+    fn to_matrix;
     fn to_vector;
 }

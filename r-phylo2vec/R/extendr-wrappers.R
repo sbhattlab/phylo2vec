@@ -16,11 +16,19 @@ add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, b
 
 #' Validate a Phylo2Vec vector
 #' @export
+check_m <- function(vector) invisible(.Call(wrap__check_m, vector))
+
+#' Validate a Phylo2Vec vector
+#' @export
 check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
+
+#' Get the cophenetic distance matrix of a Phylo2Vec matrix
+#' @export
+cophenetic_from_matrix <- function(matrix) .Call(wrap__cophenetic_from_matrix, matrix)
 
 #' Get the topological cophenetic distance matrix of a Phylo2Vec vector
 #' @export
-cophenetic_distances <- function(vector) .Call(wrap__cophenetic_distances, vector)
+cophenetic_from_vector <- function(vector) .Call(wrap__cophenetic_from_vector, vector)
 
 #' Convert an ancestry matrix to a Phylo2Vec vector
 #' @export
@@ -34,11 +42,19 @@ from_edges <- function(edges) .Call(wrap__from_edges, edges)
 #' @export
 from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 
+#' Check if a newick string has branch lengths
+#' @export
+has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
+
 #' Remove a leaf from a Phylo2Vec vector
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 
-#' Sample a random tree via Phylo2Vec
+#' Sample a random tree with branch lengths via Phylo2Vec
+#' @export
+sample_matrix <- function(n_leaves, ordered) .Call(wrap__sample_matrix, n_leaves, ordered)
+
+#' Sample a random tree topoloy via Phylo2Vec
 #' @export
 sample_vector <- function(n_leaves, ordered) .Call(wrap__sample_vector, n_leaves, ordered)
 
@@ -61,6 +77,10 @@ to_newick_from_vector <- function(vector) .Call(wrap__to_newick_from_vector, vec
 #' Get pairs from a Phylo2Vec vector
 #' @export
 to_pairs <- function(vector) .Call(wrap__to_pairs, vector)
+
+#' Convert a newick string to a Phylo2Vec vector
+#' @export
+to_matrix <- function(newick) .Call(wrap__to_matrix, newick)
 
 #' Convert a newick string to a Phylo2Vec vector
 #' @export
