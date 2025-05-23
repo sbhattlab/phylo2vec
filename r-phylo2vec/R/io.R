@@ -57,6 +57,7 @@ load_p2v <- function(filepath, delimiter = ",") {
 #' a Newick-formatted tree
 #' @return A vector (ndim == 1) or matrix (ndim == 2)
 #'  which satisfies Phylo2Vec constraints
+#' @export
 load_newick <- function(filepath_or_buffer) {
   if (file.exists(filepath_or_buffer)) {
     check_path(filepath_or_buffer, "newick")
@@ -73,6 +74,7 @@ load_newick <- function(filepath_or_buffer) {
 #' @param vector_or_matrix A vector (ndim == 1) or matrix (ndim == 2)
 #' @param filepath File path to save the Newick-formatted tree
 #' @param labels Optional labels for the leaves of the tree
+#' @export
 save_newick <- function(vector_or_matrix, filepath, labels = NULL) {
   check_path(filepath, "newick")
 

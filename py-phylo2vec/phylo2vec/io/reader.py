@@ -35,7 +35,7 @@ def load(filepath: str, delimiter: str = ",") -> np.ndarray:
 
     if arr.ndim == 1 and np.issubdtype(arr.dtype, np.integer):
         check_vector(arr)
-    elif arr.ndim == 2:
+    elif arr.ndim == 2 and np.issubdtype(arr.dtype, np.floating):
         check_matrix(arr)
     else:
         raise ValueError(

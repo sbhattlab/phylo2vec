@@ -1,5 +1,5 @@
 use extendr_api::prelude::*;
-use extendr_api::HashMap;
+use std::collections::HashMap;
 use std::result::Result;
 
 use phylo2vec::tree_vec::ops;
