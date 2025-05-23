@@ -74,39 +74,7 @@ def create_label_mapping(newick):
     label_mapping : Dict str --> str
         Mapping of leaf labels (integers converted to string) to taxa
     """
-    label_mapping = {}
-
-    newick = newick[:-1]  # For ";"
-
-    newick_int = newick
-
-    def do_reduce(newick, newick_clean, j):
-        for i, char in enumerate(newick):
-            if char == "(":
-                open_idx = i + 1
-            elif char == ")":
-                for child in newick[open_idx:i].split(",", 2):
-                    if child not in label_mapping:
-                        # Update the newick with an integer
-                        newick_clean = newick_clean.replace(child, f"{j}")
-
-                        # Add the taxon to the mapping
-                        label_mapping[f"{j}"] = child
-                        j += 1
-
-                parent = newick[i + 1 :].split(",", 1)[0].split(")", 1)[0]
-
-                newick = newick.replace(
-                    newick[open_idx - 1 : i + 1 + len(parent)], f"{j - 1}"
-                )
-
-                newick_clean = newick_clean.replace(parent, "")
-
-                return do_reduce(newick, newick_clean, j)
-
-        return newick_clean
-
-    newick_int = do_reduce(newick, newick_int, 0) + ";"
+    newick_int, label_mapping = core.create_label_mapping(newick)
 
     return newick_int, label_mapping
 
@@ -129,9 +97,6 @@ def apply_label_mapping(newick, label_mapping):
     newick : str
         Newick with string labels
     """
-    for i in range(len(label_mapping)):
-        key = f"{len(label_mapping) - i - 1}"
+    newick_str = core.apply_label_mapping(newick, label_mapping)
 
-        newick = newick.replace(key, label_mapping[key])
-
-    return newick
+    return newick_str
