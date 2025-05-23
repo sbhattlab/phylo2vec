@@ -746,7 +746,7 @@ mod tests {
     #[case(10)]
     #[case(100)]
     #[case(1000)]
-    fn test_label_mappping(#[case] n_leaves: usize) {
+    fn test_label_mapping(#[case] n_leaves: usize) {
         let nw_str = generate_random_string_newick(n_leaves);
 
         // Get the "sorted" version of the integer Newick

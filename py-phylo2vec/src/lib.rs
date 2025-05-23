@@ -132,8 +132,14 @@ fn remove_leaf(mut input_vector: Vec<usize>, leaf: usize) -> (Vec<usize>, usize)
 
 #[pyfunction]
 fn apply_label_mapping(newick: String, label_mapping: HashMap<usize, String>) -> PyResult<String> {
-    let newick_int = ops::newick::apply_label_mapping(&newick, &label_mapping)
-        .expect("Failed to apply label mapping");
+    let result = ops::newick::apply_label_mapping(&newick, &label_mapping);
+
+    // Map the potential NewickError to a PyValueErr
+    // https://pyo3.rs/v0.22.3/function/error-handling#foreign-rust-error-types
+    let newick_int = result.map_err(|e| {
+        PyErr::new::<pyo3::exceptions::PyValueError, _>(format!("Label mapping failed: {}", e))
+    })?;
+
     Ok(newick_int)
 }
 
