@@ -37,6 +37,33 @@ fn node_substr(s: &str, start: usize) -> (&str, usize) {
     (node, end)
 }
 
+/// Extract the cherries from a Newick string with branch lengths
+///
+/// The cherries are processed in order of appearance in the string,
+/// going as deep as possible in the tree structure
+///
+/// # Arguments
+///
+/// * `newick` - A string representing a phylogenetic tree in Newick format.
+///   Leaves are noted as integers (0, 1, 2, ...) according to
+///   the Phylo2Vec convention.
+///
+/// # Returns
+///
+/// A vector of triplets representing the cherries in the tree.
+/// Throws a `NewickError` if the Newick string is invalid.
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::get_cherries;
+///
+/// let newick = "((0,2)5,(1,3)4)6;";
+///
+/// let cherries = get_cherries(newick).expect("Oops");
+///
+/// assert_eq!(cherries, vec![[0, 2, 5], [1, 3, 4], [5, 4, 6]]);
+/// ```
+///
 pub fn get_cherries(newick: &str) -> Result<Ancestry, NewickError> {
     if newick.is_empty() {
         return Ok(Vec::new());
@@ -93,6 +120,32 @@ pub fn get_cherries(newick: &str) -> Result<Ancestry, NewickError> {
     Ok(ancestry)
 }
 
+/// Extract the cherries from a Newick string with branch lengths
+///
+/// # Arguments
+///
+/// * `newick` - A string representing a phylogenetic tree in Newick format.
+///   Leaves are noted as integers (0, 1, 2, ...) according to
+///   the Phylo2Vec convention.
+///
+/// # Returns
+///
+/// A vector of triplets representing the cherries in the tree.
+/// Throws a `NewickError` if the Newick string is invalid.
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::newick::get_cherries_with_bls;
+///
+/// // Without explicit parent nodes
+/// let newick = "((0:0.1,2:0.2):0.3,(1:0.5,3:0.7):0.4);";
+///
+/// let (cherries, bls) = get_cherries_with_bls(newick).expect("Oops");
+///
+/// assert_eq!(cherries, vec![[0, 2, 2], [1, 3, 3], [0, 1, 1]]);
+/// assert_eq!(bls, vec![[0.1, 0.2], [0.5, 0.7], [0.3, 0.4]]);
+/// ```
+///
 pub fn get_cherries_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickError> {
     if newick.is_empty() {
         return Ok((Vec::new(), Vec::new())); // Return empty ancestry and branch length vectors
