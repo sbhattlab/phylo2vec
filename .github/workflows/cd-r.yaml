@@ -42,7 +42,7 @@ jobs:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            any::rextendr
+            github::extendr/rextendr
       - name: Build R package
         run: |
           mkdir dist
@@ -84,7 +84,7 @@ jobs:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            any::rextendr
+            github::extendr/rextendr
       - name: Build R package
         run: |
           mkdir -p dist
@@ -121,7 +121,7 @@ jobs:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            any::rextendr
+            github::extendr/rextendr
       - name: Build R package
         run: |
           mkdir -p dist
