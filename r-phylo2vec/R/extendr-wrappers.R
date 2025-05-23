@@ -14,6 +14,19 @@ NULL
 #' @export
 add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, branch)
 
+#' Apply an integer-taxon label mapping (label_mapping)
+#' to an integer-based newick (where leaves are integers)
+#' and produce a mapped Newick (where leaves are strings (taxa))
+#'
+#' For more details, see `create_label_mapping`.
+#'
+#' Note 1: this does not check for the validity of the Newick string.
+#'
+#' Note 2: the parent nodes are removed from the output,
+#' but the branch lengths/annotations are kept.
+#' @export
+apply_label_mapping <- function(newick, label_mapping_list) .Call(wrap__apply_label_mapping, newick, label_mapping_list)
+
 #' Validate a Phylo2Vec vector
 #' @export
 check_m <- function(vector) invisible(.Call(wrap__check_m, vector))
@@ -29,6 +42,17 @@ cophenetic_from_matrix <- function(matrix) .Call(wrap__cophenetic_from_matrix, m
 #' Get the topological cophenetic distance matrix of a Phylo2Vec vector
 #' @export
 cophenetic_from_vector <- function(vector) .Call(wrap__cophenetic_from_vector, vector)
+
+#' Create an integer-taxon label mapping (label_mapping)
+#' from a string-based newick (where leaves are strings)
+#' and produce a mapped integer-based newick (where leaves are integers).
+#'
+#' Note 1: this does not check for the validity of the Newick string.
+#'
+#' Note 2: the parent nodes are removed from the output,
+#' but the branch lengths/annotations are kept.
+#' @export
+create_label_mapping <- function(newick) .Call(wrap__create_label_mapping, newick)
 
 #' Convert an ancestry matrix to a Phylo2Vec vector
 #' @export
@@ -54,7 +78,7 @@ remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 #' @export
 sample_matrix <- function(n_leaves, ordered) .Call(wrap__sample_matrix, n_leaves, ordered)
 
-#' Sample a random tree topoloy via Phylo2Vec
+#' Sample a random tree topology via Phylo2Vec
 #' @export
 sample_vector <- function(n_leaves, ordered) .Call(wrap__sample_vector, n_leaves, ordered)
 
