@@ -121,10 +121,10 @@ jobs:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            github::extendr/rextendr
       - name: Build R package
         run: |
           mkdir -p dist
+          Rscript -e "install.packages("rextendr", repos = c("https://extendr.r-universe.dev", "https://cloud.r-project.org"))"
           Rscript -e "rextendr::document('${{ env.R_PACKAGE_DIR }}')"
           Rscript -e "devtools::build('${{ env.R_PACKAGE_DIR }}', binary = TRUE, path = 'dist')"
       - name: Upload package
