@@ -1,4 +1,4 @@
-"""Methods to write Phylo2Vec vectors/matrices into other standard tree formats."""
+"""Methods to write Phylo2Vec vectors/matrices."""
 
 from typing import Dict, Optional
 
@@ -6,33 +6,7 @@ import numpy as np
 
 from phylo2vec.base.newick import to_newick
 from phylo2vec.utils.newick import apply_label_mapping
-from ._validation import check_array_path, check_newick_path
-
-
-def save_newick(
-    vector_or_matrix: np.ndarray,
-    filepath: str,
-    labels: Optional[Dict[str, str]] = None,
-) -> None:
-    """Save a Phylo2Vec vector or matrix to Newick format into a file.
-
-    Parameters
-    ----------
-    vector_or_matrix : numpy.array
-        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
-    filepath : str
-        Path to the output file
-    labels : Optional[Dict[str, str]], optional
-        A mapping of integer labels (as string) to taxon names, by default None
-    """
-    check_newick_path(filepath)
-    newick = to_newick(vector_or_matrix)
-
-    if labels:
-        newick = apply_label_mapping(newick, labels)
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(newick)
+from ._validation import check_path
 
 
 def save(vector_or_matrix: np.ndarray, filepath: str, delimiter: str = ",") -> None:
@@ -48,7 +22,7 @@ def save(vector_or_matrix: np.ndarray, filepath: str, delimiter: str = ",") -> N
     delimiter : str, optional
         Delimiter to use for saving the file, by default ","
     """
-    check_array_path(filepath)
+    check_path(filepath, "array")
     if vector_or_matrix.ndim == 2:
         fmt = "%.18e"
     elif vector_or_matrix.ndim == 1:
@@ -59,3 +33,29 @@ def save(vector_or_matrix: np.ndarray, filepath: str, delimiter: str = ",") -> N
         )
 
     np.savetxt(filepath, vector_or_matrix, fmt=fmt, delimiter=delimiter)
+
+
+def save_newick(
+    vector_or_matrix: np.ndarray,
+    filepath: str,
+    labels: Optional[Dict[str, str]] = None,
+) -> None:
+    """Save a Phylo2Vec vector or matrix to Newick format into a file.
+
+    Parameters
+    ----------
+    vector_or_matrix : numpy.array
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+    filepath : str
+        Path to the output file
+    labels : Dict[str, str], optional
+        A mapping of integer labels (as string) to taxon names, by default None
+    """
+    check_path(filepath, "newick")
+    newick = to_newick(vector_or_matrix)
+
+    if labels:
+        newick = apply_label_mapping(newick, labels)
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(newick)

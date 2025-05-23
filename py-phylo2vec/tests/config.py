@@ -10,6 +10,3 @@ MAX_N_LEAVES: Final = 200
 
 # Number of test repeats for a tree with n leaves
 N_REPEATS: Final = 10
-
-# Number of tests
-NUM_TEST_TREES: Final = 100
