@@ -11,7 +11,3 @@ if (length(args) == 0) {
 devtools::document(args[1])
 
 devtools::install(args[1], build = FALSE)
-
-if (file.exists(fn)) {
-  file.remove(fn)
-}

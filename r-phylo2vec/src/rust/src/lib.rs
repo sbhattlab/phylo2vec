@@ -1,4 +1,5 @@
 use extendr_api::prelude::*;
+use std::collections::HashMap;
 use std::result::Result;
 
 use phylo2vec::tree_vec::ops;
@@ -29,7 +30,7 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Vec<Vec<f32>>, &'static str> {
         .collect())
 }
 
-/// Sample a random tree topoloy via Phylo2Vec
+/// Sample a random tree topology via Phylo2Vec
 /// @export
 #[extendr]
 fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<i32> {
@@ -242,16 +243,63 @@ fn has_branch_lengths(newick: &str) -> bool {
     ops::newick::has_branch_lengths(newick)
 }
 
+/// Create an integer-taxon label mapping (label_mapping)
+/// from a string-based newick (where leaves are strings)
+/// and produce a mapped integer-based newick (where leaves are integers).
+///
+/// Note 1: this does not check for the validity of the Newick string.
+///
+/// Note 2: the parent nodes are removed from the output,
+/// but the branch lengths/annotations are kept.
+/// @export
+#[extendr]
+fn create_label_mapping(newick: &str) -> List {
+    let (nw_int, label_mapping) = ops::newick::create_label_mapping(newick);
+
+    let mut label_mapping_list: Vec<String> = Vec::new();
+
+    for i in 0..label_mapping.len() {
+        label_mapping_list.push(label_mapping[&i].clone());
+    }
+
+    list!(newick = nw_int, mapping = label_mapping_list)
+}
+
+/// Apply an integer-taxon label mapping (label_mapping)
+/// to an integer-based newick (where leaves are integers)
+/// and produce a mapped Newick (where leaves are strings (taxa))
+///
+/// For more details, see `create_label_mapping`.
+///
+/// Note 1: this does not check for the validity of the Newick string.
+///
+/// Note 2: the parent nodes are removed from the output,
+/// but the branch lengths/annotations are kept.
+/// @export
+#[extendr]
+fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String {
+    let label_mapping_hash = label_mapping_list
+        .iter()
+        .enumerate()
+        .map(|(i, label)| (i, label.clone()))
+        .collect::<HashMap<usize, String>>();
+
+    // Not great, but cannot figure out how to map_err to an rextendr error
+    ops::newick::apply_label_mapping(newick, &label_mapping_hash).unwrap()
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod phylo2vec;
     fn add_leaf;
+    fn apply_label_mapping;
     fn check_m;
     fn check_v;
     fn cophenetic_from_matrix;
     fn cophenetic_from_vector;
+    fn create_label_mapping;
     fn from_ancestry;
     fn from_edges;
     fn from_pairs;

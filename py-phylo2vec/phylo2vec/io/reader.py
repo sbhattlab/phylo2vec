@@ -27,13 +27,15 @@ def load(filepath: str, delimiter: str = ",") -> np.ndarray:
         which satisfies Phylo2Vec constraints
     """
     check_path(filepath, "array")
-    arr = np.loadtxt(filepath, delimiter=delimiter)
+    # np.genfromtxt with dtype = None will infer the type
+    # Using should solve the edge case:
+    # load a matrix with 2 leaves ([[0, bl1, bl2]] = float)
+    # vs. a vector with 4 leaves ([0, v1, v2] = int)
+    arr = np.genfromtxt(filepath, delimiter=delimiter, dtype=None)
 
-    if arr.ndim == 1:
-        arr = arr.astype(np.int64)
+    if arr.ndim == 1 and np.issubdtype(arr.dtype, np.integer):
         check_vector(arr)
-    elif arr.ndim == 2:
-        arr = arr.astype(np.float32)
+    elif arr.ndim == 2 and np.issubdtype(arr.dtype, np.floating):
         check_matrix(arr)
     else:
         raise ValueError(
