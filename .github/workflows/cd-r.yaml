@@ -37,12 +37,17 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          # Use pre-built binaries from Posit's public package manager to
+          # speed up R dependency installation.
+          use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            any::rextendr
+      - name: Install rextendr
+        run: |
+          Rscript -e "install.packages('rextendr', repos = c('https://extendr.r-universe.dev', 'https://cloud.r-project.org'))"
       - name: Build R package
         run: |
           mkdir dist
@@ -84,7 +89,9 @@ jobs:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            any::rextendr
+      - name: Install rextendr
+        run: |
+          Rscript -e "install.packages('rextendr', repos = c('https://extendr.r-universe.dev', 'https://cloud.r-project.org'))"
       - name: Build R package
         run: |
           mkdir -p dist
@@ -116,12 +123,17 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          # Use pre-built binaries from Posit's public package manager to
+          # speed up R dependency installation.
+          use-public-rspm: true
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ${{ env.R_PACKAGE_DIR }}
           extra-packages: |
             any::devtools
-            any::rextendr
+      - name: Install rextendr
+        run: |
+          Rscript -e "install.packages('rextendr', repos = c('https://extendr.r-universe.dev', 'https://cloud.r-project.org'))"
       - name: Build R package
         run: |
           mkdir -p dist
@@ -153,6 +165,9 @@ jobs:
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          # Use pre-built binaries from Posit's public package manager to
+          # speed up R dependency installation.
+          use-public-rspm: true
       - name: Upload to GitHub release
         if: "startsWith(github.ref, 'refs/tags/')"
         uses: softprops/action-gh-release@v2
@@ -179,6 +194,9 @@ jobs:
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          # Use pre-built binaries from Posit's public package manager to
+          # speed up R dependency installation.
+          use-public-rspm: true
       - name: Install and test package
         run: |
           Rscript -e "pkg_file <- list.files('r-package-linux', full.names = TRUE)[1]; install.packages(pkg_file, repos = NULL, type = 'source')"
