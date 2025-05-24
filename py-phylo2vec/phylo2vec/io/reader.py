@@ -7,7 +7,7 @@ import numpy as np
 from phylo2vec.base.newick import from_newick
 from phylo2vec.utils.matrix import check_matrix
 from phylo2vec.utils.vector import check_vector
-from ._validation import check_array_path, check_newick_path
+from ._validation import check_path
 
 
 def load(filepath: str, delimiter: str = ",") -> np.ndarray:
@@ -26,7 +26,7 @@ def load(filepath: str, delimiter: str = ",") -> np.ndarray:
         A vector (ndim == 1) or matrix (ndim == 2)
         which satisfies Phylo2Vec constraints
     """
-    check_array_path(filepath)
+    check_path(filepath, "array")
     # np.genfromtxt with dtype = None will infer the type
     # Using should solve the edge case:
     # load a matrix with 2 leaves ([[0, bl1, bl2]] = float)
@@ -60,7 +60,7 @@ def load_newick(filepath_or_buffer: str) -> np.ndarray:
         which satisfies Phylo2Vec constraints
     """
     if os.path.isfile(filepath_or_buffer):
-        check_newick_path(filepath_or_buffer)
+        check_path(filepath_or_buffer, "newick")
 
         with open(filepath_or_buffer, "r", encoding="utf-8") as f:
             newick = f.read().strip()
