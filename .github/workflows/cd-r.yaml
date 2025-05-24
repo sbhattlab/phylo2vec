@@ -165,6 +165,9 @@ jobs:
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          # Use pre-built binaries from Posit's public package manager to
+          # speed up R dependency installation.
+          use-public-rspm: true
       - name: Upload to GitHub release
         if: "startsWith(github.ref, 'refs/tags/')"
         uses: softprops/action-gh-release@v2
@@ -191,6 +194,9 @@ jobs:
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: release
+          # Use pre-built binaries from Posit's public package manager to
+          # speed up R dependency installation.
+          use-public-rspm: true
       - name: Install and test package
         run: |
           Rscript -e "pkg_file <- list.files('r-package-linux', full.names = TRUE)[1]; install.packages(pkg_file, repos = NULL, type = 'source')"
