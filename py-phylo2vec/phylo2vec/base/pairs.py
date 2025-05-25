@@ -11,9 +11,8 @@ from typing import List, Tuple
 def from_pairs(pairs: List[Tuple[int, int]]) -> np.ndarray:
     """Convert a list of pairs to a Phylo2Vec vector
 
-    Each pair is represented as a list of pairs (B, L)
+    Each pair is represented as a tuple (B, L)
     indicating that leaf L descends from branch B.
-
 
     Parameters
     ----------
@@ -22,7 +21,7 @@ def from_pairs(pairs: List[Tuple[int, int]]) -> np.ndarray:
 
     Returns
     -------
-    v : numpy.array
+    v : numpy.ndarray
         Phylo2Vec vector
     """
     v = core.from_pairs(pairs)
@@ -32,12 +31,12 @@ def from_pairs(pairs: List[Tuple[int, int]]) -> np.ndarray:
 def to_pairs(v: np.ndarray) -> List[Tuple[int, int]]:
     """Convert a Phylo2Vec vector to a list of pairs
 
-    Each pair is represented as a list of pairs (B, L)
+    Each pair is represented as a tuple (B, L)
     indicating that leaf L descends from branch B.
 
     Parameters
     ----------
-    v : numpy.array
+    v : numpy.ndarray
         Phylo2Vec vector
 
     Returns

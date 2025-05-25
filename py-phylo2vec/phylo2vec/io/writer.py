@@ -44,7 +44,7 @@ def save_newick(
 
     Parameters
     ----------
-    vector_or_matrix : numpy.array
+    vector_or_matrix : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
     filepath : str
         Path to the output file

@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 
 from phylo2vec import _phylo2vec_core as core
+from phylo2vec.utils.matrix import check_matrix
 from phylo2vec.utils.vector import check_vector
 
 
@@ -14,7 +15,7 @@ def cophenetic_distances(vector_or_matrix, unrooted=False):
 
     Parameters
     ----------
-    vector_or_matrix : numpy.array
+    vector_or_matrix : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
@@ -46,7 +47,7 @@ def cophenetic_distances(vector_or_matrix, unrooted=False):
 PAIRWISE_DISTANCES = {"cophenetic": cophenetic_distances}
 
 
-def pairwise_distances(v, metric="cophenetic"):
+def pairwise_distances(vector_or_matrix, metric="cophenetic"):
     """
     Compute a pairwise distance matrix
     for tree nodes from a Phylo2Vec vector.
@@ -55,8 +56,8 @@ def pairwise_distances(v, metric="cophenetic"):
 
     Parameters
     ----------
-    v : numpy.ndarray
-        Phylo2Vec vector
+    vector_or_matrix : numpy.ndarray
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
     metric : str, optional
         Pairwise distance metric, by default "cophenetic"
 
@@ -65,8 +66,15 @@ def pairwise_distances(v, metric="cophenetic"):
     numpy.ndarray
         Distance matrix
     """
-    check_vector(v)
+    if vector_or_matrix.ndim == 2:
+        check_matrix(vector_or_matrix)
+    elif vector_or_matrix.ndim == 1:
+        check_vector(vector_or_matrix)
+    else:
+        raise ValueError(
+            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
+        )
 
     func = PAIRWISE_DISTANCES[metric]
 
-    return func(v)
+    return func(vector_or_matrix)
