@@ -15,7 +15,7 @@ def cophenetic_distances(vector_or_matrix, unrooted=False):
 
     Parameters
     ----------
-    vector_or_matrix : numpy.array
+    vector_or_matrix : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
@@ -56,7 +56,7 @@ def pairwise_distances(vector_or_matrix, metric="cophenetic"):
 
     Parameters
     ----------
-    vector_or_matrix : numpy.array
+    vector_or_matrix : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
     metric : str, optional
         Pairwise distance metric, by default "cophenetic"

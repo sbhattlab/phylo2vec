@@ -21,7 +21,7 @@ def from_edges(edges: List[Tuple[int, int]]) -> np.ndarray:
 
     Returns
     -------
-    v : numpy.array
+    v : numpy.ndarray
         Phylo2Vec vector
     """
     v = core.from_edges(edges)
@@ -35,7 +35,7 @@ def to_edges(v: np.ndarray) -> List[Tuple[int, int]]:
 
     Parameters
     ----------
-    v : numpy.array
+    v : numpy.ndarray
         Phylo2Vec vector
 
     Returns

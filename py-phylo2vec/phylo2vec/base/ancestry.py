@@ -20,7 +20,7 @@ def from_ancestry(ancestry: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    numpy.array
+    numpy.ndarray
         Phylo2Vec vector
     """
     v_list = core.from_ancestry(ancestry)
@@ -50,12 +50,12 @@ def to_ancestry(v: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    v : numpy.array
+    v : numpy.ndarray
         Phylo2Vec vector
 
     Returns
     -------
-    ancestry : numpy.array
+    ancestry : numpy.ndarray
         Ancestry matrix
         1st column: child 1
         2nd column: child 2
