@@ -104,7 +104,7 @@ jobs:
           path: dist/*.tgz
 
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -147,7 +147,7 @@ jobs:
 
   release:
     name: Release R Package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: r-cran
     if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build-windows, build-macos, build-linux]
@@ -176,7 +176,7 @@ jobs:
 
   test-release:
     name: Test R Package Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment: r-cran-test
     if: github.event_name != 'release'
     needs: [build-windows, build-macos, build-linux]
