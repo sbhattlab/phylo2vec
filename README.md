@@ -60,9 +60,10 @@ in Rust.
 
 #### Option 1: from a release (Windows, Mac, Ubuntu >= 22.04)
 
-Retrieve one of the compiled binaries from the [releases](https://github.com/sbhattlab/phylo2vec/releases)
-that fits your OS. Once the file is downloaded, simply run `install.packages`
-in your R command line.
+Retrieve one of the compiled binaries from the
+[releases](https://github.com/sbhattlab/phylo2vec/releases) that fits your OS.
+Once the file is downloaded, simply run `install.packages` in your R command
+line.
 
 ```R
 install.packages("/path/to/package_file", repos = NULL, type = 'source')
@@ -70,25 +71,29 @@ install.packages("/path/to/package_file", repos = NULL, type = 'source')
 
 #### Option 2: using `devtools`
 
-⚠️ This requires installing [Rust](https://www.rust-lang.org/tools/install) to build the core package.
+⚠️ This requires installing [Rust](https://www.rust-lang.org/tools/install) to
+build the core package.
 
 ```R
 devtools::install_github("sbhattlab/phylo2vec", subdir="./r-phylo2vec", build = FALSE)
 ```
 
 Note: to download a specific version, use:
+
 ```R
 devtools::install_github("sbhattlab/phylo2vec@vX.Y.Z", subdir="./r-phylo2vec", build = FALSE)
 ```
 
 #### Option 3: manual installation
 
-⚠️ This requires installing [Rust](https://www.rust-lang.org/tools/install) to build the core package.
+⚠️ This requires installing [Rust](https://www.rust-lang.org/tools/install) to
+build the core package.
 
 Clone the repository and run the following `install.packages` in your R command
 line.
 
-Note: to download a specific version, you can use `git checkout` to a desired tag.
+Note: to download a specific version, you can use `git checkout` to a desired
+tag.
 
 ```bash
 git clone https://github.com/sbhattlab/phylo2vec
