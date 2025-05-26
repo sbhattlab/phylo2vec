@@ -6,7 +6,7 @@ import pytest
 from ete3 import Tree
 
 from phylo2vec.base.newick import to_newick
-from phylo2vec.metrics import cophenetic_distances
+from phylo2vec.metrics import cophenetic_distances, pairwise_distances
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, N_REPEATS
@@ -69,6 +69,28 @@ def test_cophenetic_matrix(n_leaves):
     """
 
     _cophenetic(n_leaves, sample_matrix)
+
+
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1])
+def test_pairwise_distances_cophenetic(n_leaves):
+    """Test the `pairwise_distances` function with cophenetic distances.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    # Test with a vector
+    vector = sample_vector(n_leaves)
+    dmat_vector = pairwise_distances(vector, metric="cophenetic")
+    dmat_vector2 = cophenetic_distances(vector)
+    assert np.array_equal(dmat_vector, dmat_vector2)
+
+    # Test with a matrix
+    matrix = sample_matrix(n_leaves)
+    dmat_matrix = pairwise_distances(matrix, metric="cophenetic")
+    dmat_matrix2 = cophenetic_distances(matrix)
+    assert np.array_equal(dmat_matrix, dmat_matrix2)
 
 
 if __name__ == "__main__":
