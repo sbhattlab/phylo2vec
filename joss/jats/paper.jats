@@ -243,7 +243,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
     with the previous release
     (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
     et al., 2024</xref>), which make use of just-in-time (JIT)
-    compilation of Python functions using Numba
+    compilation of Python functions using <monospace>Numba</monospace>
     (<xref alt="Lam et al., 2015" rid="ref-lam2015" ref-type="bibr">Lam
     et al., 2015</xref>). Execution times were benchmarked on an AMD
     Ryzen Threadripper PRO 5995WX with a 64-core CPU @ 7 GHz and 256 GB
