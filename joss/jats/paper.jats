@@ -342,10 +342,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
     <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>𝐦</mml:mi></mml:math></alternatives></inline-formula>
     with branch lengths. We use an intermediary ancestry matrix whereby
     each row describes a cherry (two children nodes and the parent
-    node), which we augment with two columns of branch lengths. These
-    columns denote the length of the branch connecting each parent and
-    their two children nodes,
-    respectively.<styled-content id="figU003Aphylo2mat"></styled-content></p></caption>
+    node), which we augment with two columns of branch lengths. The node
+    with the smallest descendant will have the branch length in the 2nd
+    column, and the other the branch length in the 3rd
+    column.<styled-content id="figU003Aphylo2mat"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="fig2.pdf" />
   </fig>
 </sec>
