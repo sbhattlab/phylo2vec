@@ -310,38 +310,13 @@ def reroot_at_random(v):
     return from_newick(newick)
 
 
-def get_ancestry_paths(v):
-    """
-    Get the ancestry paths for each node in the Phylo2Vec vector.
-
-    Parameters
-    ----------
-    v : numpy.ndarray
-        Phylo2Vec vector
-
-    Returns
-    -------
-    ancestry_paths : list of list of int
-        Ancestry paths for each node
-    """
-    ancestry = to_ancestry(v)
-    parent_vec = np.zeros(2 * len(v), dtype=np.uint64)
-
-    for i in range(len(ancestry)):
-        parent_vec[ancestry[i, :2]] = ancestry[i, 2]
-
-    ancestry_paths = []
-    for i in range(2 * len(v)):
-        path = [i]
-        while (2 * len(v)) not in path:
-            path.insert(0, parent_vec[int(path[0])])
-        ancestry_paths.append(path)
-
-    return ancestry_paths
-
-
 def get_common_ancestor(v, node1, node2):
     """Get the first recent common ancestor between two nodes in a Phylo2Vec tree
+
+    `node1` and `node2` can be leaf nodes (0 to n_leaves)
+    or internal nodes (n_leaves to 2*(n_leaves-1)).
+
+    Similar to `get_common_ancestor` in ETE, but for Phylo2Vec vectors.
 
     Parameters
     ----------
@@ -357,9 +332,5 @@ def get_common_ancestor(v, node1, node2):
     mrca : int
         Most recent common ancestor node between node1 and node2
     """
-    paths = get_ancestry_paths(v)
-    path1 = paths[node1]
-    path2 = paths[node2]
-    common_path = np.intersect1d(path1, path2)
-    mrca = common_path[0]
-    return mrca
+    assert node1 >= 0 and node2 >= 0, "Nodes must be greater than 0"
+    return core.get_common_ancestor(v, node1, node2)

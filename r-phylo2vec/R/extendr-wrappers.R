@@ -66,6 +66,9 @@ from_edges <- function(edges) .Call(wrap__from_edges, edges)
 #' @export
 from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 
+#' @export
+get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
+
 #' Check if a newick string has branch lengths
 #' @export
 has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
