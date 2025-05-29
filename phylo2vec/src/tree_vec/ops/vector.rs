@@ -561,10 +561,10 @@ fn min_common_ancestor(path1: &[usize], path2: &[usize]) -> usize {
 ///
 /// # Example
 /// ```
-/// use phylo2vec::tree_vec::ops::vector::get_mrca;
+/// use phylo2vec::tree_vec::ops::vector::get_common_ancestor;
 ///
 /// let v = vec![0, 1, 2, 3, 4];
-/// let mrca = get_mrca(&v, 2, 3);
+/// let mrca = get_common_ancestor(&v, 2, 3);
 /// // Newick string of v = (0,(1,(2,(3,(4,5)6)7)8)9)10;
 /// // So 2 and 3 share the MRCA 8.
 /// assert_eq!(mrca, 8);

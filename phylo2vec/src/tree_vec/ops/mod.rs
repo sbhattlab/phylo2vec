@@ -311,7 +311,7 @@ mod tests {
     #[case(vec![0, 1, 2, 5, 4, 2], 0, 1, 12)]
     #[case(vec![0, 1, 2, 5, 4, 2], 7, 4, 11)]
     #[case(vec![0, 2, 4, 0, 4, 0, 9, 14, 16, 3, 19, 18, 12, 24, 16, 22, 6, 4, 9], 17, 35, 35)]
-    fn test_get_mrca(
+    fn test_get_common_ancestor(
         #[case] v: Vec<usize>,
         #[case] node1: usize,
         #[case] node2: usize,
