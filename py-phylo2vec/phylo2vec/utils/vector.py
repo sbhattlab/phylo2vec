@@ -313,7 +313,8 @@ def reroot_at_random(v):
 def get_common_ancestor(v, node1, node2):
     """Get the first recent common ancestor between two nodes in a Phylo2Vec tree
 
-    `node1` and `node2` can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+    `node1` and `node2` can be leaf nodes (0 to n_leaves)
+    or internal nodes (n_leaves to 2*(n_leaves-1)).
 
     Similar to `get_common_ancestor` in ETE, but for Phylo2Vec vectors.
 

@@ -290,7 +290,9 @@ fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String 
 
 // Get the first recent common ancestor between two nodes in a Phylo2Vec tree
 // node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
-// Similar to ape's `getMRCA` function in R and ETE's `get_common_ancestor` in Python, but for Phylo2Vec vectors.
+// Similar to ape's `getMRCA` function in R (for leaf nodes)
+// and ETE's `get_common_ancestor` in Python (for all nodes), but for Phylo2Vec vectors.
+
 /// @export
 #[extendr]
 fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
