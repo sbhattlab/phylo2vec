@@ -12,7 +12,8 @@ use newick::build_newick_with_bls;
 
 pub use vector::{
     build_vector, cophenetic_distances, find_coords_of_first_leaf, from_ancestry, from_edges,
-    from_pairs, get_ancestry, get_edges, get_pairs, order_cherries, order_cherries_no_parents,
+    from_pairs, get_ancestry, get_common_ancestor, get_edges, get_pairs, order_cherries,
+    order_cherries_no_parents,
 };
 
 pub use newick::{build_newick, get_cherries, has_parents};
@@ -286,5 +287,40 @@ mod tests {
         let v2 = from_edges(&edges);
 
         assert_eq!(v, v2);
+    }
+
+    #[rstest]
+    // (0,(1,(2,(3,(4,5)))));
+    #[case(vec![0, 1, 2, 3, 4], 0, 1, 10)]
+    #[case(vec![0, 1, 2, 3, 4], 4, 5, 6)]
+    #[case(vec![0, 1, 2, 3, 4], 2, 3, 8)]
+    #[case(vec![0, 1, 2, 3, 4], 2, 7, 8)]
+    #[case(vec![0, 1, 2, 3, 4], 6, 1, 9)]
+    // (((0,(3,5)6)8,2)9,(1,4)7)10;
+    #[case(vec![0, 0, 0, 1, 3], 0, 2, 9)]
+    #[case(vec![0, 0, 0, 1, 3], 1, 4, 7)]
+    #[case(vec![0, 0, 0, 1, 3], 3, 5, 6)]
+    #[case(vec![0, 0, 0, 1, 3], 2, 4, 10)]
+    #[case(vec![0, 0, 0, 1, 3], 3, 8, 8)]
+    // (0,((4,5)8,(1,(3,(2,6)7)))));
+    #[case(vec![0, 1, 2, 5, 4, 2], 2, 6, 7)]
+    #[case(vec![0, 1, 2, 5, 4, 2], 4, 5, 8)]
+    #[case(vec![0, 1, 2, 5, 4, 2], 1, 3, 10)]
+    #[case(vec![0, 1, 2, 5, 4, 2], 1, 4, 11)]
+    #[case(vec![0, 1, 2, 5, 4, 2], 0, 2, 12)]
+    #[case(vec![0, 1, 2, 5, 4, 2], 0, 1, 12)]
+    #[case(vec![0, 1, 2, 5, 4, 2], 7, 4, 11)]
+    #[case(vec![0, 2, 4, 0, 4, 0, 9, 14, 16, 3, 19, 18, 12, 24, 16, 22, 6, 4, 9], 17, 35, 35)]
+    fn test_get_mrca(
+        #[case] v: Vec<usize>,
+        #[case] node1: usize,
+        #[case] node2: usize,
+        #[case] expected_mrca: usize,
+    ) {
+        let mrca = get_common_ancestor(&v, node1, node2);
+        assert_eq!(
+            mrca, expected_mrca,
+            "Expected mrca of nodes {node1} and {node2} for v = {v:?} to be {expected_mrca}, but got {mrca}"
+        );
     }
 }

@@ -148,6 +148,11 @@ fn create_label_mapping(newick: String) -> PyResult<(String, HashMap<usize, Stri
     Ok(ops::newick::create_label_mapping(&newick))
 }
 
+#[pyfunction]
+fn get_common_ancestor(v: Vec<usize>, node1: usize, node2: usize) -> usize {
+    ops::vector::get_common_ancestor(&v, node1, node2)
+}
+
 /// This module is exposed to Python.
 /// The line below raises an issue in DeepSource stating that this function's cyclomatic complexity is higher than threshold
 /// the analyzer does not understand that this is an API exposure function, hence the comment above to skip over this occurrence.
@@ -166,6 +171,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(from_edges, m)?)?;
     m.add_function(wrap_pyfunction!(from_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
+    m.add_function(wrap_pyfunction!(get_common_ancestor, m)?)?;
     m.add_function(wrap_pyfunction!(get_edges, m)?)?;
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;

@@ -1,6 +1,7 @@
 use crate::tree_vec::ops::avl::AVLTree;
 use crate::tree_vec::types::{Ancestry, Pair, Pairs};
 use crate::utils::is_unordered;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 /// Get all "pairs" from the Phylo2Vec vector
@@ -511,4 +512,78 @@ pub fn cophenetic_distances(v: &[usize]) -> Vec<Vec<usize>> {
         .iter()
         .map(|row| row.iter().map(|&x| x as usize).collect())
         .collect()
+}
+
+// Get the ancestry path of a tree node
+fn get_ancestry_path_of_node(pairs: &Pairs, node: usize) -> Vec<usize> {
+    let mut path = Vec::new();
+
+    let mut current_node = node;
+    let mut to_take = 0;
+
+    if current_node > pairs.len() {
+        // Skip the first `to_take` pairs (which are under `node``)
+        to_take = node - pairs.len() - 1;
+        current_node = pairs[node - pairs.len() - 1].0;
+    }
+
+    for (i, pair) in pairs.iter().enumerate().skip(to_take) {
+        if pair.0 == current_node || pair.1 == current_node {
+            path.push(pairs.len() + i + 1);
+            current_node = pair.0;
+        }
+    }
+
+    path
+}
+
+// Find the minimum common ancestor between two ancestry paths
+fn min_common_ancestor(path1: &[usize], path2: &[usize]) -> usize {
+    let mut i = 0;
+    let mut j = 0;
+
+    while i < path1.len() && j < path2.len() {
+        match path1[i].cmp(&path2[j]) {
+            Ordering::Equal => return path1[i],
+            Ordering::Less => i += 1,
+            Ordering::Greater => j += 1,
+        }
+    }
+
+    // Return the last element if no common value is found
+    path1[path1.len() - 1]
+}
+
+/// Get the most recent common ancestor (MRCA) of two nodes in a Phylo2Vec vector.
+/// node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+///
+/// Similar to `get_common_ancestor` in ETE (Python).
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::vector::get_mrca;
+///
+/// let v = vec![0, 1, 2, 3, 4];
+/// let mrca = get_mrca(&v, 2, 3);
+/// // Newick string of v = (0,(1,(2,(3,(4,5)6)7)8)9)10;
+/// // So 2 and 3 share the MRCA 8.
+/// assert_eq!(mrca, 8);
+/// ```
+pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
+    let node_max = 2 * v.len();
+
+    if node1 > node_max || node2 > node_max {
+        panic!("Node indices must be within the range of the Phylo2Vec vector. Max = {node_max}, got node1 = {node1} and node2 = {node2}");
+    }
+
+    if node1 == node2 {
+        return node1;
+    }
+
+    let pairs = get_pairs(v);
+
+    let path1 = get_ancestry_path_of_node(&pairs, node1);
+    let path2 = get_ancestry_path_of_node(&pairs, node2);
+
+    min_common_ancestor(&path1, &path2)
 }

@@ -288,6 +288,18 @@ fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String 
     ops::newick::apply_label_mapping(newick, &label_mapping_hash).unwrap()
 }
 
+// Get the first recent common ancestor between two nodes in a Phylo2Vec tree
+// node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+// Similar to ape's `getMRCA` function in R and ETE's `get_common_ancestor` in Python, but for Phylo2Vec vectors.
+/// @export
+#[extendr]
+fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
+    let v_usize: Vec<usize> = as_usize(vector);
+    let common_ancestor =
+        ops::vector::get_common_ancestor(&v_usize, node1 as usize, node2 as usize);
+    common_ancestor as i32
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -303,6 +315,7 @@ extendr_module! {
     fn from_ancestry;
     fn from_edges;
     fn from_pairs;
+    fn get_common_ancestor;
     fn has_branch_lengths;
     fn remove_leaf;
     fn sample_matrix;
