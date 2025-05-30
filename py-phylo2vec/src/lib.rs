@@ -153,6 +153,11 @@ fn get_common_ancestor(v: Vec<usize>, node1: usize, node2: usize) -> usize {
     ops::vector::get_common_ancestor(&v, node1, node2)
 }
 
+#[pyfunction]
+fn queue_shuffle(v: Vec<usize>, shuffle: bool) -> (Vec<usize>, Vec<usize>) {
+    ops::vector::queue_shuffle(&v, shuffle)
+}
+
 /// This module is exposed to Python.
 /// The line below raises an issue in DeepSource stating that this function's cyclomatic complexity is higher than threshold
 /// the analyzer does not understand that this is an API exposure function, hence the comment above to skip over this occurrence.
@@ -176,6 +181,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;
+    m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;
     m.add_function(wrap_pyfunction!(remove_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;
     m.add_function(wrap_pyfunction!(remove_parent_labels, m)?)?;

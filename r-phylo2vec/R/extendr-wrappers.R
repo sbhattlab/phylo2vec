@@ -73,6 +73,17 @@ get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_anc
 #' @export
 has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
 
+#' Produce an ordered version (i.e., birth-death process version)
+#' of a Phylo2Vec vector using the Queue Shuffle algorithm.
+#'
+#' Queue Shuffle ensures that the output tree is ordered,
+#' while also ensuring a smooth path through the space of orderings
+#'
+#' for more details, see https://doi.org/10.1093/gbe/evad213
+#'
+#' @export
+queue_shuffle <- function(vector, shuffle) .Call(wrap__queue_shuffle, vector, shuffle)
+
 #' Remove a leaf from a Phylo2Vec vector
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)

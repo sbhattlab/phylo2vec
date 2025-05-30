@@ -302,6 +302,22 @@ fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
     common_ancestor as i32
 }
 
+/// Produce an ordered version (i.e., birth-death process version)
+/// of a Phylo2Vec vector using the Queue Shuffle algorithm.
+///
+/// Queue Shuffle ensures that the output tree is ordered,
+/// while also ensuring a smooth path through the space of orderings
+///
+/// for more details, see https://doi.org/10.1093/gbe/evad213
+///
+/// @export
+#[extendr]
+fn queue_shuffle(vector: Vec<i32>, shuffle: bool) -> List {
+    let v_usize: Vec<usize> = as_usize(vector);
+    let (v_new, label_mapping) = ops::vector::queue_shuffle(&v_usize, shuffle);
+    list!(v = as_i32(v_new), mapping = as_i32(label_mapping))
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -319,6 +335,7 @@ extendr_module! {
     fn from_pairs;
     fn get_common_ancestor;
     fn has_branch_lengths;
+    fn queue_shuffle;
     fn remove_leaf;
     fn sample_matrix;
     fn sample_vector;

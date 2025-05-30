@@ -13,7 +13,7 @@ use newick::build_newick_with_bls;
 pub use vector::{
     build_vector, cophenetic_distances, find_coords_of_first_leaf, from_ancestry, from_edges,
     from_pairs, get_ancestry, get_common_ancestor, get_edges, get_pairs, order_cherries,
-    order_cherries_no_parents,
+    order_cherries_no_parents, queue_shuffle,
 };
 
 pub use newick::{build_newick, get_cherries, has_parents};
@@ -321,6 +321,32 @@ mod tests {
         assert_eq!(
             mrca, expected_mrca,
             "Expected mrca of nodes {node1} and {node2} for v = {v:?} to be {expected_mrca}, but got {mrca}"
+        );
+    }
+
+    #[rstest]
+    #[case(vec![0], vec![0], vec![0, 1])]
+    #[case(vec![0, 0], vec![0, 0], vec![0, 1, 2])]
+    #[case(vec![0, 0, 0], vec![0, 0, 0], vec![0, 1, 2, 3])]
+    #[case(vec![0, 2, 1, 6], vec![0, 0, 0, 3], vec![0, 3, 2, 4, 1])]
+    #[case(vec![0, 0, 1, 5, 5], vec![0, 0, 1, 0, 1], vec![0, 1, 4, 5, 2, 3])]
+    #[case(vec![0, 0, 0, 2, 5, 3], vec![0, 0, 0, 2, 3, 2], vec![0, 1, 2, 3, 6, 4, 5])]
+    #[case(vec![0, 0, 0, 2, 6, 3], vec![0, 0, 0, 2, 0, 5], vec![0, 1, 2, 5, 4, 3, 6])]
+    #[case(vec![0, 0, 0, 2, 7, 3], vec![0, 0, 0, 0, 3, 4], vec![0, 1, 3, 4, 5, 2, 6])]
+    fn test_queue_shuffle(
+        #[case] v_input: Vec<usize>,
+        #[case] v_expected: Vec<usize>,
+        #[case] mapping_expected: Vec<usize>,
+    ) {
+        let (v_qs, mapping_qs) = queue_shuffle(&v_input, false);
+        assert_eq!(
+            v_qs, v_expected,
+            "Expected queue shuffled vector to be {v_expected:?}, but got {v_qs:?}"
+        );
+
+        assert_eq!(
+            mapping_qs, mapping_expected,
+            "Expected queue shuffled mapping to be {mapping_expected:?}, but got {mapping_qs:?}"
         );
     }
 }

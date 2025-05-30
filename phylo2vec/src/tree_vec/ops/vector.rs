@@ -111,6 +111,27 @@ pub fn get_pairs(v: &[usize]) -> Pairs {
     }
 }
 
+fn get_ancestry_from_pairs(pairs: &Pairs) -> Ancestry {
+    let k = pairs.len();
+    let mut ancestry: Ancestry = Vec::with_capacity(k);
+
+    // Keep track of child->highest parent relationship
+    let mut parents: Vec<usize> = (0..=(2 * k + 1)).collect();
+
+    for (i, &(c1, c2)) in pairs.iter().enumerate() {
+        let next_parent = k + 1 + i;
+
+        // Push the current cherry to ancestry
+        ancestry.push([parents[c1], parents[c2], next_parent]);
+
+        // Update the parents of current children
+        parents[c1] = next_parent;
+        parents[c2] = next_parent;
+    }
+
+    ancestry
+}
+
 /// Get the ancestry of the Phylo2Vec vector
 /// v[i] = which BRANCH we do the pairing from
 ///
@@ -129,26 +150,8 @@ pub fn get_pairs(v: &[usize]) -> Pairs {
 /// v[1] = 2 is somewhat similar: we create a new branch from R that yields leaf 2
 pub fn get_ancestry(v: &[usize]) -> Ancestry {
     let pairs: Pairs = get_pairs(v);
-    let k = v.len();
 
-    // Initialize Ancestry with capacity `k`
-    let mut ancestry: Ancestry = Vec::with_capacity(k);
-
-    // Keep track of child->highest parent relationship
-    let mut parents: Vec<usize> = (0..=(2 * k + 1)).collect();
-
-    for (i, &(c1, c2)) in pairs.iter().enumerate() {
-        let next_parent = k + 1 + i;
-
-        // Push the current cherry to ancestry
-        ancestry.push([parents[c1], parents[c2], next_parent]);
-
-        // Update the parents of current children
-        parents[c1] = next_parent;
-        parents[c2] = next_parent;
-    }
-
-    ancestry
+    get_ancestry_from_pairs(&pairs)
 }
 
 pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
@@ -586,4 +589,102 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
     let path2 = get_ancestry_path_of_node(&pairs, node2);
 
     min_common_ancestor(&path1, &path2)
+}
+
+/// Produce an ordered version (i.e., birth-death process version)
+/// of a Phylo2Vec vector using the Queue Shuffle algorithm.
+///
+/// Queue Shuffle ensures that the output tree is ordered,
+/// while also ensuring a smooth path through the space of orderings
+///
+/// for more details, see https://doi.org/10.1093/gbe/evad213
+///
+/// # Example
+/// ```
+/// use phylo2vec::tree_vec::ops::vector::queue_shuffle;
+///
+/// // Tree with 7 leaves
+/// let v = vec![0, 0, 0, 2, 5, 3];
+/// let (v_qs, label_mapping) = queue_shuffle(&v, false);
+/// assert_eq!(v_qs, vec![0, 0, 0, 2, 3, 2]);
+/// // Suppose that you originally have a list of string labels for taxa
+/// // Initially, represent the n-th taxon by an integer leaf n
+/// // In this scenario,
+/// // Leaves 0, 1, 2, 3 remain unchanged
+/// // The 5th taxon is now represented by 6
+/// // The 6th taxon is now represented by 4
+/// // The 7th taxon is now represented by 5
+/// assert_eq!(label_mapping, vec![0, 1, 2, 3, 6, 4, 5]);
+/// ```
+pub fn queue_shuffle(v: &[usize], shuffle: bool) -> (Vec<usize>, Vec<usize>) {
+    let pairs = get_pairs(v);
+    let ancestry = get_ancestry_from_pairs(&pairs);
+
+    let k = v.len();
+    let n_leaves = k + 1;
+
+    //
+    // Stage 1: Create a queue of internal nodes to visit
+    //
+    let mut queue = vec![2 * k];
+    let mut j = 0;
+
+    // Stop when we have k internal nodes in the queue
+    // For a tree with k + 1 leaves, we need k internal nodes
+    while queue.len() < k {
+        let [c1, c2, _] = ancestry[queue[j] - n_leaves];
+
+        // `shuffle` allows to randomly permutate the order of children
+        let child_order = if shuffle && rand::random() {
+            [c2, c1]
+        } else {
+            [c1, c2]
+        };
+
+        // Add internal nodes to the queue
+        for &c in &child_order {
+            if c >= n_leaves {
+                queue.push(c);
+            }
+        }
+
+        // j helps visiting the next element in the queue first
+        // (i.e., internal nodes under queue[j])
+        j += 1;
+    }
+
+    //
+    // Stage 2: Re-order the pairs according to the queue
+    //
+    let mut new_pairs: Pairs = Vec::with_capacity(k);
+
+    // Mapping of original leaves to new leaves
+    // Index = original leaf
+    // Value = new leaf index
+    let mut label_mapping: Vec<usize> = (0..n_leaves).collect();
+
+    // Process the queue in reverse order
+    for i in 0..k {
+        // Next pair according to the queue
+        let (c1, c2) = pairs[queue[i] - k - 1];
+
+        let next_leaf = i + 1;
+
+        // If c2 is not the next leaf, it does not
+        // respect the constraint of an ordered tree
+        // So we swap the labels c2 and next_leaf
+        if c2 != next_leaf {
+            label_mapping[c2] = next_leaf;
+        }
+
+        // Push an ordered pair
+        new_pairs.push((label_mapping[c1], next_leaf));
+    }
+
+    // Pairs were created in reverse order, so we reverse them
+    new_pairs.reverse();
+
+    let v_new = from_pairs(&new_pairs);
+
+    (v_new, label_mapping)
 }
