@@ -5,7 +5,19 @@
 \title{Produce an ordered version (i.e., birth-death process version)
 of a Phylo2Vec vector using the Queue Shuffle algorithm.}
 \usage{
-queue_shuffle(vector, shuffle)
+queue_shuffle(vector, shuffle_cherries)
+}
+\arguments{
+\item{vector}{A Phylo2Vec vector (i.e., a vector of integers)}
+
+\item{shuffle_cherries}{If true, the algorithm will shuffle cherries (i.e., pairs of leaves)}
+}
+\value{
+A list with two elements:
+\itemize{
+\item \code{v}: The ordered Phylo2Vec vector
+\item \code{mapping}: A mapping of the original labels to the new labels
+}
 }
 \description{
 Queue Shuffle ensures that the output tree is ordered,

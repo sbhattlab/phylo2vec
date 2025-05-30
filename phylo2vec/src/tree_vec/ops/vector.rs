@@ -616,7 +616,7 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
 /// // The 7th taxon is now represented by 5
 /// assert_eq!(label_mapping, vec![0, 1, 2, 3, 6, 4, 5]);
 /// ```
-pub fn queue_shuffle(v: &[usize], shuffle: bool) -> (Vec<usize>, Vec<usize>) {
+pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<usize>) {
     let pairs = get_pairs(v);
     let ancestry = get_ancestry_from_pairs(&pairs);
 
@@ -634,8 +634,8 @@ pub fn queue_shuffle(v: &[usize], shuffle: bool) -> (Vec<usize>, Vec<usize>) {
     while queue.len() < k {
         let [c1, c2, _] = ancestry[queue[j] - n_leaves];
 
-        // `shuffle` allows to randomly permutate the order of children
-        let child_order = if shuffle && rand::random() {
+        // `shuffle_cherries` allows to randomly permutate the order of children
+        let child_order = if shuffle_cherries && rand::random() {
             [c2, c1]
         } else {
             [c1, c2]
