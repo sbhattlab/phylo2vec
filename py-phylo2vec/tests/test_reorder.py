@@ -1,6 +1,5 @@
 import random
 
-import numba as nb
 import numpy as np
 import pytest
 
@@ -10,7 +9,6 @@ from phylo2vec import _phylo2vec_core as core
 from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
 
 
-@nb.njit
 def legacy_queue_shuffle(
     ancestry_old, label_mapping_old, reorder_internal=True, shuffle_cols=False
 ):
@@ -18,6 +16,8 @@ def legacy_queue_shuffle(
     Legacy version of the queue shuffle algorithm (called _reorder_birth_death in v0.x)
 
     Reorders v as a birth-death process (i.e., an "ordered" vector)
+
+    Removed numba dependency as speed is not an issue for these tests
 
     Parameters
     ----------
@@ -62,9 +62,7 @@ def legacy_queue_shuffle(
     visited_internals = []
 
     # Taxa dict to be updated
-    label_mapping_new = nb.typed.Dict.empty(
-        key_type=nb.types.int64, value_type=nb.types.unicode_type
-    )
+    label_mapping_new = {}
 
     while len(to_visit) > 0:
         row = 2 * len(ancestry_old) - to_visit.pop(0)
@@ -127,15 +125,8 @@ def test_queue_shuffle(n_leaves):
 
         dict_mapping_old = {i: f"{i}" for i in range(n_leaves)}
 
-        dict_mapping_old_ = nb.typed.Dict.empty(
-            key_type=nb.types.int64, value_type=nb.types.unicode_type
-        )
-
-        for key, val in dict_mapping_old.items():
-            dict_mapping_old_[key] = val
-
-        ancestry_new, dict_mapping_numba = legacy_queue_shuffle(
-            np.flip(ancestry_old, axis=0), dict_mapping_old_
+        ancestry_new, dict_mapping_py = legacy_queue_shuffle(
+            np.flip(ancestry_old, axis=0), dict_mapping_old
         )
 
         # Convert back to vector and check if it matches the original vector
@@ -145,16 +136,12 @@ def test_queue_shuffle(n_leaves):
 
         assert np.array_equal(v_new_legacy, v_new_rust)
 
-        inv_dict_mapping_numba_ = {
-            int(val): key for key, val in dict_mapping_numba.items()
-        }
+        inv_dict_mapping_py = {int(val): key for key, val in dict_mapping_py.items()}
 
-        # Convert the dict_mapping_numba to a list
-        vec_mapping_numba = [
-            int(inv_dict_mapping_numba_.get(i, i)) for i in range(n_leaves)
-        ]
+        # Convert the python dict_mapping to a list
+        vec_mapping_py = [int(inv_dict_mapping_py.get(i, i)) for i in range(n_leaves)]
 
-        assert vec_mapping_numba == vec_mapping_rust
+        assert vec_mapping_py == vec_mapping_rust
 
         # Convert the rust list to a dict
         dict_mapping_rust = {
@@ -162,6 +149,4 @@ def test_queue_shuffle(n_leaves):
             for i in range(len(vec_mapping_rust))
         }
 
-        dict_mapping_numba_ = dict(dict_mapping_numba.items())
-
-        assert dict_mapping_numba_ == dict_mapping_rust
+        assert dict_mapping_py == dict_mapping_rust
