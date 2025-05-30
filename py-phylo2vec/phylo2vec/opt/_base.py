@@ -1,13 +1,20 @@
 """Base class for all optimisation methods in Phylo2Vec."""
 
+import multiprocessing
 import random
+import time
 
-import numba as nb
+from typing import Final
+
 import numpy as np
 
 from phylo2vec.datasets import read_fasta
 from phylo2vec.utils.vector import sample_vector
 
+# Multiprocessing
+DEFAULT_N_JOBS: Final = multiprocessing.cpu_count() // 4
+MIN_N_JOBS: Final = 4
+# Seeding
 MAX_SEED = 42
 
 
@@ -21,21 +28,24 @@ class BaseOptimizer:
         Random seed, by default None
     """
 
-    def __init__(self, random_seed=None):
+    def __init__(self, random_seed=None, verbose=False, n_jobs=None):
         self.random_seed = (
             random.randint(0, MAX_SEED) if random_seed is None else random_seed
         )
         random.seed(self.random_seed)
         np.random.seed(self.random_seed)
 
+        self.verbose = verbose
+
+        self.n_jobs = self._infer_n_jobs(n_jobs)
+
+    @staticmethod
+    def _infer_n_jobs(n_jobs=None):
+        return n_jobs or max(MIN_N_JOBS, DEFAULT_N_JOBS)
+
     @staticmethod
     def _make_label_mapping(records):
-        label_mapping = nb.typed.Dict.empty(
-            key_type=nb.types.int64, value_type=nb.types.unicode_type
-        )
-
-        for i, r in enumerate(records):
-            label_mapping[i] = r.id.replace(" ", ".")
+        label_mapping = dict(enumerate(r.id.replace(" ", ".") for r in records))
 
         return label_mapping
 
@@ -67,7 +77,17 @@ class BaseOptimizer:
 
         v_init = sample_vector(n_leaves)
 
+        start_time = time.time()
+
         v_opt, label_mapping, losses = self._optimise(fasta_path, v_init, label_mapping)
+
+        end_time = time.time()
+
+        if self.verbose:
+            print(
+                f"Optimisation finished in {end_time - start_time:.2f} seconds "
+                f"with {len(losses)} loss evaluations."
+            )
 
         return v_opt, label_mapping, losses
 
