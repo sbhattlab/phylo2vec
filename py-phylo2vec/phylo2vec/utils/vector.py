@@ -1,15 +1,16 @@
 """Phylo2Vec vector manipulation functions."""
 
 import random
+import warnings
 
-import numba as nb
+from typing import List, Tuple
+
 import numpy as np
 
 from ete3 import Tree
 
 from phylo2vec import _phylo2vec_core as core
 from phylo2vec.base.newick import from_newick, to_newick
-from phylo2vec.base.ancestry import from_ancestry, to_ancestry
 
 
 def check_vector(v: np.ndarray) -> None:
@@ -51,7 +52,7 @@ def sample_vector(n_leaves: int, ordered: bool = False) -> np.ndarray:
     return np.asarray(v_list)
 
 
-def remove_leaf(v, leaf):
+def remove_leaf(v, leaf) -> Tuple[np.ndarray, int]:
     """Remove a leaf from a Phylo2Vec v
 
     Parameters
@@ -73,7 +74,7 @@ def remove_leaf(v, leaf):
     return np.asarray(v_sub), sister
 
 
-def add_leaf(v, leaf, pos):
+def add_leaf(v, leaf, pos) -> np.ndarray:
     """Add a leaf to a Phylo2Vec vector v
 
     Parameters
@@ -94,7 +95,38 @@ def add_leaf(v, leaf, pos):
     return np.asarray(v_add)
 
 
-def reorder_v(reorder_method, v_old, label_mapping_old):
+def queue_shuffle(v, shuffle=False) -> Tuple[np.ndarray, List[int]]:
+    """
+    Produce an ordered version (i.e., birth-death process version)
+    of a Phylo2Vec vector using the Queue Shuffle algorithm.
+
+    Queue Shuffle ensures that the output tree is ordered,
+    while also ensuring a smooth path through the space of orderings
+
+    For more details, see https://doi.org/10.1093/gbe/evad213
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec vector
+    shuffle : bool, optional
+        If True, shuffle at random the children columns in the ancestry matrix
+
+    Returns
+    -------
+    v_new : numpy.ndarray
+        Reordered Phylo2Vec vector
+    vec_mapping : List[int]
+        Mapping of the original vector to the new vector
+        index: leaf
+        value: new leaf index in the reordered vector
+    """
+    v_new, vec_mapping = core.queue_shuffle(v, shuffle)
+
+    return np.asarray(v_new), vec_mapping
+
+
+def reorder_v(reorder_method, v_old, label_mapping_old, shuffle=False):
     """Shuffle v by reordering leaf labels
 
     Current pipeline: get ancestry matrix --> reorder --> re-build vector
@@ -110,178 +142,45 @@ def reorder_v(reorder_method, v_old, label_mapping_old):
         Current Phylo2vec vector
     label_mapping_old : dict[int, str]
         Current mapping of node label (integer) to taxa
+        Note: Will be deprecated in a future release; see `queue_shuffle` instead.
+    shuffle : bool, optional
+        If True, shuffle at random the children columns in the ancestry matrix
+
 
     Returns
     -------
     v_new : numpy.ndarray or list
         New Phylo2vec vector
-    label_mapping_new : nb.types.Dict
+    label_mapping_new : dict[int, str]
         New integer-taxon dictionary
     """
-    # TODO: make this function inplace?
-    # Get ancestry
-    ancestry_old = to_ancestry(v_old)
+
+    warnings.warn(
+        (
+            "`reorder_v` is deprecated and will be removed "
+            "in a future version. Use `queue_shuffle` instead."
+        ),
+        FutureWarning,
+    )
 
     # Reorder M
     if reorder_method == "birth_death":
-        reorder_fun = _reorder_birth_death
+        v_new, vec_mapping = queue_shuffle(v_old, shuffle=shuffle)
+        # For compatibility with the old label mapping (for _hc)
+        label_mapping_new = {
+            vec_mapping[i]: label_mapping_old[i] for i in range(len(vec_mapping))
+        }
     elif reorder_method == "bfs":
-        reorder_fun = _reorder_bfs
+        raise ValueError(
+            (
+                "`bfs` method is no longer supported as erroneous. "
+                "Use `birth_death` instead."
+            )
+        )
     else:
-        raise ValueError("`method` must be 'birth_death' or 'bfs'")
-
-    # Pass the dict to Numba
-    label_mapping_old_ = nb.typed.Dict.empty(
-        key_type=nb.types.uint16, value_type=nb.types.unicode_type
-    )
-
-    for k, v in label_mapping_old.items():
-        label_mapping_old_[k] = v
-
-    ancestry_new, label_mapping_new = reorder_fun(
-        np.flip(ancestry_old, axis=0), label_mapping_old_
-    )
-
-    # Re-build v
-    v_new = from_ancestry(ancestry_new)
+        raise ValueError(f"Unknown value for `reorder_method`: {reorder_method}")
 
     return v_new, label_mapping_new
-
-
-@nb.njit
-def _reorder_birth_death(
-    ancestry_old, label_mapping_old, reorder_internal=True, shuffle_cols=False
-):
-    """Reorder v as a birth-death process (i.e., an "ordered" vector)
-
-    Parameters
-    ----------
-    ancestry_old : numpy.ndarray
-        Ancestry matrix
-        1st column: child 1 parent node
-        2nd column: child 2
-        3rd column: parent node
-    label_mapping_old : dict[int, str]
-        Mapping of leaf labels (integer) to taxa
-    reorder_internal : bool, optional
-        If True, reorder internal labels, by default True
-    shuffle_cols : bool, optional
-        If True, shuffle children columns in the ancestry, by default False
-
-    Returns
-    -------
-    ancestry_new : numpy.ndarray
-        Reordered ancestry matrix
-    label_mapping_new :
-        Reordered mapping of leaf labels (integer) to taxa
-    """
-    # Copy old M
-    ancestry_new = ancestry_old.copy()
-
-    # Internal nodes to visit (2*len(M_old) = root label)
-    to_visit = [2 * len(ancestry_old)]
-
-    # Number of visits
-    visits = 1
-
-    # Internal labels
-    internal_labels = list(range(len(ancestry_old) + 1, 2 * len(ancestry_old)))
-
-    # Leaf "code"
-    node_code = []
-
-    # List of all visited nodes
-    visited = []
-
-    # List of visited internal nodes
-    visited_internals = []
-
-    # Taxa dict to be updated
-    label_mapping_new = nb.typed.Dict.empty(
-        key_type=nb.types.uint16, value_type=nb.types.unicode_type
-    )
-
-    while len(to_visit) > 0:
-        row = 2 * len(ancestry_old) - to_visit.pop(0)
-
-        if node_code:
-            next_pair = [node_code[visited.index(visited_internals.pop(0))], visits]
-        else:
-            next_pair = [0, 1]
-
-        if shuffle_cols:
-            col_order = 2 * random.randint(0, 1) - 1
-            ancestry_old[row, :2] = ancestry_old[row, :2][::col_order]
-            next_pair = next_pair[::col_order]
-
-        for i, child in enumerate(ancestry_old[row, :2]):
-            if child < len(ancestry_old) + 1:
-                label_mapping_new[next_pair[i]] = label_mapping_old[child]
-
-                ancestry_new[row, i] = next_pair[i]
-
-            # Not a leaf node --> add it to the visit list
-            else:
-                visited_internals.append(child)
-                if reorder_internal:
-                    # Basically, flip the nodes
-                    # Ex: relabel 7 in M_old as 9 in M_new
-                    # Then relabel 9 in M_old as 7 in M_new
-                    internal_node = internal_labels.pop()
-                    ancestry_new[row, i] = internal_node
-                    ancestry_new[2 * len(ancestry_new) - ancestry_old[row, i], 2] = (
-                        ancestry_new[row, i]
-                    )
-
-                to_visit.append(child)
-
-        visited.extend(ancestry_old[row, :2])
-
-        node_code.extend(next_pair)
-        visits += 1
-
-    # Re-sort M such that the root node R is the first row, then internal nodes R-1, R-2, ...
-    ancestry_new = ancestry_new[ancestry_new[:, 2].argsort()[::-1]]
-
-    return ancestry_new, label_mapping_new
-
-
-@nb.njit(cache=True)
-def _reorder_bfs(ancestry_old, label_mapping_old):
-    # Copy old M
-    ancestry_new = ancestry_old.copy()
-
-    # Internal nodes to visit (2*len(M_old) = root label)
-    to_visit = [2 * len(ancestry_old)]
-
-    # Leaf order
-    order = []
-
-    # Taxa dict to be updated
-    label_mapping_new = nb.typed.Dict.empty(
-        key_type=nb.types.uint16, value_type=nb.types.unicode_type
-    )
-
-    while len(to_visit) > 0:
-        # Current row of M
-        row = 2 * len(ancestry_old) - to_visit.pop(0)
-
-        for i, child in enumerate(ancestry_old[row, :-1]):
-            # Leaf node
-            if child < len(ancestry_old) + 1:
-                order.append(child)
-
-                # Update taxa dict
-                label_mapping_new[len(order) - 1] = label_mapping_old[child]
-
-                # Update M_new
-                ancestry_new[row, i] = len(order) - 1
-
-            # Not a leaf node --> add it to the visit list
-            else:
-                to_visit.append(child)
-
-    return ancestry_new, label_mapping_new
 
 
 def reroot_at_random(v):
