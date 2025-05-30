@@ -207,3 +207,6 @@ tmp/
 
 # Output files from R CMD build
 *.tar.gz
+
+# Outputs files from opt/
+trees/

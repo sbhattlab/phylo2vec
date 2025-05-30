@@ -18,7 +18,7 @@ IS_WINDOWS = sys.platform.startswith("win")
 
 def raxml_loss(
     v,
-    taxa_dict,
+    label_mapping,
     fasta_path,
     tree_folder_path,
     substitution_model,
@@ -52,7 +52,7 @@ def raxml_loss(
     except Exception as err:
         raise ValueError(f"Error for v = {repr(v)}") from err
 
-    for taxa_key, taxa_name in taxa_dict.items():
+    for taxa_key, taxa_name in label_mapping.items():
         newick = re.sub(rf"([^\d]){taxa_key}([,)])", rf"\1{taxa_name}\2", newick)
 
     with open(
