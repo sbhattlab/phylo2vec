@@ -310,11 +310,16 @@ fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
 ///
 /// for more details, see https://doi.org/10.1093/gbe/evad213
 ///
+/// @param vector A Phylo2Vec vector (i.e., a vector of integers)
+/// @param shuffle_cherries If true, the algorithm will shuffle cherries (i.e., pairs of leaves)
+/// @return A list with two elements:
+/// - `v`: The ordered Phylo2Vec vector
+/// - `mapping`: A mapping of the original labels to the new labels
 /// @export
 #[extendr]
-fn queue_shuffle(vector: Vec<i32>, shuffle: bool) -> List {
+fn queue_shuffle(vector: Vec<i32>, shuffle_cherries: bool) -> List {
     let v_usize: Vec<usize> = as_usize(vector);
-    let (v_new, label_mapping) = ops::vector::queue_shuffle(&v_usize, shuffle);
+    let (v_new, label_mapping) = ops::vector::queue_shuffle(&v_usize, shuffle_cherries);
     list!(v = as_i32(v_new), mapping = as_i32(label_mapping))
 }
 

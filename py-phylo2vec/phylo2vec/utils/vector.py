@@ -95,7 +95,7 @@ def add_leaf(v, leaf, pos) -> np.ndarray:
     return np.asarray(v_add)
 
 
-def queue_shuffle(v, shuffle=False) -> Tuple[np.ndarray, List[int]]:
+def queue_shuffle(v, shuffle_cherries=False) -> Tuple[np.ndarray, List[int]]:
     """
     Produce an ordered version (i.e., birth-death process version)
     of a Phylo2Vec vector using the Queue Shuffle algorithm.
@@ -109,8 +109,9 @@ def queue_shuffle(v, shuffle=False) -> Tuple[np.ndarray, List[int]]:
     ----------
     v : numpy.ndarray
         Phylo2Vec vector
-    shuffle : bool, optional
-        If True, shuffle at random the children columns in the ancestry matrix
+    shuffle_cherries : bool, optional
+        If True, shuffle at random the order of the cherries in the ancestry matrix
+        (i.e., the first two columns of the ancestry matrix).
 
     Returns
     -------
@@ -121,12 +122,12 @@ def queue_shuffle(v, shuffle=False) -> Tuple[np.ndarray, List[int]]:
         index: leaf
         value: new leaf index in the reordered vector
     """
-    v_new, vec_mapping = core.queue_shuffle(v, shuffle)
+    v_new, vec_mapping = core.queue_shuffle(v, shuffle_cherries)
 
     return np.asarray(v_new), vec_mapping
 
 
-def reorder_v(reorder_method, v_old, label_mapping_old, shuffle=False):
+def reorder_v(reorder_method, v_old, label_mapping_old, shuffle_cols=False):
     """Shuffle v by reordering leaf labels
 
     Current pipeline: get ancestry matrix --> reorder --> re-build vector
@@ -143,8 +144,9 @@ def reorder_v(reorder_method, v_old, label_mapping_old, shuffle=False):
     label_mapping_old : dict[int, str]
         Current mapping of node label (integer) to taxa
         Note: Will be deprecated in a future release; see `queue_shuffle` instead.
-    shuffle : bool, optional
-        If True, shuffle at random the children columns in the ancestry matrix
+    shuffle_cols : bool, optional
+        If True, shuffle at random the order of the cherries in the ancestry matrix
+        (i.e., the first two columns of the ancestry matrix).
 
 
     Returns
@@ -165,7 +167,7 @@ def reorder_v(reorder_method, v_old, label_mapping_old, shuffle=False):
 
     # Reorder M
     if reorder_method == "birth_death":
-        v_new, vec_mapping = queue_shuffle(v_old, shuffle=shuffle)
+        v_new, vec_mapping = queue_shuffle(v_old, shuffle_cherries=shuffle_cols)
         # For compatibility with the old label mapping (for _hc)
         label_mapping_new = {
             vec_mapping[i]: label_mapping_old[i] for i in range(len(vec_mapping))

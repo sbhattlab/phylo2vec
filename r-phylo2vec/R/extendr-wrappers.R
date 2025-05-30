@@ -81,8 +81,13 @@ has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
 #'
 #' for more details, see https://doi.org/10.1093/gbe/evad213
 #'
+#' @param vector A Phylo2Vec vector (i.e., a vector of integers)
+#' @param shuffle_cherries If true, the algorithm will shuffle cherries (i.e., pairs of leaves)
+#' @return A list with two elements:
+#' - `v`: The ordered Phylo2Vec vector
+#' - `mapping`: A mapping of the original labels to the new labels
 #' @export
-queue_shuffle <- function(vector, shuffle) .Call(wrap__queue_shuffle, vector, shuffle)
+queue_shuffle <- function(vector, shuffle_cherries) .Call(wrap__queue_shuffle, vector, shuffle_cherries)
 
 #' Remove a leaf from a Phylo2Vec vector
 #' @export

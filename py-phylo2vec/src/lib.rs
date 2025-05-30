@@ -154,8 +154,8 @@ fn get_common_ancestor(v: Vec<usize>, node1: usize, node2: usize) -> usize {
 }
 
 #[pyfunction]
-fn queue_shuffle(v: Vec<usize>, shuffle: bool) -> (Vec<usize>, Vec<usize>) {
-    ops::vector::queue_shuffle(&v, shuffle)
+fn queue_shuffle(v: Vec<usize>, shuffle_cherries: bool) -> (Vec<usize>, Vec<usize>) {
+    ops::vector::queue_shuffle(&v, shuffle_cherries)
 }
 
 /// This module is exposed to Python.
