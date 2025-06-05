@@ -175,7 +175,7 @@ cython_debug/
 
 # Where I try stuff
 drafts/
-drafts.ipynb
+drafts*.ipynb
 
 # Temporary trees
 trees/# pixi environments
