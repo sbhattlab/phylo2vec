@@ -185,32 +185,6 @@ def reorder_v(reorder_method, v_old, label_mapping_old, shuffle_cols=False):
     return v_new, label_mapping_new
 
 
-def reroot_at_random(v):
-    """Reroot a tree (via its Phylo2Vec vector v) at a random node
-
-    Parameters
-    ----------
-    v : numpy.ndarray
-        Phylo2Vec representation of a tree
-
-    Returns
-    -------
-    numpy.ndarray
-        rerooted v
-    """
-    ete3_tree = Tree(to_newick(v), format=8)
-
-    ete3_tree.set_outgroup(f"{random.randint(0, 2 * len(v) - 1)}")
-
-    newick = ete3_tree.write(format=9)
-
-    v_new = from_newick(newick)
-
-    check_vector(v_new)
-
-    return from_newick(newick)
-
-
 def get_common_ancestor(v, node1, node2):
     """Get the first recent common ancestor between two nodes in a Phylo2Vec tree
 
@@ -235,3 +209,50 @@ def get_common_ancestor(v, node1, node2):
     """
     assert node1 >= 0 and node2 >= 0, "Nodes must be greater than 0"
     return core.get_common_ancestor(v, node1, node2)
+
+
+def reroot(v, node) -> np.ndarray:
+    """Reroot a tree (via its Phylo2Vec vector v) at a given node
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec representation of a tree
+    node : int
+        A node to reroot the tree at
+
+        Must be a valid node in the tree, i.e., in the range [0, 2 * n_leaves - 1]
+
+    Returns
+    -------
+    numpy.ndarray
+        rerooted vector
+    """
+    ete3_tree = Tree(to_newick(v), format=8)
+
+    ete3_tree.set_outgroup(f"{node}")
+
+    newick = ete3_tree.write(format=9)
+
+    v_new = from_newick(newick)
+
+    check_vector(v_new)
+
+    return from_newick(newick)
+
+
+def reroot_at_random(v) -> np.ndarray:
+    """Reroot a tree (via its Phylo2Vec vector v) at a random node
+
+    Parameters
+    ----------
+    v : numpy.ndarray
+        Phylo2Vec representation of a tree
+
+    Returns
+    -------
+    numpy.ndarray
+        rerooted vector
+    """
+
+    return reroot(v, random.randint(0, 2 * len(v) - 1))
