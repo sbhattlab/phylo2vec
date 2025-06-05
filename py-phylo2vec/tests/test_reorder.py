@@ -1,3 +1,5 @@
+"""Temporary test of reordering functions against legacy algorithms (v0.x)"""
+
 import random
 
 import numpy as np

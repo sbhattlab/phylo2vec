@@ -12,11 +12,11 @@ use std::collections::HashMap;
 /// Average case is O(n^1.5)
 /// Worst case is O(n^2) for unordered trees.
 fn get_pairs_loop(v: &[usize]) -> Pairs {
-    let num_of_leaves: usize = v.len();
-    let mut pairs: Pairs = Vec::with_capacity(num_of_leaves);
+    let k: usize = v.len();
+    let mut pairs: Pairs = Vec::with_capacity(k);
 
     // First loop (reverse iteration)
-    for i in (0..num_of_leaves).rev() {
+    for i in (0..k).rev() {
         /*
         If v[i] <= i, it's like a birth-death process.
         The next pair to add is (v[i], next_leaf) as the branch leading to v[i]
@@ -30,7 +30,7 @@ fn get_pairs_loop(v: &[usize]) -> Pairs {
     }
 
     // Second loop
-    for (j, &vj) in v.iter().enumerate().take(num_of_leaves).skip(1) {
+    for (j, &vj) in v.iter().enumerate().skip(1) {
         let next_leaf = j + 1;
         if vj == 2 * j {
             // 2 * j = extra root ==> pairing = (0, next_leaf)
