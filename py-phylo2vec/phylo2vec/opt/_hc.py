@@ -8,7 +8,7 @@ import numpy as np
 
 from joblib import delayed, Parallel
 
-from phylo2vec.opt._base import BaseOptimizer
+from phylo2vec.opt._base import BaseOptimizer, BaseResult
 from phylo2vec.opt._hc_losses import raxml_loss
 from phylo2vec.utils.vector import reorder_v, reroot_at_random
 
@@ -27,8 +27,6 @@ class HillClimbingOptimizer(BaseOptimizer):
         If None, will create a folder called "trees"
     substitution_model : str, optional
         DNA/AA substitution model, by default "GTR"
-    reorder_method : str, optional
-        Phylo2Vec vector reordering method, by default "birth_death"
     random_seed : int, optional
         Random seed, by default None
         Controls both the randomness of the initial vector
@@ -49,7 +47,6 @@ class HillClimbingOptimizer(BaseOptimizer):
         raxml_cmd="raxml-ng",
         tree_folder_path=None,
         substitution_model="GTR",
-        reorder_method="birth_death",
         random_seed=None,
         tol=0.001,
         patience=3,
@@ -66,7 +63,6 @@ class HillClimbingOptimizer(BaseOptimizer):
         self.raxml_cmd = raxml_cmd
         self.tree_folder_path = tree_folder_path
         self.substitution_model = substitution_model
-        self.reorder_method = reorder_method
         self.tol = tol
         self.rounds = rounds
         self.patience = patience
@@ -91,7 +87,7 @@ class HillClimbingOptimizer(BaseOptimizer):
                 print("Changing equivalences...")
             v_proposal = reroot_at_random(v)
 
-            v_proposal, proposal_loss, label_mapping = self._optimise_single(
+            v_proposal, proposal_loss, label_mapping = self._step(
                 fasta_path, v.copy(), label_mapping
             )
 
@@ -111,11 +107,18 @@ class HillClimbingOptimizer(BaseOptimizer):
 
             losses.append(current_loss)
 
-        return v, label_mapping, losses
+        best_params = BaseResult(
+            v=v,
+            label_mapping=label_mapping,
+            scores=losses,
+            best_score=current_loss,
+        )
 
-    def _optimise_single(self, fasta_path, v, label_mapping):
+        return best_params
+
+    def _step(self, fasta_path, v, label_mapping):
         # Reorder v
-        v_shuffled, label_mapping = reorder_v(self.reorder_method, v, label_mapping)
+        v_shuffled, label_mapping = reorder_v("birth_death", v, label_mapping)
 
         # Get current loss
         current_best_loss = raxml_loss(
@@ -136,7 +139,7 @@ class HillClimbingOptimizer(BaseOptimizer):
                 # Calculate gradient for changes in row i
                 # "gradient" here simply refers to a numerical gradient
                 # between loss(v_current) and loss(v_proposal)
-                proposal_grads, proposal_losses = self.grad_single(
+                proposal_grads, proposal_losses = self._value_and_grad_proposals(
                     fasta_path=fasta_path,
                     v_proposal=v_shuffled,
                     current_loss=current_best_loss,
@@ -171,8 +174,10 @@ class HillClimbingOptimizer(BaseOptimizer):
 
         return v_shuffled, current_best_loss, label_mapping
 
-    def grad_single(self, fasta_path, v_proposal, current_loss, label_mapping, i):
-        """Calculate gradients for a single index of v
+    def _value_and_grad_proposals(
+        self, fasta_path, v_proposal, current_loss, label_mapping, i
+    ):
+        """Calculate losses and gradients for a single index change in v
 
         Parameters
         ----------
@@ -182,7 +187,7 @@ class HillClimbingOptimizer(BaseOptimizer):
             v representation of a new tree proposal
         current_loss : float
             Current best loss
-        label_mapping : dict[int, str]
+        label_mapping : Dict[int, str]
             Current mapping of leaf labels (integer) to taxa
         i : long
             index of v to change and to calculate a gradient on

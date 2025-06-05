@@ -4,7 +4,8 @@ import multiprocessing
 import random
 import time
 
-from typing import Final
+from dataclasses import dataclass
+from typing import Dict, List, Final
 
 import numpy as np
 
@@ -16,6 +17,28 @@ DEFAULT_N_JOBS: Final = multiprocessing.cpu_count() // 4
 MIN_N_JOBS: Final = 4
 # Seeding
 MAX_SEED = 42
+
+
+@dataclass
+class BaseResult:
+    """Result of the optimization process.
+
+    Attributes
+    ----------
+    v_opt : numpy.ndarray
+        Optimized phylo2vec vector.
+    label_mapping : Dict[int, str]
+        Mapping of leaf labels (integer) to taxa.
+    best_score : float
+        The best score achieved during optimization.
+    scores : List[float]
+        List of scores obtained during optimization.
+    """
+
+    v: np.ndarray
+    label_mapping: Dict[int, str]
+    best_score: float
+    scores: List[float]
 
 
 class BaseOptimizer:
@@ -49,7 +72,7 @@ class BaseOptimizer:
 
         return label_mapping
 
-    def fit(self, fasta_path):
+    def fit(self, fasta_path) -> BaseResult:
         """Fit an optimizer to a fasta file
 
         Parameters
@@ -61,7 +84,7 @@ class BaseOptimizer:
         -------
         v_opt : numpy.ndarray
             Optimized phylo2vec vector
-        label_mapping : dict[int, str]
+        label_mapping : List[str]
             Mapping of leaf labels (integer) to taxa
         losses : array-like
             List/Array of collected losses
@@ -79,17 +102,17 @@ class BaseOptimizer:
 
         start_time = time.time()
 
-        v_opt, label_mapping, losses = self._optimise(fasta_path, v_init, label_mapping)
+        result = self._optimise(fasta_path, v_init, label_mapping)
 
         end_time = time.time()
 
         if self.verbose:
             print(
                 f"Optimisation finished in {end_time - start_time:.2f} seconds "
-                f"with {len(losses)} loss evaluations."
+                f"with {len(result.scores)} loss evaluations."
             )
 
-        return v_opt, label_mapping, losses
+        return result
 
     def _optimise(self, fasta_path, v, label_mapping):
         raise NotImplementedError
