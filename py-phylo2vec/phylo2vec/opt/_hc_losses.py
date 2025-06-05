@@ -8,6 +8,7 @@ import sys
 from pathlib import PurePosixPath
 
 from phylo2vec.base.newick import to_newick
+from phylo2vec.utils.newick import apply_label_mapping
 
 # Regex for a negative float
 NEG_FLOAT_PATTERN = re.compile(r"-\d+.\d+")
@@ -31,7 +32,7 @@ def raxml_loss(
     ----------
     v : numpy.ndarray or list
         v representation of a tree
-    taxa_dict : dict[int, str]
+    taxa_dict : Dict[int, str]
         Current mapping of leaf labels (integer) to taxa
     fasta_path : str
         Path to fasta file
@@ -52,8 +53,7 @@ def raxml_loss(
     except Exception as err:
         raise ValueError(f"Error for v = {repr(v)}") from err
 
-    for taxa_key, taxa_name in label_mapping.items():
-        newick = re.sub(rf"([^\d]){taxa_key}([,)])", rf"\1{taxa_name}\2", newick)
+    newick = apply_label_mapping(newick, label_mapping)
 
     with open(
         os.path.join(tree_folder_path, outfile), "w", encoding="utf-8"
