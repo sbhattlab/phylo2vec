@@ -49,13 +49,13 @@ def get_edges_exp_log(W, rooted):
         trindx_x_i = jnp.where(trindx_x < i, trindx_x, 1)
         trindx_y_i = jnp.where(trindx_x < i, trindx_y, 0)
 
-        indx = (trindx_x_i, trindx_y_i)
+        index = (trindx_x_i, trindx_y_i)
 
-        E_new = E_new.at[indx].set(
-            E[indx]
+        E_new = E_new.at[index].set(
+            E[index]
             + jnp.log(
                 1
-                - 0.5 * (W_tmp[i - 1, indx[1]] + W_tmp[i - 1, indx[0]])
+                - 0.5 * (W_tmp[i - 1, index[1]] + W_tmp[i - 1, index[0]])
                 + jnp.finfo(float).eps
             )
         )
