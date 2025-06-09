@@ -54,7 +54,9 @@ class HillClimbingOptimizer(BaseOptimizer):
         n_jobs=None,
         verbose=False,
     ):
-        super().__init__(random_seed=random_seed, n_jobs=n_jobs, verbose=verbose)
+        super().__init__(
+            mode="vector", random_seed=random_seed, n_jobs=n_jobs, verbose=verbose
+        )
 
         if tree_folder_path is None:
             os.makedirs("trees", exist_ok=True)
@@ -68,9 +70,9 @@ class HillClimbingOptimizer(BaseOptimizer):
         self.patience = patience
         self.verbose = verbose
 
-    def _optimise(self, fasta_path, v, label_mapping):
+    def _optimise(self, fasta_path, tree, label_mapping):
         current_loss = raxml_loss(
-            v=v,
+            v=tree,
             label_mapping=label_mapping,
             fasta_path=fasta_path,
             tree_folder_path=self.tree_folder_path,
@@ -85,13 +87,13 @@ class HillClimbingOptimizer(BaseOptimizer):
         while wait < self.patience:
             if self.verbose:
                 print("Changing equivalences...")
-            v_proposal = reroot_at_random(v)
+            v_proposal = reroot_at_random(tree)
 
             v_proposal, proposal_loss, label_mapping = self._step(
-                fasta_path, v.copy(), label_mapping
+                fasta_path, tree.copy(), label_mapping
             )
 
-            v = v_proposal.copy()
+            tree = v_proposal.copy()
 
             if abs(proposal_loss - current_loss) > self.tol:
                 # Found a better loss so reset the patience counter
@@ -108,7 +110,7 @@ class HillClimbingOptimizer(BaseOptimizer):
             losses.append(current_loss)
 
         best_params = BaseResult(
-            v=v,
+            best=tree,
             label_mapping=label_mapping,
             scores=losses,
             best_score=current_loss,

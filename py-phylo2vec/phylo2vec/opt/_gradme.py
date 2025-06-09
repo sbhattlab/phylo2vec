@@ -67,7 +67,9 @@ class GradMEOptimizer(BaseOptimizer):
         n_jobs=None,
         verbose=False,
     ):
-        super().__init__(random_seed=random_seed, n_jobs=n_jobs, verbose=verbose)
+        super().__init__(
+            mode="vector", random_seed=random_seed, n_jobs=n_jobs, verbose=verbose
+        )
 
         self.model = model
 
@@ -81,7 +83,7 @@ class GradMEOptimizer(BaseOptimizer):
     def _optimise(
         self,
         fasta_path,
-        v,
+        tree,
         label_mapping,
     ):
         data = self.pdist(fasta_path, self.model)
@@ -111,9 +113,9 @@ class GradMEOptimizer(BaseOptimizer):
                 value_and_grad_fun,
             )
 
-            v = w_out.argmax(1)
+            tree = w_out.argmax(1)
 
-            w_discrete = jnp.eye(w_out.shape[0])[v]
+            w_discrete = jnp.eye(w_out.shape[0])[tree]
 
             score = gradme_loss(w_discrete, dm, rooted=True)
 
@@ -122,10 +124,10 @@ class GradMEOptimizer(BaseOptimizer):
             scores.append(best_score)
 
             if not self.rooted:
-                v = reroot_at_random(v)
+                tree = reroot_at_random(tree)
 
             # Queue shuffle
-            _, vec_mapping = queue_shuffle(v, shuffle_cherries=True)
+            _, vec_mapping = queue_shuffle(tree, shuffle_cherries=True)
 
             # Re-arrange the label mapping and the distance matrix
             col_order = []
@@ -138,10 +140,10 @@ class GradMEOptimizer(BaseOptimizer):
             if self.verbose:
                 iterator.set_postfix({"\033[95m Best score ": best_score})
 
-        v = jnp.eye(w_out.shape[0])[w_out.argmax(1)]
+        tree = jnp.eye(w_out.shape[0])[w_out.argmax(1)]
 
         best_params = GradMEResult(
-            v=v,
+            best=tree,
             best_score=best_score,
             scores=scores,
             W=w_out,

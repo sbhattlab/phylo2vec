@@ -2,6 +2,7 @@
 
 import multiprocessing
 import random
+import sys
 import time
 
 from dataclasses import dataclass
@@ -10,6 +11,7 @@ from typing import Dict, List, Final
 import numpy as np
 
 from phylo2vec.datasets import read_fasta
+from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
 
 # Multiprocessing
@@ -17,6 +19,8 @@ DEFAULT_N_JOBS: Final = multiprocessing.cpu_count() // 4
 MIN_N_JOBS: Final = 4
 # Seeding
 MAX_SEED = 42
+# Test if the current platform is Windows or not
+IS_WINDOWS = sys.platform.startswith("win")
 
 
 @dataclass
@@ -25,8 +29,8 @@ class BaseResult:
 
     Attributes
     ----------
-    v_opt : numpy.ndarray
-        Optimized phylo2vec vector.
+    best : numpy.ndarray
+        Optimized phylo2vec vector or matrix.
     label_mapping : Dict[int, str]
         Mapping of leaf labels (integer) to taxa.
     best_score : float
@@ -35,7 +39,7 @@ class BaseResult:
         List of scores obtained during optimization.
     """
 
-    v: np.ndarray
+    best: np.ndarray
     label_mapping: Dict[int, str]
     best_score: float
     scores: List[float]
@@ -51,7 +55,9 @@ class BaseOptimizer:
         Random seed, by default None
     """
 
-    def __init__(self, random_seed=None, verbose=False, n_jobs=None):
+    def __init__(self, mode="vector", random_seed=None, verbose=False, n_jobs=None):
+        assert mode in ["vector", "matrix"], "Mode must be either 'vector' or 'matrix'."
+        self.mode = mode
         self.random_seed = (
             random.randint(0, MAX_SEED) if random_seed is None else random_seed
         )
@@ -82,12 +88,9 @@ class BaseOptimizer:
 
         Returns
         -------
-        v_opt : numpy.ndarray
-            Optimized phylo2vec vector
-        label_mapping : List[str]
-            Mapping of leaf labels (integer) to taxa
-        losses : array-like
-            List/Array of collected losses
+        result : BaseResult
+            Result of the optimization process, containing the optimized vector,
+            label mapping, best score, and scores during optimization.
         """
         # TODO: figure out how to change this when the user selects load fasta
         # Probably an boolean "preloaded"
@@ -98,11 +101,16 @@ class BaseOptimizer:
 
         n_leaves = len(label_mapping)
 
-        v_init = sample_vector(n_leaves)
+        if self.mode == "vector":
+            obj_init = sample_vector(n_leaves)
+        elif self.mode == "matrix":
+            obj_init = sample_matrix(n_leaves)
+        else:
+            raise ValueError(f"Unknown mode: {self.mode}")
 
         start_time = time.time()
 
-        result = self._optimise(fasta_path, v_init, label_mapping)
+        result = self._optimise(fasta_path, obj_init, label_mapping)
 
         end_time = time.time()
 
@@ -114,7 +122,7 @@ class BaseOptimizer:
 
         return result
 
-    def _optimise(self, fasta_path, v, label_mapping):
+    def _optimise(self, fasta_path, tree, label_mapping):
         raise NotImplementedError
 
     def __repr__(self):
