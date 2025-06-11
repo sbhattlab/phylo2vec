@@ -3,18 +3,15 @@
 import os
 import re
 import subprocess
-import sys
 
 from pathlib import PurePosixPath
 
 from phylo2vec.base.newick import to_newick
+from phylo2vec.opt._base import IS_WINDOWS
 from phylo2vec.utils.newick import apply_label_mapping
 
 # Regex for a negative float
 NEG_FLOAT_PATTERN = re.compile(r"-\d+.\d+")
-
-# Test if the current platform is Windows or not
-IS_WINDOWS = sys.platform.startswith("win")
 
 
 def raxml_loss(
