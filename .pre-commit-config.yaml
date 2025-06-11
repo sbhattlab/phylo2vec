@@ -30,6 +30,7 @@ repos:
     hooks:
       - id: codespell
         args: ["--write-changes", "--ignore-words", ".codespell-whitelist"]
+        exclude: \.ipynb$
 
   - repo: local
     hooks:
