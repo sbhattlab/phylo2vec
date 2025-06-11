@@ -43,12 +43,32 @@ class GradME(BaseOptimizer):
 
     Parameters
     ----------
+    model : str
+        Phylogenetic model to use (e.g., "JC", "K80", etc.)
+    gamma : bool, optional
+        Whether to use gamma correction for the distance matrix, by default False
+    solver : str, optional
+        The optimization solver to use, by default "adafactor"
+    learning_rate : float, optional
+        Learning rate for the optimizer, by default 1.5
+    rooted : bool, optional
+        Whether to operate in a rooted tree space or not, by default False
+    n_shuffles : int, optional
+        Number of shuffles to perform during optimization, by default 100
+    n_iter_per_step : int, optional
+        Number of iterations per optimization step, by default 5000
+    patience : int, optional
+        Number of iterations to wait for improvement before stopping, by default 10
+    tol : float, optional
+        Tolerance for convergence, by default 1e-8
     random_seed : int, optional
         Random seed for reproducibility, by default None
     n_jobs : int, optional
         Number of parallel jobs, by default None
     verbose : bool, optional
         Verbosity level, by default False
+    optimizer_kwargs : dict, optional
+        Additional keyword arguments for the optimizer, by default {}
     """
 
     def __init__(
