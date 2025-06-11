@@ -1,7 +1,7 @@
 """Phylo2Vec-based optimisation methods."""
 
-from ._base import BaseOptimizer
-from ._gradme import GradMEOptimizer
-from ._hc import HillClimbingOptimizer
+from ._gradme import GradME
+from ._gradme_losses import gradme_loss
+from ._hc import HillClimbing
 
-__all__ = ["BaseOptimizer", "GradMEOptimizer", "HillClimbingOptimizer"]
+__all__ = ["GradME", "gradme_loss", "HillClimbing"]

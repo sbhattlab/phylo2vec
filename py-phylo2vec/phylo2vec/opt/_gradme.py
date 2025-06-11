@@ -1,25 +1,21 @@
 """Methods for GradME optimisation."""
 
+import random
+
 from dataclasses import dataclass
 
+import jax
 import jax.numpy as jnp
 import optax
-import rpy2
-import rpy2.robjects as ro
 
 from jax import jit, value_and_grad
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.conversion import localconverter
-from rpy2.robjects.packages import importr
+from jax.nn import softmax
 from tqdm import tqdm
 
 from phylo2vec.opt._base import BaseOptimizer, BaseResult
-from phylo2vec.opt._gradme_losses import gradme_loss
-from phylo2vec.utils.vector import queue_shuffle, reroot_at_random
-
-
-# Disable rpy2 warning
-rpy2.rinterface_lib.callbacks.consolewrite_warnerror = lambda *args: None
+from phylo2vec.opt._gradme_losses import gradme_loss, make_W
+from phylo2vec.opt.utils import dnadist
+from phylo2vec.utils.vector import queue_shuffle, reroot
 
 
 @dataclass
@@ -34,10 +30,11 @@ class GradMEResult(BaseResult):
         The optimized weight matrix representing the phylogenetic tree.
     """
 
-    W: jnp.ndarray
+    best_W: jnp.ndarray
+    label_mapping: dict
 
 
-class GradMEOptimizer(BaseOptimizer):
+class GradME(BaseOptimizer):
     """GradME Optimizer for phylogenetic trees.
 
     This optimizer uses the GradME algorithm to optimize phylogenetic trees.
@@ -57,28 +54,33 @@ class GradMEOptimizer(BaseOptimizer):
     def __init__(
         self,
         model,
+        gamma=False,
         solver="adafactor",
         learning_rate=1.5,
         rooted=False,
         n_shuffles=100,
         n_iter_per_step=5000,
+        patience=10,
         tol=1e-8,
         random_seed=None,
         n_jobs=None,
         verbose=False,
+        **optimizer_kwargs,
     ):
         super().__init__(
             mode="vector", random_seed=random_seed, n_jobs=n_jobs, verbose=verbose
         )
 
         self.model = model
-
-        self.optimizer = getattr(optax, solver)(learning_rate=learning_rate)
+        self.gamma = gamma
+        self.solver = solver
         self.learning_rate = learning_rate
         self.rooted = rooted
         self.n_shuffles = n_shuffles
         self.n_iter_per_step = n_iter_per_step
+        self.patience = patience
         self.tol = tol
+        self.optimizer_kwargs = optimizer_kwargs
 
     def _optimise(
         self,
@@ -86,15 +88,21 @@ class GradMEOptimizer(BaseOptimizer):
         tree,
         label_mapping,
     ):
-        data = self.pdist(fasta_path, self.model)
+        data = dnadist(fasta_path, self.model, self.gamma)
         dm = jnp.asarray(data)
-        k = dm.shape[0] - 1
+        n_leaves = dm.shape[0]
 
         # Forward and backward pass function
+        optimizer = getattr(optax, self.solver)(
+            learning_rate=self.learning_rate, **self.optimizer_kwargs
+        )
         value_and_grad_fun = jit(value_and_grad(gradme_loss))
 
         # Initial "best" score, set as an arbitrarily high value
         best_score = 1e8
+        best_W = jnp.tril(jnp.ones((n_leaves, n_leaves)))
+        best_tree = jnp.zeros((n_leaves - 1,))
+        best_label_mapping = label_mapping.copy()
 
         # List of scores obtained during optimization
         scores = []
@@ -104,99 +112,110 @@ class GradMEOptimizer(BaseOptimizer):
         if self.verbose:
             iterator = tqdm(iterator)
 
-        for _ in iterator:
-            w_in = self._init_W(k)
+        # Patience
+        wait = 0
 
-            w_out = self._step(
-                w_in,
+        for _ in iterator:
+            # Initialize parameters for the current iteration
+            params_in = self._init(n_leaves)
+
+            # Perform a round of optimization
+            params_out = self._step(
+                params_in,
                 dm,
                 value_and_grad_fun,
+                optimizer,
             )
 
+            # Transform the parameters into a weight matrix
+            # Compute the loss of the most probable tree
+            w_out = make_W(params_out, n_leaves)
             tree = w_out.argmax(1)
+            score = gradme_loss(jnp.eye(n_leaves - 1)[tree], dm, rooted=self.rooted)
 
-            w_discrete = jnp.eye(w_out.shape[0])[tree]
-
-            score = gradme_loss(w_discrete, dm, rooted=True)
-
-            best_score = min(best_score, score)
+            # Update the best score and the best parameters
+            if score < best_score:
+                best_tree = tree
+                best_W = w_out
+                best_score = score
+                best_label_mapping = label_mapping.copy()
+                wait = 0
+            else:
+                wait += 1
 
             scores.append(best_score)
 
-            if not self.rooted:
-                tree = reroot_at_random(tree)
-
-            # Queue shuffle
-            _, vec_mapping = queue_shuffle(tree, shuffle_cherries=True)
-
-            # Re-arrange the label mapping and the distance matrix
-            col_order = []
-            for i, idx in enumerate(vec_mapping):
-                label_mapping[i] = label_mapping[idx]
-                col_order.append(label_mapping[i])
-
-            dm = jnp.asarray(data.loc[col_order, col_order])
+            dm, label_mapping = self._shuffle(tree, data, label_mapping, self.rooted)
 
             if self.verbose:
-                iterator.set_postfix({"\033[95m Best score ": best_score})
+                iterator.set_postfix_str(f"Current loss: {best_score:.6f}")
 
-        tree = jnp.eye(w_out.shape[0])[w_out.argmax(1)]
+            if wait >= self.patience:
+                if self.verbose:
+                    print(
+                        f"Early stopping after {self.patience} iterations "
+                        f"without improvement."
+                    )
+                break
 
-        best_params = GradMEResult(
-            best=tree,
+        return GradMEResult(
+            best=best_tree,
+            best_W=softmax(best_W, where=jnp.tril(jnp.ones_like(best_W))),
             best_score=best_score,
             scores=scores,
-            W=w_out,
-            label_mapping=label_mapping,
+            label_mapping=best_label_mapping,
         )
 
-        return best_params
+    def _step(self, params, dm, value_and_grad_fun, optimizer):
+        params = self._init(n_leaves=dm.shape[0])
 
-    @staticmethod
-    def _init_W(k, eps=1e-8):
-        x = jnp.tril(jnp.ones((k, k)))
-
-        w_init = x / (x.sum(1)[:, jnp.newaxis] + eps)
-
-        return w_init
-
-    def _step(self, w, dm, value_and_grad_fun):
-        state = self.optimizer.init(w)
+        state = optimizer.init(params)
 
         prev_loss = 1e8
 
         for _ in range(self.n_iter_per_step):
-            loss, gradients = value_and_grad_fun(w, dm, self.rooted)
+            loss, gradients = value_and_grad_fun(params, dm, self.rooted)
 
             if jnp.abs(loss - prev_loss) < self.tol:
                 break
 
             prev_loss = loss
 
-            updates, state = self.optimizer.update(gradients, state, w)
+            updates, state = optimizer.update(gradients, state, params)
+            params = optax.apply_updates(params, updates)
 
-            w = optax.apply_updates(w, updates)
-
-        return w
+        return params
 
     @staticmethod
-    def pdist(fasta_path, model):
-        with localconverter(ro.default_converter + pandas2ri.converter):
-            importr("ape")
+    def _init(n_leaves):
+        key = jax.random.PRNGKey(0)
 
-            ro.globalenv["fasta_path"] = fasta_path
-            ro.globalenv["model"] = model
+        length = n_leaves * (n_leaves - 1) // 2
 
-            # DNA Evolution model: F81 + Gamma
-            dm = ro.r(
-                """
-                aln <- read.FASTA(fasta_path, type = "DNA")
+        return (
+            0.5 * jnp.ones(length)
+            + jax.random.normal(key, shape=(length,)) * 1 / n_leaves
+        )
 
-                dm <- dist.dna(aln, model = model)
+    @staticmethod
+    def _shuffle(tree, data, label_mapping, rooted):
+        if not rooted:
+            root = random.randint(0, data.shape[0])
+            tree = reroot(tree, root)
 
-                D <- as.data.frame(as.matrix(dm))
-                D
-                """
-            )
+        # Queue shuffle
+        _, vec_mapping = queue_shuffle(tree, shuffle_cherries=False)
 
-        return dm
+        # Re-arrange the label mapping and the distance matrix
+        label_mapping_new = {i: label_mapping[idx] for i, idx in enumerate(vec_mapping)}
+        label_mapping = label_mapping_new
+
+        col_order = [label_mapping_new[i] for i in range(len(label_mapping_new))]
+
+        dm = jnp.asarray(data.loc[col_order, col_order])
+
+        return dm, label_mapping
+
+
+# This is a compatibility alias for the HillClimbing class.
+GradMEOptimizer = GradME
