@@ -68,15 +68,15 @@ class HillClimbing(BaseOptimizer):
         self.verbose = verbose
         self.loss_kwargs = loss_kwargs
 
-    def _optimise(self, fasta_path, tree, label_mapping):
+    def _optimise(self, fasta_path, tree, label_mapping) -> BaseResult:
         """Optimise a tree using hill-climbing
 
         Parameters
         ----------
         fasta_path : str
             Path to fasta file
-        v_proposal : numpy.ndarray or list
-            v representation of the current tree
+        tree : numpy.ndarray
+            random tree to optimize, in v representation
         label_mapping : Dict[int, str]
             Current mapping of leaf labels (integer) to taxa
 

@@ -1,15 +1,20 @@
 """Loss functions for GradME optimisation."""
 
+import math
+
 import jax.numpy as jnp
 
 from jax import jit, lax
-from jax.nn import softmax
+from jax.nn import softplus
 from jax.scipy.special import logsumexp
 
 
 @jit
 def get_edges_exp_log(W, rooted):
-    """Log version of get_edges_exp
+    """
+    Calculate the expectation of the objective value of a tree drawn with distribution W.
+
+    E_ij = Expected value of the path length between nodes i and j in the tree
 
     Parameters
     ----------
@@ -90,15 +95,55 @@ def get_edges_exp_log(W, rooted):
     return E
 
 
+def make_W(params, n_leaves=None, eps=1e-8):
+    """'Un-flatten' params to a W matrix representing the distribution of ordered trees
+
+    Parameters
+    ----------
+    params : jax.numpy.ndarray
+        Flattened version of W
+    n_leaves : int, optional
+        Number of leaves in the tree, by default None.
+        If None, it will be inferred from the length of params.
+    eps : float, optional
+        Term added to improve numerical stability, by default 1e-8
+
+    Returns
+    -------
+    W : jax.numpy.ndarray
+        distribution of ordered trees
+    """
+    if n_leaves is None:
+        # Solution of quadratic equation: k^2 - k - 2*len(params)
+        k = int((1 + math.sqrt(1 + 8 * len(params))) // 2) - 1
+    else:
+        k = n_leaves - 1
+
+    W = jnp.zeros((k, k)).at[jnp.tril_indices(k)].set(softplus(params))
+
+    W = W / (jnp.tril(W).sum(1)[:, jnp.newaxis] + eps)
+
+    return W
+
+
 @jit
-def gradme_loss(W, D, rooted):
+def _gradme_loss(W, dm, rooted):
+    expected_path_lengths = get_edges_exp_log(W, rooted)
+
+    loss = logsumexp(expected_path_lengths, b=dm)
+
+    return loss
+
+
+def gradme_loss(weights, dm, rooted):
     """Log version of the BME loss function used in GradME
 
     Parameters
     ----------
-    W : jax.numpy.array
-        Ordered tree probability matrix
-    D : jax.numpy.array
+    weights : jax.numpy.array
+        Can be a squared matrix (ordered tree probability matrix)
+        or a vector (flattened tree probability matrix)
+    dm : jax.numpy.array
         Distance matrix
     rooted : bool
         True is the tree is rooted, otherwise False
@@ -108,10 +153,11 @@ def gradme_loss(W, D, rooted):
     float
         Continuous BME loss
     """
-    W = softmax(W, where=jnp.tril(jnp.ones_like(W)))
+    if weights.ndim == 1:
+        weights = make_W(weights, dm.shape[0])
 
-    E = get_edges_exp_log(W, rooted)
+    assert (
+        weights.ndim == 2 and weights.shape[0] == weights.shape[1]
+    ), "Input must be a square matrix."
 
-    loss = logsumexp(E, b=D)
-
-    return loss
+    return _gradme_loss(weights, dm, rooted)
