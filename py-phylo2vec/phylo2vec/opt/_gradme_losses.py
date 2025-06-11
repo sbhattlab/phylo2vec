@@ -96,6 +96,23 @@ def get_edges_exp_log(W, rooted):
 
 
 def make_W(params, n_leaves=None, eps=1e-8):
+    """'Un-flatten' params to a W matrix representing the distribution of ordered trees
+
+    Parameters
+    ----------
+    params : jax.numpy.ndarray
+        Flattened version of W
+    n_leaves : int, optional
+        Number of leaves in the tree, by default None.
+        If None, it will be inferred from the length of params.
+    eps : float, optional
+        Term added to improve numerical stability, by default 1e-8
+
+    Returns
+    -------
+    W : jax.numpy.ndarray
+        distribution of ordered trees
+    """
     if n_leaves is None:
         # Solution of quadratic equation: k^2 - k - 2*len(params)
         k = int((1 + math.sqrt(1 + 8 * len(params))) // 2) - 1

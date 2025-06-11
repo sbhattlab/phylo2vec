@@ -3,6 +3,7 @@
 import random
 
 from dataclasses import dataclass
+from typing import Dict, Tuple
 
 import jax
 import jax.numpy as jnp
@@ -26,12 +27,11 @@ class GradMEResult(BaseResult):
 
     Attributes
     ----------
-    W : jax.numpy.ndarray
+    best_W : jax.numpy.ndarray
         The optimized weight matrix representing the phylogenetic tree.
     """
 
     best_W: jnp.ndarray
-    label_mapping: dict
 
 
 class GradME(BaseOptimizer):
@@ -87,7 +87,32 @@ class GradME(BaseOptimizer):
         fasta_path,
         tree,
         label_mapping,
-    ):
+    ) -> GradMEResult:
+        """Optimise a tree using GradME
+
+        Parameters
+        ----------
+        fasta_path : str
+            Path to fasta file
+        tree : numpy.ndarray
+            random tree to optimize, in v representation (unused)
+        label_mapping : Dict[int, str]
+            Current mapping of leaf labels (integer) to taxa
+
+        Returns
+        -------
+        GradMEResult
+            best : numpy.ndarray
+                Optimized phylo2vec vector.
+            best_W : jax.numpy.ndarray
+                The optimized weight matrix representing the phylogenetic tree.
+            label_mapping : Dict[int, str]
+                Mapping of leaf labels (integer) to taxa.
+            best_score : float
+                The best score achieved during optimization.
+            scores : List[float]
+                List of scores obtained during optimization.
+        """
         data = dnadist(fasta_path, self.model, self.gamma)
         dm = jnp.asarray(data)
         n_leaves = dm.shape[0]
@@ -166,7 +191,25 @@ class GradME(BaseOptimizer):
             label_mapping=best_label_mapping,
         )
 
-    def _step(self, params, dm, value_and_grad_fun, optimizer):
+    def _step(self, dm, params, value_and_grad_fun, optimizer) -> jax.numpy.ndarray:
+        """Perform a step of the hill-climbing optimisation
+
+        Parameters
+        ----------
+        dm : jax.numpy.ndarray
+            Distance matrix of the taxa
+        params : jax.numpy.ndarray
+            Flattened triangular matrix representing the continous tree
+        value_and_grad_fun : Callable
+            Function to compute the loss and gradients
+        optimizer : optax optimizer
+            Optimizer to use for gradient descent
+
+        Returns
+        -------
+        params : jax.numpy.ndarray
+            Updated parameters after one step of optimization.
+        """
         params = self._init(n_leaves=dm.shape[0])
 
         state = optimizer.init(params)
@@ -187,7 +230,20 @@ class GradME(BaseOptimizer):
         return params
 
     @staticmethod
-    def _init(n_leaves):
+    def _init(n_leaves: int) -> jax.numpy.ndarray:
+        """Initialise a set of parameters for n_leaves
+
+        Parameters
+        ----------
+        n_leaves : int
+            Number of leaves
+
+        Returns
+        -------
+        jax.numpy.ndarray
+            Initial parameters as a flattened triangular matrix
+            representing the continuous tree.
+        """
         key = jax.random.PRNGKey(0)
 
         length = n_leaves * (n_leaves - 1) // 2
@@ -198,7 +254,31 @@ class GradME(BaseOptimizer):
         )
 
     @staticmethod
-    def _shuffle(tree, data, label_mapping, rooted):
+    def _shuffle(
+        tree, data, label_mapping, rooted
+    ) -> Tuple[jax.numpy.ndarray, Dict[int, str]]:
+        """
+        Shuffle the tree
+        (and the label mapping and data) accordingly
+
+        Parameters
+        ----------
+        tree : jax.numpy.ndarray
+            The tree represented as a vector
+        data : pandas.DataFrame
+            Distance matrix of the taxa
+        label_mapping : Dict[int, str]
+            Current mapping of leaf labels (integer) to taxa
+        rooted : bool
+            Whether the tree is rooted or not
+
+        Returns
+        -------
+        dm : jax.numpy.ndarray
+            The shuffled distance matrix.
+        label_mapping : Dict[int, str]
+            The updated mapping of leaf labels (integer) to taxa after shuffling.
+        """
         if not rooted:
             root = random.randint(0, data.shape[0])
             tree = reroot(tree, root)
