@@ -170,7 +170,7 @@ def reorder_v(reorder_method, v_old, label_mapping_old, shuffle_cols=False):
         v_new, vec_mapping = queue_shuffle(v_old, shuffle_cherries=shuffle_cols)
         # For compatibility with the old label mapping (for _hc)
         label_mapping_new = {
-            vec_mapping[i]: label_mapping_old[i] for i in range(len(vec_mapping))
+            i: label_mapping_old[idx] for i, idx in enumerate(vec_mapping)
         }
     elif reorder_method == "bfs":
         raise ValueError(

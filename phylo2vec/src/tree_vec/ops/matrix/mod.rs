@@ -25,26 +25,17 @@ use crate::tree_vec::ops::vector::{
 ///
 /// Assumes a valid Newick string. Relies on helper functions for processing.
 pub fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
-    let (cherries, mut bls, row_idxs, bl_rows_to_swap) = if has_parents(newick) {
+    // Get the cherries and branch lengths
+    let (mut cherries, mut bls) = get_cherries_with_bls(newick)
+        .expect("failed to get cherries with branch lengths and no parents");
+
+    // Order the cherries in the ancestry matrix
+    let (row_idxs, bl_rows_to_swap) = if has_parents(newick) {
         // Case 1: Newick string with parent nodes
-
-        // Get the cherries and branch lengths
-        let (mut cherries, bls) =
-            get_cherries_with_bls(newick).expect("failed to get cherries with branch lengths");
-
-        // Order the cherries in the ancestry matrix
-        let (row_idxs, bl_rows_to_swap) = order_cherries(&mut cherries);
-        (cherries, bls, row_idxs, bl_rows_to_swap)
+        order_cherries(&mut cherries)
     } else {
         // Case 2: Newick string without parent nodes
-
-        // Get the cherries and branch lengths
-        let (mut cherries, bls) = get_cherries_with_bls(newick)
-            .expect("failed to get cherries with branch lengths and no parents");
-
-        // Order the cherries in the ancestry matrix
-        let (row_idxs, bl_rows_to_swap) = order_cherries_no_parents(&mut cherries);
-        (cherries, bls, row_idxs, bl_rows_to_swap)
+        order_cherries_no_parents(&mut cherries)
     };
 
     // Build the vector
@@ -247,9 +238,6 @@ mod tests {
         #[case] expected_distances: Vec<Vec<f32>>,
     ) {
         let distances = cophenetic_distances_with_bls(&matrix);
-
-        println!("Distances: {:?}", distances);
-        println!("Expected Distances: {:?}", expected_distances);
 
         let rtol = 1e-5;
         let atol = 1e-8;
