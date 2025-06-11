@@ -608,6 +608,59 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
 ///
 /// for more details, see https://doi.org/10.1093/gbe/evad213
 ///
+/// Illustration of the algorithm with a simple case:
+///                  ////-3
+///            ////6|
+///      ////7|      \\\\-2
+///     |      \\\\-1
+///   -8|
+///     |
+///     |      ////-4
+///      \\\\5|
+///            \\\\-0
+///
+///   The ancestry array of this tree is:
+///   [[0, 4, 5]
+///   [2, 3, 6]
+///   [1, 6, 7]
+///   [5, 7, 8]]
+///
+///   Unrolled from the bottom right, it becomes:
+///   8 7 5 6 1 3 2 4 0
+///
+///   We encode the nodes as follows:
+///   Start by encoding the first two non-root nodes as 0, 1
+///   For the next pairs:
+///    * The left member takes the label was the previous parent node
+///    * The right member increments the previous right member by 1
+///
+///   8 7 5 6 1 3 2 4 0
+///     0 1 0 2
+///
+///   (previous parent node = 7, encoded as 0)
+///
+///   then
+///
+///   8 7 5 6 1 3 2 4 0
+///     0 1 0 2 1 3
+///
+///   (previous parent node = 5, encoded as 1)
+///
+///   then
+///
+///   8 7 5 6 1 3 2 4 0
+///     0 1 0 2 1 3 0 4
+///
+///   (previous parent node = 6, encoded as 0)
+///
+///   The created sequence, viewed two by two
+///   consitutes the reversed pairs of the Phylo2Vec vector:
+///   ((0, 1), (0, 2), (1, 3), (0, 4))
+///
+///   Note that the full algorithm also features a queue of internal nodes
+///   which could switch the processing order of rows in the ancestry array.
+///
+///
 /// # Example
 /// ```
 /// use phylo2vec::tree_vec::ops::vector::queue_shuffle;
@@ -626,21 +679,22 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
 /// assert_eq!(label_mapping, vec![1, 5, 6, 4, 0, 2, 3]);
 /// ```
 pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<usize>) {
-    let pairs = get_pairs(v);
-    let ancestry = get_ancestry_from_pairs(&pairs);
+    let ancestry = get_ancestry(v);
 
     let k = v.len();
     let n_leaves = k + 1;
 
-    //
-    // Stage 1: Create a queue of internal nodes to visit
-    //
+    // Queue of internal nodes
     let mut queue = vec![2 * k];
     let mut j = 0;
+
+    // Output pairs
     let mut new_pairs: Pairs = Vec::new();
 
+    // Output mapping of leaves to their new labels (indices)
     let mut label_mapping: Vec<usize> = (0..n_leaves).collect();
 
+    // Node code tracks the `code` of internal nodes
     let mut node_code = Vec::new();
 
     while new_pairs.len() < k {
