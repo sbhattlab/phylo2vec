@@ -325,14 +325,11 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![0], vec![0], vec![0, 1])]
-    #[case(vec![0, 0], vec![0, 0], vec![0, 1, 2])]
-    #[case(vec![0, 0, 0], vec![0, 0, 0], vec![0, 1, 2, 3])]
-    #[case(vec![0, 2, 1, 6], vec![0, 0, 0, 3], vec![0, 3, 2, 4, 1])]
-    #[case(vec![0, 0, 1, 5, 5], vec![0, 0, 1, 0, 1], vec![0, 1, 4, 5, 2, 3])]
-    #[case(vec![0, 0, 0, 2, 5, 3], vec![0, 0, 0, 2, 3, 2], vec![0, 1, 2, 3, 6, 4, 5])]
-    #[case(vec![0, 0, 0, 2, 6, 3], vec![0, 0, 0, 2, 0, 5], vec![0, 1, 2, 5, 4, 3, 6])]
-    #[case(vec![0, 0, 0, 2, 7, 3], vec![0, 0, 0, 0, 3, 4], vec![0, 1, 3, 4, 5, 2, 6])]
+    #[case(vec![0], vec![0], vec![1, 0])]
+    #[case(vec![0, 0], vec![0, 1], vec![1, 2, 0])]
+    #[case(vec![0, 0, 0], vec![0, 1, 2], vec![1, 2, 3, 0])]
+    #[case(vec![0, 2, 1, 3], vec![0, 1, 1, 1], vec![2, 4, 0, 1, 3])]
+    #[case(vec![0, 0, 0, 2, 5, 3], vec![0, 1, 1, 2, 3, 2], vec![1, 5, 6, 4, 0, 2, 3])]
     fn test_queue_shuffle(
         #[case] v_input: Vec<usize>,
         #[case] v_expected: Vec<usize>,

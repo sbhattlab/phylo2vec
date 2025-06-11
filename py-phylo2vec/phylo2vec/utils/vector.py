@@ -104,6 +104,50 @@ def queue_shuffle(v, shuffle_cherries=False) -> Tuple[np.ndarray, List[int]]:
     while also ensuring a smooth path through the space of orderings
 
     For more details, see https://doi.org/10.1093/gbe/evad213
+    Illustration of the algorithm:
+                    ////-3
+                ////6|
+        ////7|      \\\\-2
+        |     |
+    -8|      \\\\-1
+        |
+        |      ////-4
+        \\\\5|
+                \\\\-0
+
+    The ancestry array of this tree is:
+    [8, 7, 5]
+    [7, 6, 1]
+    [6, 3, 2]
+    [5, 4, 0]
+
+    Unrolled, it becomes:
+    8 7 5 6 1 3 2 4 0
+
+    We encode the nodes as it:
+    Start by encoding the first two non-root nodes as 0, 1
+    For the next pairs:
+        * The left member takes the label was the previous parent node
+        * The right member increments the previous right member by 1
+
+    Ex:
+    8 7 5 6 1 3 2 4 0
+        0 1 0 2
+
+    then
+
+    8 7 5 6 1 3 2 4 0
+        0 1 0 2 1 3
+
+    then
+
+    8 7 5 6 1 3 2 4 0
+        0 1 0 2 1 3 0 4
+
+    The code for the leaf nodes (0, 1, 2, 3, 4) is their new label
+
+    Note that the full algorithm also features a queue of internal nodes
+    which could switch the processing order of rows in the ancestry array.
 
     Parameters
     ----------
@@ -170,7 +214,7 @@ def reorder_v(reorder_method, v_old, label_mapping_old, shuffle_cols=False):
         v_new, vec_mapping = queue_shuffle(v_old, shuffle_cherries=shuffle_cols)
         # For compatibility with the old label mapping (for _hc)
         label_mapping_new = {
-            vec_mapping[i]: label_mapping_old[i] for i in range(len(vec_mapping))
+            i: label_mapping_old[idx] for i, idx in enumerate(vec_mapping)
         }
     elif reorder_method == "bfs":
         raise ValueError(
