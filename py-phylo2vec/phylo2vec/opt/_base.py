@@ -2,7 +2,6 @@
 
 import multiprocessing
 import random
-import sys
 import time
 
 from dataclasses import dataclass
@@ -19,8 +18,6 @@ DEFAULT_N_JOBS: Final = multiprocessing.cpu_count() // 4
 MIN_N_JOBS: Final = 4
 # Seeding
 MAX_SEED = 42
-# Test if the current platform is Windows or not
-IS_WINDOWS = sys.platform.startswith("win")
 
 
 @dataclass
@@ -56,11 +53,11 @@ class BaseOptimizer:
     """
 
     def __init__(self, mode="vector", random_seed=None, verbose=False, n_jobs=None):
+
         assert mode in ["vector", "matrix"], "Mode must be either 'vector' or 'matrix'."
         self.mode = mode
-        self.random_seed = (
-            random.randint(0, MAX_SEED) if random_seed is None else random_seed
-        )
+
+        self.random_seed = random_seed or random.randint(0, MAX_SEED)
         random.seed(self.random_seed)
         np.random.seed(self.random_seed)
 
@@ -71,12 +68,6 @@ class BaseOptimizer:
     @staticmethod
     def _infer_n_jobs(n_jobs=None):
         return n_jobs or max(MIN_N_JOBS, DEFAULT_N_JOBS)
-
-    @staticmethod
-    def _make_label_mapping(records):
-        label_mapping = dict(enumerate(r.id.replace(" ", ".") for r in records))
-
-        return label_mapping
 
     def fit(self, fasta_path) -> BaseResult:
         """Fit an optimizer to a fasta file
@@ -95,9 +86,10 @@ class BaseOptimizer:
         # TODO: figure out how to change this when the user selects load fasta
         # Probably an boolean "preloaded"
         # If True, change the fasta path to include the module name
-        records = list(read_fasta(fasta_path))
+        records = read_fasta(fasta_path)
 
-        label_mapping = self._make_label_mapping(records)
+        # Make a label mapping from the records
+        label_mapping = dict(enumerate(r.id.replace(" ", ".") for r in records))
 
         n_leaves = len(label_mapping)
 

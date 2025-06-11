@@ -13,29 +13,27 @@ from phylo2vec.opt._hc_losses import raxml_loss
 from phylo2vec.utils.vector import reorder_v, reroot_at_random
 
 
-class HillClimbingOptimizer(BaseOptimizer):
+class HillClimbing(BaseOptimizer):
     """Optimisation using a simple hill-climbing scheme
 
     More details in the Phylo2Vec paper/preprint
 
     Parameters
     ----------
-    raxml_cmd : str
-        Location of the RAxML-nG executable, by default "raxml-ng"
-    tree_folder_path : str, optional
-        Path to a folder which will contain all intermediary and best trees, by default None
-        If None, will create a folder called "trees"
-    substitution_model : str, optional
+    model : str, optional
         DNA/AA substitution model, by default "GTR"
-    random_seed : int, optional
-        Random seed, by default None
-        Controls both the randomness of the initial vector
     tol : float, optional
         Tolerance for topology change, by default 0.001
     patience : int, optional
         Number of passes without improvement, by default 3
     rounds : int, optional
         Number of indices of v to change in a single pass, by default 1
+    tree_folder_path : str, optional
+        Path to a folder which will contain all intermediary and best trees, by default None
+        If None, will create a folder called "trees"
+    random_seed : int, optional
+        Random seed, by default None
+        Controls both the randomness of the initial vector
     n_jobs : int, optional
         The number of jobs to run in parallel, by default None
     verbose : bool, optional
@@ -44,15 +42,15 @@ class HillClimbingOptimizer(BaseOptimizer):
 
     def __init__(
         self,
-        raxml_cmd="raxml-ng",
-        tree_folder_path=None,
-        substitution_model="GTR",
-        random_seed=None,
+        model,
         tol=0.001,
-        patience=3,
         rounds=1,
+        patience=3,
+        tree_folder_path=None,
+        random_seed=None,
         n_jobs=None,
         verbose=False,
+        **loss_kwargs,
     ):
         super().__init__(
             mode="vector", random_seed=random_seed, n_jobs=n_jobs, verbose=verbose
@@ -62,22 +60,45 @@ class HillClimbingOptimizer(BaseOptimizer):
             os.makedirs("trees", exist_ok=True)
             tree_folder_path = "trees"
 
-        self.raxml_cmd = raxml_cmd
-        self.tree_folder_path = tree_folder_path
-        self.substitution_model = substitution_model
-        self.tol = tol
+        self.model = model
         self.rounds = rounds
         self.patience = patience
+        self.tol = tol
+        self.tree_folder_path = tree_folder_path
         self.verbose = verbose
+        self.loss_kwargs = loss_kwargs
 
-    def _optimise(self, fasta_path, tree, label_mapping):
+    def _optimise(self, fasta_path, tree, label_mapping) -> BaseResult:
+        """Optimise a tree using hill-climbing
+
+        Parameters
+        ----------
+        fasta_path : str
+            Path to fasta file
+        tree : numpy.ndarray
+            random tree to optimize, in v representation
+        label_mapping : Dict[int, str]
+            Current mapping of leaf labels (integer) to taxa
+
+        Returns
+        -------
+        BaseResult
+            best : numpy.ndarray
+                Optimized phylo2vec vector.
+            label_mapping : Dict[int, str]
+                Mapping of leaf labels (integer) to taxa.
+            best_score : float
+                The best score achieved during optimization.
+            scores : List[float]
+                List of scores obtained during optimization.
+        """
         current_loss = raxml_loss(
             v=tree,
             label_mapping=label_mapping,
             fasta_path=fasta_path,
+            model=self.model,
             tree_folder_path=self.tree_folder_path,
-            substitution_model=self.substitution_model,
-            cmd=self.raxml_cmd,
+            **self.loss_kwargs,
         )
 
         wait = 0
@@ -109,16 +130,34 @@ class HillClimbingOptimizer(BaseOptimizer):
 
             losses.append(current_loss)
 
-        best_params = BaseResult(
+        return BaseResult(
             best=tree,
             label_mapping=label_mapping,
             scores=losses,
             best_score=current_loss,
         )
 
-        return best_params
-
     def _step(self, fasta_path, v, label_mapping):
+        """Perform a step of the hill-climbing optimisation
+
+        Parameters
+        ----------
+        fasta_path : str
+            Path to fasta file
+        v_proposal : numpy.ndarray or list
+            v representation of the current tree
+        label_mapping : Dict[int, str]
+            Current mapping of leaf labels (integer) to taxa
+
+        Returns
+        -------
+        v_shuffled : numpy.ndarray
+            v representation of the tree after the hill-climbing step
+        current_best_loss : float
+            Current best loss after the hill-climbing step
+        label_mapping : Dict[int, str]
+            Updated mapping of leaf labels (integer) to taxa
+        """
         # Reorder v
         v_shuffled, label_mapping = reorder_v("birth_death", v, label_mapping)
 
@@ -127,14 +166,14 @@ class HillClimbingOptimizer(BaseOptimizer):
             v=v_shuffled,
             label_mapping=label_mapping,
             fasta_path=fasta_path,
+            model=self.model,
             tree_folder_path=self.tree_folder_path,
-            substitution_model=self.substitution_model,
             outfile=f"{Path(fasta_path).stem}_best.tree",
-            cmd=self.raxml_cmd,
+            **self.loss_kwargs,
         )
 
         if self.verbose:
-            print(f"Start optimise_single: {current_best_loss:.3f}")
+            print(f"Start step: {current_best_loss:.3f}")
 
         for _ in range(self.rounds):
             for i in range(1, len(v_shuffled)):
@@ -159,9 +198,6 @@ class HillClimbingOptimizer(BaseOptimizer):
                         grad_choice + 1 if grad_choice >= v_shuffled[i] else grad_choice
                     )
 
-                    # Reorder v
-                    # v_shuffled, taxa_dict = reorder_v(v_shuffled, taxa_dict)
-
                     if self.verbose:
                         grad_propose = proposal_losses[grad_choice] - current_best_loss
                         print(
@@ -172,7 +208,7 @@ class HillClimbingOptimizer(BaseOptimizer):
                     current_best_loss = proposal_losses[grad_choice]
 
         if self.verbose:
-            print(f"End optimise_single: {current_best_loss:.3f}")
+            print(f"End step: {current_best_loss:.3f}")
 
         return v_shuffled, current_best_loss, label_mapping
 
@@ -214,9 +250,8 @@ class HillClimbingOptimizer(BaseOptimizer):
                 label_mapping=label_mapping,
                 fasta_path=fasta_path,
                 tree_folder_path=self.tree_folder_path,
-                substitution_model=self.substitution_model,
+                model=self.model,
                 outfile=f"{Path(fasta_path).stem}_tree{i}{j}.tree",
-                cmd=self.raxml_cmd,
             )
 
         proposal_losses = np.array(
@@ -230,3 +265,7 @@ class HillClimbingOptimizer(BaseOptimizer):
         proposal_losses_diff = current_loss - proposal_losses
 
         return proposal_losses_diff, proposal_losses
+
+
+# This is a compatibility alias for the HillClimbing class.
+HillClimbingOptimizer = HillClimbing
