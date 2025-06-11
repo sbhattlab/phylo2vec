@@ -3,23 +3,25 @@
 import os
 import re
 import subprocess
+import sys
 
 from pathlib import PurePosixPath
 
 from phylo2vec.base.newick import to_newick
-from phylo2vec.opt._base import IS_WINDOWS
 from phylo2vec.utils.newick import apply_label_mapping
 
+# Test if the current platform is Windows or not
+IS_WINDOWS = sys.platform.startswith("win")
 # Regex for a negative float
 NEG_FLOAT_PATTERN = re.compile(r"-\d+.\d+")
 
 
 def raxml_loss(
+    fasta_path,
     v,
     label_mapping,
-    fasta_path,
+    model,
     tree_folder_path,
-    substitution_model,
     outfile="tmp.tree",
     **kwargs,
 ):
@@ -27,16 +29,16 @@ def raxml_loss(
 
     Parameters
     ----------
-    v : numpy.ndarray or list
-        v representation of a tree
-    taxa_dict : Dict[int, str]
-        Current mapping of leaf labels (integer) to taxa
     fasta_path : str
         Path to fasta file
+    v : numpy.ndarray or list
+        v representation of a tree
+    label_mapping : Dict[int, str]
+        Current mapping of leaf labels (integer) to taxa
+    model : str
+        DNA/AA substitution model
     tree_folder_path : str
         Path to a folder which will contain all intermediary and best trees
-    substitution_model : str
-        DNA/AA substitution model
     outfile : str, optional
         Path to a temporary tree written in Newick format, by default 'tmp.tree'
 
@@ -58,18 +60,16 @@ def raxml_loss(
         nw_file.write(newick)
 
     return exec_raxml_ng(
-        fasta_path=str(PurePosixPath(fasta_path.replace("C:", "/mnt/c"))),
         tree_path=str(
             PurePosixPath(tree_folder_path.replace("C:", "/mnt/c/"), outfile)
         ),
-        substitution_model=substitution_model,
+        fasta_path=str(PurePosixPath(fasta_path.replace("C:", "/mnt/c"))),
+        model=model,
         **kwargs,
     )
 
 
-def exec_raxml_ng(
-    fasta_path, tree_path, substitution_model, cmd="raxml-ng", no_files=True
-):
+def exec_raxml_ng(fasta_path, tree_path, model, cmd="raxml-ng", no_files=True):
     """Optimize branch lengths and free model parameters on a fixed topology
     using RaxML-NG (https://github.com/amkozlov/raxml-ng)
 
@@ -79,7 +79,7 @@ def exec_raxml_ng(
         Path to FASTA file (MSA)
     tree_path : str
         Path to tree file (Newick representation of the tree)
-    substitution_model : str
+    model : str
         DNA evolution model
     cmd : str, optional
         Location of the RAxML-nG executable, by default "raxml-ng"
@@ -99,7 +99,7 @@ def exec_raxml_ng(
         "--tree",
         tree_path,
         "--model",
-        substitution_model,
+        model,
         "--brlen",
         "scaled",
         "--log",
