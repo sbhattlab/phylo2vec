@@ -698,9 +698,11 @@ pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<us
     let mut node_code = Vec::new();
 
     while new_pairs.len() < k {
+        // Next row in the ancestry
         let [c2, c1, _] = ancestry[queue[j] - n_leaves];
 
         // `shuffle_cherries` allows to randomly permutate the order of children
+        // useful in optimisation algorithms
         let child_order = if shuffle_cherries && rand::random() {
             [c2, c1]
         } else {
@@ -709,18 +711,23 @@ pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<us
 
         let next_leaf = j + 1;
 
+        // If the node code is empty, we are at the root
+        // Otherwise, we take the 2nd previous node code
         let new_pair = if node_code.is_empty() {
             (0, 1)
         } else {
             (node_code[j - 1], next_leaf)
         };
 
+        // Push the new pair to the output
         new_pairs.push(new_pair);
 
-        // Add internal nodes to the queue
+        // Process internal nodes
         for (i, &c) in child_order.iter().enumerate() {
             if c >= n_leaves {
+                // Add internal nodes to the queue
                 queue.push(c);
+                // Encode internal nodes in the node code
                 if i == 0 {
                     node_code.push(new_pair.0)
                 } else {
@@ -729,6 +736,7 @@ pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<us
             }
         }
 
+        // Process leaf nodes --> update the label mapping
         if child_order[1] < n_leaves {
             label_mapping[new_pair.1] = c2;
         }
@@ -743,6 +751,7 @@ pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<us
 
     let v_qs = from_pairs(&new_pairs);
 
+    // Check that the label mapping is unique
     {
         let unique: HashSet<_> = label_mapping.iter().copied().collect();
         assert_eq!(
