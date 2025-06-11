@@ -29,7 +29,13 @@ repos:
     rev: "v2.4.1"
     hooks:
       - id: codespell
-        args: ["--write-changes", "--ignore-words", ".codespell-whitelist"]
+        args:
+        - "--write-changes"
+        - "--ignore-words"
+        - ".codespell-whitelist"
+        - "--ignore-regex"
+        - "[A-Za-z0-9+/]{100,}"
+
 
   - repo: local
     hooks:
