@@ -654,7 +654,7 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
 ///   (previous parent node = 6, encoded as 0)
 ///
 ///   The created sequence, viewed two by two
-///   consitutes the reversed pairs of the Phylo2Vec vector:
+///   constitutes the reversed pairs of the Phylo2Vec vector:
 ///   ((0, 1), (0, 2), (1, 3), (0, 4))
 ///
 ///   Note that the full algorithm also features a queue of internal nodes
