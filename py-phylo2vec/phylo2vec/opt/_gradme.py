@@ -219,7 +219,7 @@ class GradME(BaseOptimizer):
         dm : jax.numpy.ndarray
             Distance matrix of the taxa
         params : jax.numpy.ndarray
-            Flattened triangular matrix representing the continous tree
+            Flattened triangular matrix representing the continuous tree
         value_and_grad_fun : Callable
             Function to compute the loss and gradients
         optimizer : optax optimizer
