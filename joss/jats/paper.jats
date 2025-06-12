@@ -164,14 +164,14 @@ a Creative Commons Attribution 4.0 International License (CC BY
 <sec id="summary">
   <title>Summary</title>
   <p>Phylogenetics is a fundamental component of many analysis
-  frameworks in computational and evolutionary biology
+  frameworks in biology
   (<xref alt="Yang, 2014" rid="ref-yang2014" ref-type="bibr">Yang,
   2014</xref>) as well as linguistics
   (<xref alt="Atkinson &amp; Gray, 2005" rid="ref-atkinson2005" ref-type="bibr">Atkinson
-  &amp; Gray, 2005</xref>). Recently, the advent of large-scale genomics
-  and the SARS-CoV-2 pandemic has underscored the necessity to scale
-  phylogenetic software to handle large datasets of genomes or
-  phylogenetic trees
+  &amp; Gray, 2005</xref>) to study the evolutionary relationships of
+  different entities. Recently, the advent of large-scale genomics and
+  the SARS-CoV-2 pandemic has underscored the necessity for phylogenetic
+  software to handle large datasets of genomes or phylogenetic trees
   (<xref alt="Attwood et al., 2022" rid="ref-attwood2022" ref-type="bibr">Attwood
   et al., 2022</xref>;
   <xref alt="Kapli et al., 2020" rid="ref-kapli2020" ref-type="bibr">Kapli
@@ -180,7 +180,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   et al., 2024</xref>;
   <xref alt="Kraemer et al., 2025" rid="ref-kraemer2025" ref-type="bibr">Kraemer
   et al., 2025</xref>). While significant efforts have focused on
-  scaling phylogenetic inference
+  scaling optimisation algorithms
   (<xref alt="De Maio et al., 2023" rid="ref-demaio2023" ref-type="bibr">De
   Maio et al., 2023</xref>;
   <xref alt="Sanderson, 2021" rid="ref-sanderson2021" ref-type="bibr">Sanderson,
@@ -194,23 +194,21 @@ a Creative Commons Attribution 4.0 International License (CC BY
   to efficient representations of data for genomes
   (<xref alt="Deorowicz et al., 2023" rid="ref-deorowicz2023" ref-type="bibr">Deorowicz
   et al., 2023</xref>) and phylogenetic trees such as phylo2vec
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>), HOP
   (<xref alt="Chauve et al., 2025" rid="ref-chauve2025" ref-type="bibr">Chauve
-  et al., 2025</xref>), and OLA
-  (<xref alt="Richman et al., 2025" rid="ref-richman2025" ref-type="bibr">Richman
+  et al., 2025</xref>;
+  <xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2024</xref>;
+  <xref alt="Richman et al., 2025" rid="ref-richman2025" ref-type="bibr">Richman
   et al., 2025</xref>). Compared to traditional tree representations
   such as the Newick format
   (<xref alt="Felsenstein, 2004" rid="ref-felsenstein2004" ref-type="bibr">Felsenstein,
-  2004</xref>), which describes a phylogenetic tree as a string of
-  nested parentheses enclosing pairs of leaves or subtrees, these modern
-  representations utilize integer vectors to define the tree topology
-  traversal. This approach offers several advantages, including easier
-  manipulability, increased memory efficiency, and applicability to
-  downstream tasks such as machine learning
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>).</p>
-  <p>Here, we present the new release of
+  2004</xref>), which represents trees using strings of nested
+  parentheses, modern representations of phylogenetic trees utilize
+  integer vectors to define the tree topology traversal. This approach
+  offers several advantages, including easier manipulability, increased
+  memory efficiency, and applicability to downstream tasks such as
+  machine learning.</p>
+  <p>Here, we present the latest release of
   <monospace>phylo2vec</monospace> (or Phylo2Vec), a high-performance
   software package for encoding, manipulating, and analysing binary
   phylogenetic trees. At its core, the package is based on the phylo2vec
@@ -222,10 +220,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
   leaves into an integer vector of size <inline-formula><alternatives>
   <tex-math><![CDATA[n-1]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>.
-  Compared to the traditional Newick format, phylo2vec was designed with
-  fast sampling and rapid tree comparison in mind. This release features
-  a core implementation in Rust, providing significant performance
-  improvements and memory efficiency
+  Compared to the traditional Newick format, phylo2vec is designed to
+  enable fast sampling and comparison of binary trees. This release
+  features a core implementation in Rust, providing significant
+  performance improvements and memory efficiency
   (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
   while remaining available in Python (superseding the release described
   in the original paper
@@ -277,11 +275,11 @@ a Creative Commons Attribution 4.0 International License (CC BY
   tree comparison and efficient tree data compression
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>). Third, the inherent tree representation of
-  phylo2vec offers a pathway to gradient-based optimisation frameworks
-  for phylogenetic inference. A notable example is GradME
+  phylo2vec offers a pathway to several optimisation frameworks for
+  phylogenetic inference. A notable example is GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
-  et al., 2023</xref>), which relaxes the vector representation of
-  phylo2vec into a continuous space.</p>
+  et al., 2023</xref>), a gradient descent-based algorithm which uses a
+  relaxed representation of phylo2vec into a continuous space.</p>
 </sec>
 <sec id="features">
   <title>Features</title>
@@ -352,17 +350,14 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <title>Maintenance</title>
   <p>With Phylo2Vec, we aim to support long-term maintenance through
   implementing recommended software practices explicitly into the
-  structure of the project and development workflow, rather than leaving
-  them implied. This avoids human error as the repo’s structure itself
-  enforces good practices, rather than placing the responsibility solely
-  on code contributors. More specifically, we have structured the
-  project such that the Rust API contains the core algorithms, and all
-  other language components are APIs that bind to the Rust functions.
-  This avoids tight coupling, as it allows for the possibility of adding
-  new languages to bind to the Rust API’s, without needing to change
-  anything in the Rust project itself. Additionally, we have established
-  a robust continuous integration (CI) pipeline using GitHub Actions,
-  which features:</p>
+  structure of the project and development workflow. More specifically,
+  we have structured the project such that the Rust API contains the
+  core algorithms, and all other language components are APIs that bind
+  to the Rust functions. This avoids tight coupling, as it allows for
+  the possibility of adding new languages to bind to the Rust API’s,
+  without needing to change anything in the Rust project itself.
+  Additionally, we have established a robust continuous integration (CI)
+  pipeline using GitHub Actions, which features:</p>
   <list list-type="bullet">
     <list-item>
       <p>Unit test frameworks for Rust
