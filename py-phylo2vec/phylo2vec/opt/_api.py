@@ -4,22 +4,37 @@ API for registering and listing optimisation schemes.
 Inspired by the `torchvision.models` API for registering models.
 """
 
-from typing import Callable, List
+from typing import List, Type
 
-SCHEME_REGISTRY = {}
+from phylo2vec.opt._base import BaseOptimizer
+
+OPTIMIZER_REGISTRY = {}
 
 
-def register_model(name: str = None) -> Callable:
-    def wrapper(cls: Callable) -> Callable:
+def register_method(name: str = None) -> Type[BaseOptimizer]:
+    """Decorator to register an optimisation scheme.
+
+    Parameters
+    ----------
+    name : str, optional
+        Name of the optimizer, by default None
+
+    Returns
+    -------
+    Type[BaseOptimizer]
+        Decorated class that inherits from BaseOptimizer.
+    """
+
+    def wrapper(cls: Type[BaseOptimizer]) -> Type[BaseOptimizer]:
         key = name if name else cls.__name__
-        if key in SCHEME_REGISTRY:
-            raise ValueError(f"Optimisation scheme '{key}' already registered.")
-        SCHEME_REGISTRY[key] = cls
+        if key in OPTIMIZER_REGISTRY:
+            raise ValueError(f"Optimization scheme '{key}' already registered.")
+        OPTIMIZER_REGISTRY[key] = cls
         return cls
 
     return wrapper
 
 
-def list_models() -> List:
-    """List all registered models."""
-    return list(SCHEME_REGISTRY.keys())
+def list_methods() -> List:
+    """List all registered optimization schemes."""
+    return list(OPTIMIZER_REGISTRY.keys())
