@@ -8,11 +8,13 @@ import numpy as np
 
 from joblib import delayed, Parallel
 
+from phylo2vec.opt._api import register_model
 from phylo2vec.opt._base import BaseOptimizer, BaseResult
 from phylo2vec.opt._hc_losses import raxml_loss
 from phylo2vec.utils.vector import reorder_v, reroot_at_random
 
 
+@register_model()
 class HillClimbing(BaseOptimizer):
     """Optimisation using a simple hill-climbing scheme
 

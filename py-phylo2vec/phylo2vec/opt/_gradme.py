@@ -13,6 +13,7 @@ from jax import jit, value_and_grad
 from jax.nn import softmax
 from tqdm import tqdm
 
+from phylo2vec.opt._api import register_model
 from phylo2vec.opt._base import BaseOptimizer, BaseResult
 from phylo2vec.opt._gradme_losses import gradme_loss, make_W
 from phylo2vec.opt.utils import dnadist
@@ -34,6 +35,7 @@ class GradMEResult(BaseResult):
     best_W: jnp.ndarray
 
 
+@register_model()
 class GradME(BaseOptimizer):
     """GradME Optimizer for phylogenetic trees.
 
