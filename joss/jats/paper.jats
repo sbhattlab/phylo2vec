@@ -277,7 +277,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   tree comparison and efficient tree data compression
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>). Third, the inherent tree representation of
-  phylo2vec offers a pathway to gradient-based optimization frameworks
+  phylo2vec offers a pathway to gradient-based optimisation frameworks
   for phylogenetic inference. A notable example is GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
   et al., 2023</xref>), which relaxes the vector representation of
@@ -288,8 +288,18 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <p>The presented release of <monospace>phylo2vec</monospace> addresses
   several limitations of
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>). In particular, it allows for branch length
-  annotations, extending the vector representation of size
+  et al., 2024</xref>). From an optimisation perspective, it introduces
+  efficient <inline-formula><alternatives>
+  <tex-math><![CDATA[\mathcal{O}(n \log n)]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
+  implementations for both vector-to-Newick and Newick-to-vector
+  conversions, leveraging Adelson-Velsky and Landis (AVL) trees
+  (<xref alt="Adelson-Velsky &amp; Landis, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
+  &amp; Landis, 1962</xref>) and Fenwick trees
+  (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
+  1994</xref>), respectively.</p>
+  <p>In terms of new features, it supports branch length annotations by
+  extending the vector representation of size
   <inline-formula><alternatives>
   <tex-math><![CDATA[n-1]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>
@@ -300,35 +310,24 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <tex-math><![CDATA[n]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>n</mml:mi></mml:math></alternatives></inline-formula>
   denotes the number of leaves (or taxa) in a tree
-  (<xref alt="[fig:phylo2mat]" rid="figU003Aphylo2mat">[fig:phylo2mat]</xref>),
-  a <bold><inline-formula><alternatives>
-  <tex-math><![CDATA[\mathcal{O}(n \log n)]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula></bold>
-  implementation of vector-to-Newick conversion based on Adelson-Velsky
-  and Landis (AVL;
-  (<xref alt="Adelson-Velsky &amp; Landis, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
-  &amp; Landis, 1962</xref>)) trees, and a
-  <inline-formula><alternatives>
-  <tex-math><![CDATA[\mathcal{O}(n \log n)]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
-  implementation of Newick-to-vector conversion making use of Fenwick
-  trees
-  (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
-  1994</xref>) during the vector construction. Moreover, the current
-  release features several new additions, including several leaf-level
-  operations (pruning, placement, MRCA finding), fast cophenetic
-  distance matrix calculation, and a skeleton for Bayesian phylogenetic
-  inference using Markov Chain Monte Carlo (MCMC) in the highly
-  optimised <monospace>Beagle</monospace> library that underpins a
-  number of phylogenetic software
+  (<xref alt="[fig:phylo2mat]" rid="figU003Aphylo2mat">[fig:phylo2mat]</xref>).
+  Further enhancements include several leaf-level operations (pruning,
+  placement, MRCA identification), fast cophenetic distance matrix
+  calculation, and various optimisation schemes based on phylo2vec tree
+  representations, notably hill-climbing and GradME
+  (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
+  et al., 2023</xref>). Bayesian phylogenetic inference via Markov Chain
+  Monte Carlo (MCMC) with phylo2vec matrices is also made possible by a
+  likelihood function that leverages tree representation similarities
+  between phylo2vec and <monospace>BEAGLE</monospace>, a highly
+  optimised library that underpins a number of phylogenetic software
   (<xref alt="Ayres et al., 2012" rid="ref-ayres2012" ref-type="bibr">Ayres
   et al., 2012</xref>;
   <xref alt="Suchard &amp; Rambaut, 2009" rid="ref-suchard2009" ref-type="bibr">Suchard
-  &amp; Rambaut, 2009</xref>). The inference framework leverages
-  similarities between phylo2vec and <monospace>BEAGLE</monospace>’s
-  inner representation of post-order traversal. Lastly,
-  user-friendliness is enhanced by step-by-step demos of the inner
-  workings of phylo2vec’s vector representation.</p>
+  &amp; Rambaut, 2009</xref>). Finally, user-friendliness is enhanced by
+  step-by-step demos of the inner workings of phylo2vec’s
+  representations and their conversion to commonly used phylogenetic
+  tree formats (e.g., Newick string, list of edges).</p>
   <fig>
     <caption><p>Recovering a tree from a phylo2vec vector: example for
     <inline-formula><alternatives>

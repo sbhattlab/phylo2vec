@@ -2,8 +2,20 @@
 Minimum working example of BEAGLE4State
 to calculate the likelihood of a Phylo2Vec matrix.
 
-For more details, see:
+This likelihood function could be used in MCMC
+to optimize a tree topology or branch lengths.
+
+A simple MCMC scheme could be to sample a matrix,
+make a topology and branch length change on an index of the matrix,
+and accept the change with a probability based on the difference
+in tree likelihoods.
+
+Based on this example from the BEAGLE library:
 https://github.com/beagle-dev/beagle-lib/blob/hmc-clock/examples/standalone/hellobeagle/hello.cpp
+
+License: MIT License
+
+Adaptation in Python made by Neil Scheidwasser, 2025
 """
 
 # pylint: disable=redefined-outer-name, invalid-name
@@ -738,7 +750,7 @@ def parse_matrix(m):
         edge_lengths_flattened[ancestry[i, 0]] = edge_lengths[i, 0]
         edge_lengths_flattened[ancestry[i, 1]] = edge_lengths[i, 1]
 
-    return edge_lengths_flattened
+    return v, edge_lengths_flattened
 
 
 # @nb.njit(cache=True)
