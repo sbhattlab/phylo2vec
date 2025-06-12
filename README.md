@@ -43,9 +43,10 @@ pip install phylo2vec
 ```
 
 Several optimization schemes based on Phylo2Vec are also available, but require
-extra dependencies. (See this [notebook](https://phylo2vec.readthedocs.io/en/latest/demo_opt.html)
-for a demo). To avoid bloating the standard package, these dependencies
-must be installed separately. To do so, run:
+extra dependencies. (See this
+[notebook](https://phylo2vec.readthedocs.io/en/latest/demo_opt.html) for a
+demo). To avoid bloating the standard package, these dependencies must be
+installed separately. To do so, run:
 
 ```bash
 pip install phylo2vec[opt]
@@ -148,7 +149,8 @@ v_rerooted = reroot_at_random(v)
 
 #### Optimization
 
-To run the hill climbing-based optimisation scheme presented in the original Phylo2Vec [paper](https://doi.org/10.1093/sysbio/syae030), run:
+To run the hill climbing-based optimisation scheme presented in the original
+Phylo2Vec [paper](https://doi.org/10.1093/sysbio/syae030), run:
 
 ```python
 # A hill-climbing scheme to optimize Phylo2Vec vectors
