@@ -23,8 +23,10 @@ authors:
     affiliation: 4
   - name: Frederik Mølkjær Andersen
     orcid: 0009-0004-4071-3707
+    affiliation: 1
   - name: Mark P Khurana
     orcid: 0000-0002-1123-7674
+    affiliation: 1
   - name: Landung Setiawan
     orcid: 0000-0002-1624-2667
     affiliation: 2
@@ -33,6 +35,7 @@ authors:
     affiliation: 2
   - name: David A Duchêne
     orcid: 0000-0002-5479-1974
+    affiliation: 1
   - name: Samir Bhatt
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: "1, 3"
