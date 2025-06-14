@@ -41,7 +41,7 @@ authors:
     affiliation: "1, 3"
     orcid: 0000-0002-0891-4611
 affiliations:
- - name: Section of Health Data Science and AI, University of Copenhagen, Copenhagen
+ - name: Section of Health Data Science and AI, University of Copenhagen, Copenhagen, Denmark
    index: 1
  - name: eScience Institute, University of Washington, Seattle, United States
    index: 2
