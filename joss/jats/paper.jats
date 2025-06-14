@@ -59,7 +59,7 @@ manipulation</article-title>
 <surname>Andersen</surname>
 <given-names>Frederik Mølkjær</given-names>
 </name>
-<xref ref-type="aff" rid="aff-"/>
+<xref ref-type="aff" rid="aff-1"/>
 </contrib>
 <contrib contrib-type="author">
 <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-1123-7674</contrib-id>
@@ -67,7 +67,7 @@ manipulation</article-title>
 <surname>Khurana</surname>
 <given-names>Mark P</given-names>
 </name>
-<xref ref-type="aff" rid="aff-"/>
+<xref ref-type="aff" rid="aff-1"/>
 </contrib>
 <contrib contrib-type="author">
 <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-1624-2667</contrib-id>
@@ -91,7 +91,7 @@ manipulation</article-title>
 <surname>Duchêne</surname>
 <given-names>David A</given-names>
 </name>
-<xref ref-type="aff" rid="aff-"/>
+<xref ref-type="aff" rid="aff-1"/>
 </contrib>
 <contrib contrib-type="author" corresp="yes">
 <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-0891-4611</contrib-id>
@@ -106,7 +106,7 @@ manipulation</article-title>
 <aff id="aff-1">
 <institution-wrap>
 <institution>Section of Health Data Science and AI, University of
-Copenhagen, Copenhagen</institution>
+Copenhagen, Copenhagen, Denmark</institution>
 </institution-wrap>
 </aff>
 <aff id="aff-2">
@@ -292,8 +292,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
   implementations for both vector-to-Newick and Newick-to-vector
   conversions, leveraging Adelson-Velsky and Landis (AVL) trees
-  (<xref alt="Adelson-Velsky &amp; Landis, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
-  &amp; Landis, 1962</xref>) and Fenwick trees
+  (<xref alt="Adelson-Velsky &amp; Landis, In Russian. English translation in Soviet Mathematics Doklady, 3:1259--1263, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
+  &amp; Landis, In Russian. English translation in Soviet Mathematics
+  Doklady, 3:1259--1263, 1962</xref>) and Fenwick trees
   (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
   1994</xref>), respectively.</p>
   <p>In terms of new features, it supports branch length annotations by
@@ -415,6 +416,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>Systematic Biology</source>
       <publisher-name>Oxford University Press US</publisher-name>
       <year iso-8601-date="2024">2024</year>
+      <pub-id pub-id-type="doi">10.1093/sysbio/syae030</pub-id>
       <fpage>syae030</fpage>
       <lpage></lpage>
     </element-citation>
@@ -429,6 +431,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>Bioinformatics</source>
       <year iso-8601-date="2019">2019</year>
       <volume>35</volume>
+      <pub-id pub-id-type="doi">10.1093/bioinformatics/bty633</pub-id>
       <fpage>526</fpage>
       <lpage>528</lpage>
     </element-citation>
@@ -445,6 +448,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2009">2009</year>
       <volume>25</volume>
       <issue>11</issue>
+      <pub-id pub-id-type="doi">10.1093/bioinformatics/btp244</pub-id>
       <fpage>1370</fpage>
       <lpage>1376</lpage>
     </element-citation>
@@ -470,6 +474,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2012">2012</year>
       <volume>61</volume>
       <issue>1</issue>
+      <pub-id pub-id-type="doi">10.1093/sysbio/syr100</pub-id>
       <fpage>170</fpage>
       <lpage>173</lpage>
     </element-citation>
@@ -481,11 +486,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Landis</surname><given-names>Evgenii</given-names></name>
       </person-group>
       <article-title>An algorithm for the organization of information</article-title>
-      <source>Soviet Math.</source>
-      <year iso-8601-date="1962">1962</year>
-      <volume>3</volume>
-      <fpage>1259</fpage>
-      <lpage>1263</lpage>
+      <source>Proc. USSR Acad. Sci.</source>
+      <volume>146</volume>
+      <fpage>263</fpage>
+      <lpage>266</lpage>
     </element-citation>
   </ref>
   <ref id="ref-penn2023">
@@ -504,6 +508,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2023">2023</year>
       <volume>15</volume>
       <issue>12</issue>
+      <pub-id pub-id-type="doi">10.1093/gbe/evad213</pub-id>
       <fpage>evad213</fpage>
       <lpage></lpage>
     </element-citation>
@@ -555,6 +560,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2013">2013</year>
       <volume>28</volume>
       <issue>12</issue>
+      <pub-id pub-id-type="doi">10.1016/j.tree.2013.09.004</pub-id>
       <fpage>719</fpage>
       <lpage>728</lpage>
     </element-citation>
@@ -570,6 +576,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2016">2016</year>
       <volume>32</volume>
       <issue>3</issue>
+      <pub-id pub-id-type="doi">10.1093/bioinformatics/btv573</pub-id>
       <fpage>444</fpage>
       <lpage>446</lpage>
     </element-citation>
@@ -587,6 +594,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2016">2016</year>
       <volume>33</volume>
       <issue>6</issue>
+      <pub-id pub-id-type="doi">10.1093/molbev/msw046</pub-id>
       <fpage>1635</fpage>
       <lpage>1638</lpage>
     </element-citation>
@@ -598,7 +606,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Holder</surname><given-names>Mark T.</given-names></name>
         <name><surname>Sukumaran</surname><given-names>Jeet</given-names></name>
       </person-group>
-      <article-title>DendroPy 5: A mature python library for phylogenetic computing</article-title>
+      <article-title>DendroPy 5: a mature Python library for phylogenetic computing</article-title>
       <source>Journal of Open Source Software</source>
       <publisher-name>The Open Journal</publisher-name>
       <year iso-8601-date="2024">2024</year>
@@ -623,6 +631,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2020">2020</year>
       <volume>21</volume>
       <issue>7</issue>
+      <pub-id pub-id-type="doi">10.1038/s41576-020-0233-0</pub-id>
       <fpage>428</fpage>
       <lpage>444</lpage>
     </element-citation>
@@ -633,10 +642,11 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Sanderson</surname><given-names>Theo</given-names></name>
       </person-group>
       <article-title>Taxonium, a web-based tool for exploring large phylogenetic trees</article-title>
-      <source>Elife</source>
+      <source>eLife</source>
       <publisher-name>eLife Sciences Publications, Ltd</publisher-name>
       <year iso-8601-date="2022">2022</year>
       <volume>11</volume>
+      <pub-id pub-id-type="doi">10.7554/eLife.82392</pub-id>
     </element-citation>
   </ref>
   <ref id="ref-demaio2023">
@@ -655,6 +665,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2023">2023</year>
       <volume>55</volume>
       <issue>5</issue>
+      <pub-id pub-id-type="doi">10.1038/s41588-023-01368-0</pub-id>
       <fpage>746</fpage>
       <lpage>752</lpage>
     </element-citation>
@@ -674,6 +685,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2022">2022</year>
       <volume>23</volume>
       <issue>9</issue>
+      <pub-id pub-id-type="doi">10.1038/s41576-022-00483-8</pub-id>
       <fpage>547</fpage>
       <lpage>562</lpage>
     </element-citation>
@@ -687,6 +699,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>bioRxiv</source>
       <publisher-name>Cold Spring Harbor Laboratory</publisher-name>
       <year iso-8601-date="2021">2021</year>
+      <pub-id pub-id-type="doi">10.1101/2021.10.27.465994</pub-id>
       <fpage>2021</fpage>
       <lpage>10</lpage>
     </element-citation>
@@ -709,6 +722,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2021">2021</year>
       <volume>53</volume>
       <issue>6</issue>
+      <pub-id pub-id-type="doi">10.1038/s41588-021-00862-7</pub-id>
       <fpage>809</fpage>
       <lpage>816</lpage>
     </element-citation>
@@ -733,6 +747,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2024">2024</year>
       <volume>9</volume>
       <issue>2</issue>
+      <pub-id pub-id-type="doi">10.1038/s41564-023-01587-5</pub-id>
       <fpage>550</fpage>
       <lpage>560</lpage>
     </element-citation>
@@ -750,6 +765,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2023">2023</year>
       <volume>39</volume>
       <issue>3</issue>
+      <pub-id pub-id-type="doi">10.1093/bioinformatics/btad097</pub-id>
       <fpage>btad097</fpage>
       <lpage></lpage>
     </element-citation>
@@ -764,6 +780,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <article-title>Vector encoding of phylogenetic trees by ordered leaf attachment</article-title>
       <year iso-8601-date="2025">2025</year>
       <uri>https://arxiv.org/abs/2503.10169</uri>
+      <pub-id pub-id-type="doi">10.48550/arXiv.2503.10169</pub-id>
     </element-citation>
   </ref>
   <ref id="ref-chauve2025">
@@ -779,6 +796,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2025">2025</year>
       <volume>380</volume>
       <issue>1919</issue>
+      <pub-id pub-id-type="doi">10.1098/rstb.2024.0226</pub-id>
       <fpage>20240226</fpage>
       <lpage></lpage>
     </element-citation>
@@ -795,6 +813,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2005">2005</year>
       <volume>54</volume>
       <issue>4</issue>
+      <pub-id pub-id-type="doi">10.1080/10635150590950317</pub-id>
       <fpage>513</fpage>
       <lpage>526</lpage>
     </element-citation>
@@ -807,6 +826,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>Molecular evolution: A statistical approach</source>
       <publisher-name>Oxford University Press</publisher-name>
       <year iso-8601-date="2014">2014</year>
+      <pub-id pub-id-type="doi">10.1093/acprof:oso/9780199602605.001.0001</pub-id>
     </element-citation>
   </ref>
   <ref id="ref-felsenstein2004">
@@ -836,12 +856,13 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Escobar-Herrera</surname><given-names>Leandro Andrés</given-names></name>
         <name><surname>others</surname></name>
       </person-group>
-      <article-title>High-resolution epidemiological landscape from~ 290,000 SARS-CoV-2 genomes from denmark</article-title>
+      <article-title>High-resolution epidemiological landscape from~ 290,000 SARS-CoV-2 genomes from Denmark</article-title>
       <source>Nature communications</source>
       <publisher-name>Nature Publishing Group UK London</publisher-name>
       <year iso-8601-date="2024">2024</year>
       <volume>15</volume>
       <issue>1</issue>
+      <pub-id pub-id-type="doi">10.1038/s41467-024-51371-0</pub-id>
       <fpage>7123</fpage>
       <lpage></lpage>
     </element-citation>
@@ -867,6 +888,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2025">2025</year>
       <volume>638</volume>
       <issue>8051</issue>
+      <pub-id pub-id-type="doi">10.1038/s41586-024-08564-w</pub-id>
       <fpage>623</fpage>
       <lpage>635</lpage>
     </element-citation>
@@ -881,6 +903,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2011">2011</year>
       <volume>3</volume>
       <issue>1</issue>
+      <pub-id pub-id-type="doi">10.32614/rj-2011-002</pub-id>
       <fpage>5</fpage>
       <lpage>10</lpage>
     </element-citation>
@@ -892,9 +915,11 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Pitrou</surname><given-names>Antoine</given-names></name>
         <name><surname>Seibert</surname><given-names>Stanley</given-names></name>
       </person-group>
-      <article-title>Numba: A llvm-based python jit compiler</article-title>
+      <article-title>Numba: A LLVM-based Python JIT compiler</article-title>
       <source>Proceedings of the second workshop on the LLVM compiler infrastructure in HPC</source>
+      <publisher-name>Association for Computing Machinery</publisher-name>
       <year iso-8601-date="2015">2015</year>
+      <pub-id pub-id-type="doi">10.1145/2833157.2833162</pub-id>
       <fpage>1</fpage>
       <lpage>6</lpage>
     </element-citation>
@@ -910,6 +935,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="1994">1994</year>
       <volume>24</volume>
       <issue>3</issue>
+      <pub-id pub-id-type="doi">10.1002/spe.4380240306</pub-id>
       <fpage>327</fpage>
       <lpage>336</lpage>
     </element-citation>
