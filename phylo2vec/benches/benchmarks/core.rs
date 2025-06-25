@@ -1,6 +1,6 @@
 use criterion::{criterion_group, BenchmarkId, Criterion};
 use phylo2vec::tree_vec::ops;
-use phylo2vec::utils::sample_vector;
+use phylo2vec::utils::{sample_matrix, sample_vector};
 use std::ops::RangeInclusive;
 use std::time::Duration;
 
@@ -44,6 +44,18 @@ fn bench_to_newick(c: &mut Criterion) {
                 b.iter(|| ops::to_newick_from_vector(&v));
             },
         );
+
+        // Benchmark unordered case
+        group.bench_with_input(
+            BenchmarkId::new("matrix_unordered", sample_size),
+            &sample_size,
+            |b, &size| {
+                let m = sample_matrix(size, false);
+
+                // Benchmark only the to_newick operation
+                b.iter(|| ops::to_newick_from_matrix(&m.view()));
+            },
+        );
     }
     group.finish();
 }
@@ -73,10 +85,33 @@ fn bench_to_vector(c: &mut Criterion) {
     group.finish();
 }
 
+fn bench_to_matrix(c: &mut Criterion) {
+    let mut group = c.benchmark_group("to_matrix");
+    // Set logarithmic scale for plot
+    group.plot_config(
+        criterion::PlotConfiguration::default().summary_scale(criterion::AxisScale::Logarithmic),
+    );
+    for i in SAMPLE_SIZES {
+        let sample_size = 10000 * i;
+        group.bench_with_input(
+            BenchmarkId::from_parameter(sample_size),
+            &sample_size,
+            |b, &size| {
+                // Generate the matrix once outside the benchmark loop
+                let m = sample_matrix(size, false);
+                let newick = ops::to_newick_from_matrix(&m.view());
+                // Benchmark only the to_vector operation
+                b.iter(|| ops::matrix::to_matrix(&newick));
+            },
+        );
+    }
+    group.finish();
+}
+
 criterion_group! {
     name = core;
     config = Criterion::default()
         .sample_size(30)
         .warm_up_time(Duration::from_millis(1000));
-    targets = bench_to_newick, bench_to_vector
+    targets = bench_to_newick, bench_to_vector, bench_to_matrix
 }
