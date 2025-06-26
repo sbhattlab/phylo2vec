@@ -1,3 +1,5 @@
+use ndarray::{s, Array2};
+
 use crate::tree_vec::ops::avl::AVLTree;
 use crate::tree_vec::types::{Ancestry, Pair, Pairs};
 use crate::utils::is_unordered;
@@ -445,7 +447,7 @@ pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
 /// where n = number of leaves.
 /// Each distance corresponds to the sum of the branch lengths between two leaves
 /// Inspired from the `cophenetic` function in the `ape` package: https://github.com/emmanuelparadis/ape
-pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f32; 2]>>) -> Vec<Vec<f32>> {
+pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f32; 2]>>) -> Array2<f32> {
     let k = v.len();
     let ancestry = get_ancestry(v);
 
@@ -457,11 +459,11 @@ pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f32; 2]>>) -> Vec<Ve
     // Note: unrooted option was removed.
     // Originally implemented to match tr.unroot() in ete3
     // But now prefer to operate such that unrooting
-    // preserves total branch lengths (compatible with ape,
+    // preserves total branch lengths (compatible with ape
     // and ete3, see https://github.com/etetoolkit/ete/pull/344)
 
     // Dist shape: N_nodes x N_nodes
-    let mut dist: Vec<Vec<f32>> = vec![vec![0.0; 2 * k + 1]; 2 * k + 1];
+    let mut dist = Array2::<f32>::zeros((2 * k + 1, 2 * k + 1));
     let mut all_visited: Vec<usize> = Vec::new();
 
     for i in 0..k {
@@ -470,24 +472,24 @@ pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f32; 2]>>) -> Vec<Ve
 
         if !all_visited.is_empty() {
             for &visited in &all_visited[0..all_visited.len() - 1] {
-                let dist1 = dist[p][visited] + bl1;
-                let dist2 = dist[p][visited] + bl2;
+                let dist1 = dist[[p, visited]] + bl1;
+                let dist2 = dist[[p, visited]] + bl2;
 
-                dist[c1][visited] = dist1;
-                dist[visited][c1] = dist1;
-                dist[c2][visited] = dist2;
-                dist[visited][c2] = dist2;
+                dist[[c1, visited]] = dist1;
+                dist[[visited, c1]] = dist1;
+                dist[[c2, visited]] = dist2;
+                dist[[visited, c2]] = dist2;
             }
         }
 
-        dist[c1][c2] = bl1 + bl2;
-        dist[c2][c1] = bl1 + bl2;
+        dist[[c1, c2]] = bl1 + bl2;
+        dist[[c2, c1]] = bl1 + bl2;
 
-        dist[c1][p] = bl1;
-        dist[p][c1] = bl1;
+        dist[[c1, p]] = bl1;
+        dist[[p, c1]] = bl1;
 
-        dist[c2][p] = bl2;
-        dist[p][c2] = bl2;
+        dist[[c2, p]] = bl2;
+        dist[[p, c2]] = bl2;
 
         all_visited.push(c1);
         all_visited.push(c2);
@@ -495,14 +497,9 @@ pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f32; 2]>>) -> Vec<Ve
     }
 
     let n_leaves = k + 1;
-    let mut result: Vec<Vec<f32>> = vec![vec![0.0; n_leaves]; n_leaves];
-    for i in 0..n_leaves {
-        for j in 0..n_leaves {
-            result[i][j] = dist[i][j];
-        }
-    }
 
-    result
+    // Return the upper-left n_leaves x n_leaves submatrix
+    dist.slice(s![0..n_leaves, 0..n_leaves]).to_owned()
 }
 
 /// Get the cophenetic distances from the Phylo2Vec vector
@@ -516,14 +513,8 @@ pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f32; 2]>>) -> Vec<Ve
 /// let v = vec![0, 0, 0, 1, 3, 3, 1, 4, 4];
 /// let dist = cophenetic_distances(&v);
 /// ```
-pub fn cophenetic_distances(v: &[usize]) -> Vec<Vec<usize>> {
-    let result = _cophenetic_distances(v, None);
-
-    // Convert f32 to usize
-    result
-        .iter()
-        .map(|row| row.iter().map(|&x| x as usize).collect())
-        .collect()
+pub fn cophenetic_distances(v: &[usize]) -> Array2<f32> {
+    _cophenetic_distances(v, None)
 }
 
 // Get the ancestry path of a tree node

@@ -657,13 +657,13 @@ mod tests {
     #[case(1000)]
     fn test_has_branch_lengths(#[case] n_leaves: usize) {
         let m = sample_matrix(n_leaves, false);
-        let newick = to_newick_from_matrix(&m);
+        let newick = to_newick_from_matrix(&m.view());
         // Check if the newick string has branch lengths
         let result = has_branch_lengths(&newick);
         assert!(result); // skipcq: RS-W1024
 
         // Check if the newick string does not have branch lengths
-        let (v, _) = parse_matrix(&m);
+        let (v, _) = parse_matrix(&m.view());
         let result_no_branch_lengths = has_branch_lengths(&to_newick_from_vector(&v));
         assert!(!result_no_branch_lengths); // skipcq: RS-W1024
     }

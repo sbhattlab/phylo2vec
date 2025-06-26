@@ -1,4 +1,5 @@
 use extendr_api::prelude::*;
+use ndarray::{Array2, Axis};
 use std::collections::HashMap;
 use std::result::Result;
 
@@ -14,20 +15,38 @@ fn as_i32(v: Vec<usize>) -> Vec<i32> {
 }
 
 // Convert R matrix to Rust Vec<Vec<f32>>
-fn convert_from_rmatrix(matrix: &Robj) -> Result<Vec<Vec<f32>>, &'static str> {
+fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f32>, &'static str> {
     let data = matrix.as_real_slice().ok_or("Expected numeric matrix")?;
     let dims = matrix.dim().ok_or("Matrix is missing dimensions")?;
 
     let (nrows, ncols) = (dims[0].inner() as usize, dims[1].inner() as usize);
 
+    if data.len() != nrows * ncols {
+        return Err("Matrix dimensions do not match data length");
+    }
+    // Create a 2D array with the specified dimensions
+    let mut array = Array2::<f32>::zeros((nrows, ncols));
+    // for (i, mut row) in array.axis_iter_mut(Axis(0)).enumerate() {
+    //     for j in 0..ncols {
+    //         row[j] = data[] as f32; // Convert to f32
+    //     }
+    // }
+    for i in 0..nrows {
+        for j in 0..ncols {
+            array[[i, j]] = data[j * nrows + i] as f32; // Convert to f32
+        }
+    }
+
+    Ok(array)
+
     // Convert column-major to row-major Vec<Vec<f32>>
-    Ok((0..nrows)
-        .map(|row| {
-            (0..ncols)
-                .map(|col| data[col * nrows + row] as f32)
-                .collect()
-        })
-        .collect())
+    // Ok((0..nrows)
+    //     .map(|row| {
+    //         (0..ncols)
+    //             .map(|col| data[col * nrows + row] as f32)
+    //             .collect()
+    //     })
+    //     .collect())
 }
 
 /// Sample a random tree topology via Phylo2Vec
@@ -43,9 +62,8 @@ fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<i32> {
 #[extendr]
 fn sample_matrix(n_leaves: usize, ordered: bool) -> RMatrix<f64> {
     let matrix = utils::sample_matrix(n_leaves, ordered);
-    let nrows = matrix.len();
-    let ncols = matrix[0].len();
-    RMatrix::new_matrix(nrows, ncols, |r, c| matrix[r][c] as f64)
+    let shape = matrix.shape();
+    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]] as f64)
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
@@ -61,7 +79,7 @@ fn to_newick_from_vector(vector: Vec<i32>) -> String {
 #[extendr]
 fn to_newick_from_matrix(matrix: RMatrix<f64>) -> String {
     let matrix = convert_from_rmatrix(&matrix).unwrap();
-    ops::to_newick_from_matrix(&matrix)
+    ops::to_newick_from_matrix(&matrix.view())
 }
 
 /// Convert a newick string to a Phylo2Vec vector
@@ -77,9 +95,8 @@ fn to_vector(newick: &str) -> Vec<i32> {
 #[extendr]
 fn to_matrix(newick: &str) -> RMatrix<f64> {
     let matrix = ops::matrix::to_matrix(newick);
-    let nrows = matrix.len();
-    let ncols = matrix[0].len();
-    RMatrix::new_matrix(nrows, ncols, |r, c| matrix[r][c] as f64)
+    let shape = matrix.shape();
+    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]] as f64)
 }
 
 /// Validate a Phylo2Vec vector
@@ -96,7 +113,7 @@ fn check_v(vector: Vec<i32>) {
 fn check_m(vector: RMatrix<f64>) {
     let matrix = convert_from_rmatrix(&vector).unwrap();
 
-    utils::check_m(&matrix);
+    utils::check_m(&matrix.view());
 }
 
 /// Get the ancestry matrix of a Phylo2Vec vector
@@ -215,7 +232,7 @@ fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
     let v_usize: Vec<usize> = as_usize(vector);
     let k = v_usize.len();
     let coph_usize = ops::cophenetic_distances(&v_usize);
-    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_usize[r][c] as i32);
+    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_usize[[r, c]] as i32);
     let dimnames = (0..k + 1).map(|x| x as i32).collect::<Vec<i32>>();
     coph.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
 
@@ -227,9 +244,9 @@ fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
 #[extendr]
 fn cophenetic_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     let matrix_f32 = convert_from_rmatrix(&matrix).unwrap();
-    let k = matrix_f32.len();
-    let coph_f32 = ops::matrix::cophenetic_distances_with_bls(&matrix_f32);
-    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_f32[r][c] as f64);
+    let k = matrix_f32.shape()[0];
+    let coph_f32 = ops::matrix::cophenetic_distances_with_bls(&matrix_f32.view());
+    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_f32[[r, c]] as f64);
     let dimnames = (0..k + 1).map(|x| x as i32).collect::<Vec<i32>>();
     coph.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
 

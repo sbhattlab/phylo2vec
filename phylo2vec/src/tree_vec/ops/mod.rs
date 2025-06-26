@@ -1,3 +1,5 @@
+use ndarray::ArrayView2;
+
 pub mod avl;
 pub mod matrix;
 pub mod newick;
@@ -25,7 +27,7 @@ pub fn to_newick_from_vector(v: &[usize]) -> String {
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
-pub fn to_newick_from_matrix(m: &[Vec<f32>]) -> String {
+pub fn to_newick_from_matrix(m: &ArrayView2<f32>) -> String {
     // First, check the matrix structure for validity
     check_m(m);
 
@@ -142,6 +144,7 @@ pub fn remove_leaf(v: &mut [usize], leaf: usize) -> (Vec<usize>, usize) {
 mod tests {
     use super::*;
     use crate::utils::sample_vector;
+    use ndarray::{array, Array2};
     use rstest::*;
 
     /// Test the conversion of vector to Newick format
@@ -158,21 +161,19 @@ mod tests {
 
     /// Test the conversion of a matrix to a Newick string
     #[rstest]
-    #[case(vec![
-        vec![0.0, 0.9, 0.4],
-        vec![0.0, 0.8, 3.12],
-        vec![3.0, 0.4, 0.5],
+    #[case(array![
+        [0.0, 0.9, 0.4],
+        [0.0, 0.8, 3.12],
+        [3.0, 0.4, 0.5],
     ], "(((0:0.9,2:0.4)4:0.8,3:3.12)5:0.4,1:0.5)6;")]
-    #[case(vec![
-        vec![0.0, 0.1, 0.2],
-    ], "(0:0.1,1:0.2)2;")]
-    #[case(vec![
-        vec![0.0, 1.0, 3.0],
-        vec![0.0, 0.1, 0.2],
-        vec![1.0, 0.5, 0.7],
+    #[case(array![[0.0, 0.1, 0.2]], "(0:0.1,1:0.2)2;")]
+    #[case(array![
+        [0.0, 1.0, 3.0],
+        [0.0, 0.1, 0.2],
+        [1.0, 0.5, 0.7],
     ], "((0:0.1,2:0.2)5:0.5,(1:1,3:3)4:0.7)6;")]
-    fn test_to_newick_from_matrix(#[case] m: Vec<Vec<f32>>, #[case] expected: &str) {
-        let newick = to_newick_from_matrix(&m);
+    fn test_to_newick_from_matrix(#[case] m: Array2<f32>, #[case] expected: &str) {
+        let newick = to_newick_from_matrix(&m.view());
         assert_eq!(newick, expected);
     }
 
@@ -189,16 +190,13 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![0], vec![vec![0, 2], vec![2, 0]])]
-    // #[case(vec![0], true, vec![vec![0, 1], vec![1, 0]])]
-    #[case(vec![0, 1, 2], vec![vec![0, 3, 4, 4], vec![3, 0, 3, 3], vec![4, 3, 0, 2], vec![4, 3, 2, 0]])]
-    // #[case(vec![0, 1, 2], true, vec![vec![0, 2, 3, 3], vec![2, 0, 3, 3], vec![3, 3, 0, 2], vec![3, 3, 2, 0]])]
-    #[case(vec![0, 0, 1], vec![vec![0, 4, 2, 4], vec![4, 0, 4, 2], vec![2, 4, 0, 4], vec![4, 2, 4, 0]])]
-    // #[case(vec![0, 0, 1], true, vec![vec![0, 3, 2, 3], vec![3, 0, 3, 2], vec![2, 3, 0, 3], vec![3, 2, 3, 0]])]
+    #[case(vec![0], array![[0.0, 2.0], [2.0, 0.0]])]
+    #[case(vec![0, 1, 2], array![[0.0, 3.0, 4.0, 4.0], [3.0, 0.0, 3.0, 3.0], [4.0, 3.0, 0.0, 2.0], [4.0, 3.0, 2.0, 0.0]])]
+    #[case(vec![0, 0, 1], array![[0.0, 4.0, 2.0, 4.0], [4.0, 0.0, 4.0, 2.0], [2.0, 4.0, 0.0, 4.0], [4.0, 2.0, 4.0, 0.0]])]
     fn test_cophenetic_distances(
         #[case] v: Vec<usize>,
         // #[case] unrooted: bool,
-        #[case] expected: Vec<Vec<usize>>,
+        #[case] expected: Array2<f32>,
     ) {
         assert_eq!(cophenetic_distances(&v), expected);
     }
