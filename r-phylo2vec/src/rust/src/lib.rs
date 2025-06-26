@@ -26,11 +26,6 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f32>, &'static str> {
     }
     // Create a 2D array with the specified dimensions
     let mut array = Array2::<f32>::zeros((nrows, ncols));
-    // for (i, mut row) in array.axis_iter_mut(Axis(0)).enumerate() {
-    //     for j in 0..ncols {
-    //         row[j] = data[] as f32; // Convert to f32
-    //     }
-    // }
     for i in 0..nrows {
         for j in 0..ncols {
             array[[i, j]] = data[j * nrows + i] as f32; // Convert to f32
