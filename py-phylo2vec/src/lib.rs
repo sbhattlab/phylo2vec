@@ -1,3 +1,4 @@
+use numpy::{IntoPyArray, PyArray2, PyReadonlyArray2};
 use pyo3::prelude::*;
 
 use phylo2vec::tree_vec::ops;
@@ -11,8 +12,9 @@ fn to_newick_from_vector(input_vector: Vec<usize>) -> PyResult<String> {
 }
 
 #[pyfunction]
-fn to_newick_from_matrix(input_matrix: Vec<Vec<f32>>) -> PyResult<String> {
-    let newick = ops::to_newick_from_matrix(&input_matrix);
+fn to_newick_from_matrix(input_matrix: PyReadonlyArray2<f32>) -> PyResult<String> {
+    let arr = input_matrix.as_array();
+    let newick = ops::to_newick_from_matrix(&arr);
     Ok(newick)
 }
 
@@ -22,8 +24,8 @@ fn to_vector(newick: &str) -> Vec<usize> {
 }
 
 #[pyfunction]
-fn to_matrix(newick: &str) -> Vec<Vec<f32>> {
-    ops::matrix::to_matrix(newick)
+fn to_matrix<'py>(py: Python<'py>, newick: &str) -> Bound<'py, PyArray2<f32>> {
+    ops::matrix::to_matrix(newick).into_pyarray(py)
 }
 
 #[pyfunction]
@@ -71,18 +73,22 @@ fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
 }
 
 #[pyfunction]
-fn cophenetic_distances(input_vector: Vec<usize>) -> Vec<Vec<usize>> {
-    ops::vector::cophenetic_distances(&input_vector)
+fn cophenetic_distances(py: Python<'_>, input_vector: Vec<usize>) -> Bound<'_, PyArray2<f32>> {
+    ops::vector::cophenetic_distances(&input_vector).into_pyarray(py)
 }
 
 #[pyfunction]
-fn cophenetic_distances_with_bls(input_matrix: Vec<Vec<f32>>) -> Vec<Vec<f32>> {
-    ops::matrix::cophenetic_distances_with_bls(&input_matrix)
+fn cophenetic_distances_with_bls<'py>(
+    py: Python<'py>,
+    input_matrix: PyReadonlyArray2<f32>,
+) -> Bound<'py, PyArray2<f32>> {
+    let m = input_matrix.as_array();
+    ops::matrix::cophenetic_distances_with_bls(&m).into_pyarray(py)
 }
 
 #[pyfunction]
-fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
-    utils::sample_matrix(n_leaves, ordered)
+fn sample_matrix(py: Python<'_>, n_leaves: usize, ordered: bool) -> Bound<'_, PyArray2<f32>> {
+    utils::sample_matrix(n_leaves, ordered).into_pyarray(py)
 }
 
 #[pyfunction]
@@ -91,8 +97,9 @@ fn check_v(input_vector: Vec<usize>) {
 }
 
 #[pyfunction]
-fn check_m(input_matrix: Vec<Vec<f32>>) {
-    utils::check_m(&input_matrix);
+fn check_m(input_matrix: PyReadonlyArray2<f32>) {
+    let m = input_matrix.as_array();
+    utils::check_m(&m);
 }
 
 #[pyfunction]

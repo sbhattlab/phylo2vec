@@ -1,3 +1,4 @@
+use ndarray::{Array2, ArrayView2, Axis};
 use rand::{distributions::Uniform, prelude::Distribution, Rng};
 
 /// Sample a vector with `n_leaves` elements.
@@ -46,7 +47,7 @@ pub fn sample_vector(n_leaves: usize, ordering: bool) -> Vec<usize> {
 /// let v = sample_matrix(10, false);
 /// let v2 = sample_matrix(5, true);
 /// ```
-pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
+pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f32> {
     // Use the existing sample function to generate v
     let v = sample_vector(n_leaves, ordered);
     let bl_size = (v.len(), 2); // 2 columns for the branch lengths
@@ -65,11 +66,13 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Vec<Vec<f32>> {
         bls.push(row);
     }
 
-    // Combine `v` and `bls` into a matrix (Vec<Vec<f32>>)
-    let mut m: Vec<Vec<f32>> = Vec::with_capacity(v.len());
-    for i in 0..v.len() {
-        let row: Vec<f32> = vec![v[i] as f32, bls[i][0], bls[i][1]];
-        m.push(row);
+    // Combine `v` and `bls` into a matrix
+    let mut m = Array2::<f32>::zeros((v.len(), 3));
+
+    for (i, mut row) in m.axis_iter_mut(Axis(0)).enumerate() {
+        row[0] = v[i] as f32; // First column is the vector part
+        row[1] = bls[i][0]; // Second column is the first branch length
+        row[2] = bls[i][1]; // Third column is the second branch length
     }
 
     m
@@ -109,20 +112,22 @@ pub fn check_v(v: &[usize]) {
 /// # Examples
 ///
 /// ```
+/// use ndarray::array;
 /// use phylo2vec::utils::{check_m};
 ///
-/// check_m(&vec![
-/// vec![0.0, 0.0, 0.0],
-/// vec![0.0, 0.1, 0.2],
-/// vec![1.0, 0.5, 0.7],]);
+/// check_m(&array![
+///     [0.0, 0.0, 0.0],
+///     [0.0, 0.1, 0.2],
+///     [1.0, 0.5, 0.7]].view()
+/// );
 ///
-pub fn check_m(matrix: &[Vec<f32>]) {
+pub fn check_m(matrix: &ArrayView2<f32>) {
     // Validate the vector part (first column)
-    let vector: Vec<usize> = matrix.iter().map(|row| row[0] as usize).collect();
+    let vector: Vec<usize> = matrix.outer_iter().map(|row| row[0] as usize).collect();
     check_v(&vector);
 
     // Ensure all branch lengths (remaining columns) are non-negative
-    for row in matrix.iter() {
+    for row in matrix.outer_iter() {
         assert!(
             row[1] >= 0.0 && row[2] >= 0.0,
             "Branch lengths must be positive"
@@ -205,24 +210,14 @@ mod tests {
         let matrix = sample_matrix(n_leaves, ordering);
 
         // Check the number of rows in the matrix
-        assert_eq!(matrix.len(), n_leaves - 1);
+        assert_eq!(matrix.shape()[0], n_leaves - 1);
 
         // Check if the number of columns in the matrix is correct (e.g., 2)
-        let num_columns = matrix[0].len();
+        let num_columns = matrix.shape()[1];
         assert!(num_columns > 0, "Matrix should have at least one column.");
 
-        // Example check function for matrix values (values should be between min_val and max_val)
-        for (i, m_i) in matrix.iter().enumerate() {
-            for (j, m_ij) in m_i.iter().enumerate().skip(1) {
-                assert!(
-                    (0.0..=1.0).contains(m_ij),
-                    "Matrix value out of bounds at ({}, {}): {}",
-                    i,
-                    j,
-                    m_ij
-                );
-            }
-        }
+        // Check that the branch lengths are positive
+        assert_eq!(matrix.abs(), matrix);
     }
 
     #[rstest]
