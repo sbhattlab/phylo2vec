@@ -36,6 +36,20 @@ def test_vector_to_newick(benchmark, sample_size):
 
 
 @pytest.mark.parametrize("sample_size", BIG_RANGE)
+def test_matrix_to_newick(benchmark, sample_size):
+    """Benchmark the conversion of an unordered matrix to Newick format.
+
+    Parameters
+    ----------
+    benchmark : _pytest.fixtures.BenchmarkFixture
+        Benchmark fixture from pytest-benchmark
+    sample_size : int
+        Number of leaves in the vector
+    """
+    benchmark(core.to_newick_from_matrix, core.sample_matrix(sample_size, False))
+
+
+@pytest.mark.parametrize("sample_size", BIG_RANGE)
 def test_vector_from_newick(benchmark, sample_size):
     """Benchmark the conversion of a Newick string (without branch lengths) to vector format
 
@@ -53,7 +67,7 @@ def test_vector_from_newick(benchmark, sample_size):
 
 
 @pytest.mark.parametrize("sample_size", BIG_RANGE)
-def test_matrix_to_newick(benchmark, sample_size):
+def test_matrix_from_newick(benchmark, sample_size):
     """Benchmark the conversion of a Newick string (with branch lengths) to a matrix format
 
     Parameters
@@ -67,17 +81,3 @@ def test_matrix_to_newick(benchmark, sample_size):
         core.to_matrix,
         core.to_newick_from_matrix(core.sample_matrix(sample_size, False)),
     )
-
-
-@pytest.mark.parametrize("sample_size", BIG_RANGE)
-def test_matrix_from_newick(benchmark, sample_size):
-    """Benchmark the conversion of an unordered matrix to Newick format.
-
-    Parameters
-    ----------
-    benchmark : _pytest.fixtures.BenchmarkFixture
-        Benchmark fixture from pytest-benchmark
-    sample_size : int
-        Number of leaves in the vector
-    """
-    benchmark(core.to_newick_from_matrix, core.sample_matrix(sample_size, False))
