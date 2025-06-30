@@ -15,7 +15,7 @@ def check_matrix(m: np.ndarray) -> None:
     m : numpy.ndarray
         Phylo2Vec matrix
     """
-    core.check_m(m.tolist())
+    core.check_m(m)
 
 
 def sample_matrix(n_leaves: int, ordered: bool = False) -> np.ndarray:
@@ -37,5 +37,4 @@ def sample_matrix(n_leaves: int, ordered: bool = False) -> np.ndarray:
         2nd and 3rd columns: branch lengths of cherry [i] in the ancestry matrix
     """
 
-    matrix = core.sample_matrix(n_leaves, ordered)
-    return np.asarray(matrix)
+    return core.sample_matrix(n_leaves, ordered)

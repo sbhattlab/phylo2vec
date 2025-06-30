@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use thiserror;
 
-use crate::tree_vec::types::{Ancestry, Pairs};
+use crate::types::Ancestry;
 
 mod newick_patterns;
 
@@ -15,7 +15,7 @@ pub enum NewickError {
     // For problematic float parsing in the Newick string
     #[error("ParseFloatError: {0}")]
     ParseFloatError(#[from] std::num::ParseFloatError),
-    // For problematic stack popping in get_cherries
+    // For problematic stack popping in parsing functions
     #[error("Stack underflow error encountered")]
     StackUnderflow,
 }
@@ -55,16 +55,16 @@ fn node_substr(s: &str, start: usize) -> (&str, usize) {
 ///
 /// # Example
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::get_cherries;
+/// use phylo2vec::newick::parse;
 ///
 /// let newick = "((0,2)5,(1,3)4)6;";
 ///
-/// let cherries = get_cherries(newick).expect("Oops");
+/// let cherries = parse(newick).expect("Oops");
 ///
 /// assert_eq!(cherries, vec![[0, 2, 5], [1, 3, 4], [5, 4, 6]]);
 /// ```
 ///
-pub fn get_cherries(newick: &str) -> Result<Ancestry, NewickError> {
+pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
     if newick.is_empty() {
         return Ok(Vec::new());
     }
@@ -135,18 +135,18 @@ pub fn get_cherries(newick: &str) -> Result<Ancestry, NewickError> {
 ///
 /// # Example
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::get_cherries_with_bls;
+/// use phylo2vec::newick::parse_with_bls;
 ///
 /// // Without explicit parent nodes
 /// let newick = "((0:0.1,2:0.2):0.3,(1:0.5,3:0.7):0.4);";
 ///
-/// let (cherries, bls) = get_cherries_with_bls(newick).expect("Oops");
+/// let (cherries, bls) = parse_with_bls(newick).expect("Oops");
 ///
 /// assert_eq!(cherries, vec![[0, 2, 2], [1, 3, 3], [0, 1, 1]]);
 /// assert_eq!(bls, vec![[0.1, 0.2], [0.5, 0.7], [0.3, 0.4]]);
 /// ```
 ///
-pub fn get_cherries_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickError> {
+pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickError> {
     if newick.is_empty() {
         return Ok((Vec::new(), Vec::new())); // Return empty ancestry and branch length vectors
     }
@@ -243,80 +243,12 @@ pub fn get_cherries_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), 
     Ok((ancestry, bls))
 }
 
-/// Prepare the cache for building the Newick string
-fn prepare_cache(pairs: &Pairs) -> Vec<String> {
-    let num_leaves = pairs.len() + 1;
-
-    let mut cache: Vec<String> = vec![String::new(); num_leaves];
-
-    // c1 will always be preceded by a left paren: (c1,c2)p
-    // So we add a left paren to the cache to avoid insert operations
-    for &(c1, _) in pairs.iter() {
-        cache[c1].push('(');
-    }
-
-    // Add all leaf labels to the cache
-    for (i, s) in cache.iter_mut().enumerate() {
-        s.push_str(&i.to_string());
-    }
-
-    cache
-}
-
-/// Build newick string from a vector of pairs
-pub fn build_newick(pairs: &Pairs) -> String {
-    let num_leaves = pairs.len() + 1;
-
-    let mut cache: Vec<String> = prepare_cache(pairs);
-
-    for (i, &(c1, c2)) in pairs.iter().enumerate() {
-        // std::mem::take helps with efficient swapping of values like std::move in C++
-        let s2 = std::mem::take(&mut cache[c2]);
-
-        // Parent node (not needed in theory, but left for legacy reasons)
-        let sp = (num_leaves + i).to_string();
-
-        // sub-newick structure: (c1,c2)p
-        cache[c1].push(',');
-        cache[c1].push_str(&s2);
-        cache[c1].push(')');
-        cache[c1].push_str(&sp);
-    }
-
-    format!("{};", cache[0])
-}
-
-/// Build newick string from the ancestry matrix and branch lengths
-pub fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> String {
-    let num_leaves = pairs.len() + 1;
-
-    let mut cache = prepare_cache(pairs);
-
-    for (i, (&(c1, c2), &[bl1, bl2])) in pairs.iter().zip(branch_lengths.iter()).enumerate() {
-        let s2 = std::mem::take(&mut cache[c2]);
-        let sp = (num_leaves + i).to_string();
-        let sb1 = bl1.to_string();
-        let sb2 = bl2.to_string();
-
-        cache[c1].push(':');
-        cache[c1].push_str(&sb1);
-        cache[c1].push(',');
-        cache[c1].push_str(&s2);
-        cache[c1].push(':');
-        cache[c1].push_str(&sb2);
-        cache[c1].push(')');
-        cache[c1].push_str(&sp);
-    }
-
-    format!("{};", cache[0])
-}
-
 /// Remove parent labels from the Newick string
 ///
 /// # Example
 ///
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::remove_parent_labels;
+/// use phylo2vec::newick::remove_parent_labels;
 ///
 /// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
 /// let result = remove_parent_labels(newick);
@@ -332,7 +264,7 @@ pub fn remove_parent_labels(newick: &str) -> String {
 /// # Example
 ///
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::remove_branch_lengths;
+/// use phylo2vec::newick::remove_branch_lengths;
 ///
 /// let newick = "((0:0.0194831,2:0.924941)5:0.18209481,(1:1,3:3)4:4)6;";
 /// let result = remove_branch_lengths(newick);
@@ -351,7 +283,7 @@ pub fn remove_branch_lengths(newick: &str) -> String {
 /// # Example
 ///
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::has_parents;
+/// use phylo2vec::newick::has_parents;
 ///
 /// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
 /// let result = has_parents(newick);
@@ -371,7 +303,7 @@ pub fn has_parents(newick: &str) -> bool {
 /// # Example
 ///
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::has_branch_lengths;
+/// use phylo2vec::newick::has_branch_lengths;
 /// let newick = "(((0:0.1,(3:0.1,5:0.1)6:0.1)8:0.1,2:0.1)9:0.1,(1:0.1,4:0.1)7:0.1)10;";
 /// let result = has_branch_lengths(newick);
 /// assert!(result);
@@ -390,7 +322,7 @@ pub fn has_branch_lengths(newick: &str) -> bool {
 /// # Example
 ///
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::find_num_leaves;
+/// use phylo2vec::newick::find_num_leaves;
 ///
 /// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
 /// let result = find_num_leaves(newick);
@@ -421,7 +353,7 @@ pub fn find_num_leaves(newick: &str) -> usize {
 ///
 /// # Example
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::create_label_mapping;
+/// use phylo2vec::newick::create_label_mapping;
 ///
 /// let nw_str = "(((aaaaaaaaae,(aaaaaaaaaf,aaaaaaaaag)),aaaaaaaaaa),(aaaaaaaaab,(aaaaaaaaac,aaaaaaaaad)));";
 /// let (nw_int, label_mapping) = create_label_mapping(&nw_str);
@@ -436,10 +368,10 @@ pub fn find_num_leaves(newick: &str) -> usize {
 /// ```
 pub fn create_label_mapping(newick: &str) -> (String, HashMap<usize, String>) {
     if newick.is_empty() {
-        return (String::new(), HashMap::<usize, String>::new());
+        return (String::default(), HashMap::<usize, String>::new());
     }
 
-    let mut newick_int = String::new();
+    let mut newick_int = String::default();
     // Label mapping
     // Key: leaf index (integer)
     // Value: leaf label (string)
@@ -516,7 +448,7 @@ pub fn create_label_mapping(newick: &str) -> (String, HashMap<usize, String>) {
 /// # Example
 /// ```
 /// use std::collections::HashMap;
-/// use phylo2vec::tree_vec::ops::newick::apply_label_mapping;
+/// use phylo2vec::newick::apply_label_mapping;
 ///
 /// let nw_int = "(((0:1,(1:1,2:1):1):1,3:1):1,(4:1,(5:1,6:1):1):1);";
 /// let label_mapping = HashMap::<usize, String>::from(
@@ -540,10 +472,10 @@ pub fn apply_label_mapping(
     label_mapping: &HashMap<usize, String>,
 ) -> Result<String, NewickError> {
     if newick.is_empty() {
-        return Ok(String::new());
+        return Ok(String::default());
     }
 
-    let mut newick_str = String::new();
+    let mut newick_str = String::default();
     let newick_bytes = newick.as_bytes();
 
     let mut i: usize = 0;
@@ -602,10 +534,57 @@ pub fn apply_label_mapping(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tree_vec::ops::{parse_matrix, to_newick_from_matrix, to_newick_from_vector};
-    use crate::utils::{sample_matrix, sample_vector};
+    use crate::matrix::base::{parse_matrix, sample_matrix};
+    use crate::matrix::convert::to_newick as to_newick_from_matrix;
+    use crate::vector::base::sample_vector;
+    use crate::vector::convert::to_newick as to_newick_from_vector;
     use rand::{distributions::Alphanumeric, Rng};
     use rstest::*;
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_has_parents(#[case] n_leaves: usize) {
+        let v = sample_vector(n_leaves, false);
+        let newick = to_newick_from_vector(&v);
+        // Check if the newick string has parents
+        let result = has_parents(&newick);
+        assert!(result); // skipcq: RS-W1024
+
+        // Check if the newick string does not have parents
+        let result_no_parents = has_parents(&remove_parent_labels(&newick));
+        assert!(!result_no_parents); // skipcq: RS-W1024
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_has_branch_lengths(#[case] n_leaves: usize) {
+        let m = sample_matrix(n_leaves, false);
+        let newick = to_newick_from_matrix(&m.view());
+        // Check if the newick string has branch lengths
+        let result = has_branch_lengths(&newick);
+        assert!(result); // skipcq: RS-W1024
+
+        // Check if the newick string does not have branch lengths
+        let (v, _) = parse_matrix(&m.view());
+        let result_no_branch_lengths = has_branch_lengths(&to_newick_from_vector(&v));
+        assert!(!result_no_branch_lengths); // skipcq: RS-W1024
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_find_num_leaves(#[case] n_leaves: usize) {
+        let v = sample_vector(n_leaves, false);
+        let newick = to_newick_from_vector(&v);
+        // Check if the newick string has parents
+        let result = find_num_leaves(&newick);
+        assert_eq!(result, n_leaves);
+    }
 
     #[rstest]
     #[case("(((0,(3,5)6)8,2)9,(1,4)7)10;", "(((0,(3,5)),2),(1,4));")]
@@ -636,67 +615,35 @@ mod tests {
     }
 
     #[rstest]
-    #[case(10)]
-    #[case(100)]
-    #[case(1000)]
-    fn test_has_parents(#[case] n_leaves: usize) {
-        let v = sample_vector(n_leaves, false);
-        let newick = to_newick_from_vector(&v);
-        // Check if the newick string has parents
-        let result = has_parents(&newick);
-        assert!(result); // skipcq: RS-W1024
+    #[case("((1,2)4,3)5;", vec![[1, 2, 4], [4, 3, 5]])]
+    #[case("((1,2)5,(3,4)6)7;", vec![[1, 2, 5], [3, 4, 6], [5, 6, 7]])]
+    #[case("(1,2);", vec![[1, 2, 2]] )]
+    fn test_parse(#[case] newick: &str, #[case] expected_ancestry: Vec<[usize; 3]>) {
+        let ancestry = parse(newick).expect("failed to get cherries");
 
-        // Check if the newick string does not have parents
-        let result_no_parents = has_parents(&remove_parent_labels(&newick));
-        assert!(!result_no_parents); // skipcq: RS-W1024
-    }
-
-    #[rstest]
-    #[case(10)]
-    #[case(100)]
-    #[case(1000)]
-    fn test_has_branch_lengths(#[case] n_leaves: usize) {
-        let m = sample_matrix(n_leaves, false);
-        let newick = to_newick_from_matrix(&m);
-        // Check if the newick string has branch lengths
-        let result = has_branch_lengths(&newick);
-        assert!(result); // skipcq: RS-W1024
-
-        // Check if the newick string does not have branch lengths
-        let (v, _) = parse_matrix(&m);
-        let result_no_branch_lengths = has_branch_lengths(&to_newick_from_vector(&v));
-        assert!(!result_no_branch_lengths); // skipcq: RS-W1024
-    }
-
-    #[rstest]
-    #[case(10)]
-    #[case(100)]
-    #[case(1000)]
-    fn test_find_num_leaves(#[case] n_leaves: usize) {
-        let v = sample_vector(n_leaves, false);
-        let newick = to_newick_from_vector(&v);
-        // Check if the newick string has parents
-        let result = find_num_leaves(&newick);
-        assert_eq!(result, n_leaves);
+        // Verify the ancestry
+        assert_eq!(ancestry, expected_ancestry);
     }
 
     #[rstest]
     #[case("((1:0.5,2:0.7)4:0.9,3:0.8)5;", vec![[1, 2, 4], [4, 3, 5]], vec![[0.5, 0.7], [0.9, 0.8]])]
+    #[case("((1:1,2:2)5:5,(3:3,4:4)6:6)7;", vec![[1, 2, 5], [3, 4, 6], [5, 6, 7]], vec![[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]] )]
+    #[case("((1:1,2:2)5:5,(4:4,3:3)6:6)7;", vec![[1, 2, 5], [4, 3, 6], [5, 6, 7]], vec![[1.0, 2.0], [4.0, 3.0], [5.0, 6.0]] )]
     #[case("(1:0.5,2:0.7);", vec![[1, 2, 2]], vec![[0.5, 0.7]] )]
-    fn test_get_cherries_with_bls(
+    fn test_parse_with_bls(
         #[case] newick: &str,
         #[case] expected_ancestry: Vec<[usize; 3]>,
         #[case] expected_bls: Vec<[f32; 2]>,
     ) {
         let (ancestry, bls) =
-            get_cherries_with_bls(newick).expect("failed to get cherries with branch lengths");
+            parse_with_bls(newick).expect("failed to get cherries with branch lengths");
 
         // Verify the ancestry
-        assert_eq!(ancestry, expected_ancestry); // Ensure ancestry matches the expected
+        assert_eq!(ancestry, expected_ancestry);
 
         // Verify the branch lengths
-        assert_eq!(bls.len(), expected_bls.len()); // Ensure the number of branch lengths is correct
-        assert_eq!(bls, expected_bls); // Ensure branch lengths match the expected
+        assert_eq!(bls.len(), expected_bls.len());
+        assert_eq!(bls, expected_bls);
     }
 
     // Generate a random Newick string with random taxon labels

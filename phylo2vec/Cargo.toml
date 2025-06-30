@@ -8,6 +8,7 @@ description.workspace = true
 license.workspace = true
 
 [dependencies]
+ndarray = "0.16.1"
 rand = "*"
 regex = "1.11.1"
 thiserror = "2.0.12"

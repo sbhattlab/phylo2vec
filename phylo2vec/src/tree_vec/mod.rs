@@ -1,10 +1,7 @@
-use crate::utils::sample_vector;
-
-// Import the types module
-pub mod types;
-
-// Import the operations modules
-pub mod ops;
+use crate::types::Ancestry;
+use crate::vector::base::sample_vector;
+use crate::vector::convert;
+use crate::vector::ops;
 
 /// A vector representation of a phylogenetic tree
 ///
@@ -62,19 +59,19 @@ impl TreeVec {
     /// # Returns
     /// A String containing the Newick representation of the tree
     pub fn to_newick(&self) -> String {
-        ops::to_newick_from_vector(&self.data)
+        convert::to_newick(&self.data)
     }
 
     /// Gets the ancestry matrix representation of the tree
     ///
     /// # Returns
     /// An `Ancestry` type containing parent-child relationships
-    pub fn get_ancestry(&self) -> types::Ancestry {
-        ops::get_ancestry(&self.data)
+    pub fn get_ancestry(&self) -> Ancestry {
+        convert::to_ancestry(&self.data)
     }
 
     pub fn get_edges(&self) -> Vec<(usize, usize)> {
-        ops::get_edges(&self.data)
+        convert::to_edges(&self.data)
     }
 
     /// Adds a new leaf to the tree
@@ -173,7 +170,7 @@ mod tests {
     #[case(vec![0, 0, 1], vec![[1, 3, 4],
         [0, 2, 5],
         [5, 4, 6]])]
-    fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: types::Ancestry) {
+    fn test_get_ancestry(#[case] v: Vec<usize>, #[case] expected: Ancestry) {
         let tree = TreeVec::new(v, None, None);
         let ancestry = tree.get_ancestry();
         assert_eq!(ancestry, expected);

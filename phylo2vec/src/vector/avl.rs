@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use crate::tree_vec::types::Pair;
+use crate::types::Pair;
 
 pub struct Node {
     value: Pair,
@@ -30,6 +30,25 @@ pub struct AVLTree {
 impl AVLTree {
     pub fn new() -> Self {
         AVLTree { root: None }
+    }
+
+    pub fn with_vector(v: &[usize]) -> Self {
+        let mut avl_tree = AVLTree::default();
+        let k = v.len();
+        avl_tree.insert(0, (0, 1));
+
+        for (i, &vi) in v.iter().enumerate().take(k).skip(1) {
+            let next_leaf = i + 1;
+            if vi <= i {
+                avl_tree.insert(0, (v[i], next_leaf));
+            } else {
+                let index = v[i] - next_leaf;
+                let pair = AVLTree::lookup(&avl_tree, index);
+                avl_tree.insert(index + 1, (pair.0, next_leaf));
+            }
+        }
+
+        avl_tree
     }
 
     fn get_height(node: &Option<Box<Node>>) -> usize {
@@ -190,10 +209,6 @@ impl AVLTree {
 
         result
     }
-
-    pub fn get_pairs(&self) -> Vec<Pair> {
-        self.inorder_traversal()
-    }
 }
 
 impl Default for AVLTree {
@@ -209,7 +224,7 @@ mod tests {
 
     #[fixture]
     fn sample_tree() -> AVLTree {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         tree.insert(0, (1, 1));
         tree.insert(1, (2, 2));
         tree.insert(2, (3, 3));
@@ -235,7 +250,7 @@ mod tests {
         #[case] lookup_index: usize,
         #[case] expected: Pair,
     ) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         for (index, value) in inserts {
             tree.insert(index, value);
         }
@@ -247,7 +262,7 @@ mod tests {
     #[case(vec![(0, (3, 3)), (0, (2, 2)), (0, (1, 1))], vec![(1, 1), (2, 2), (3, 3)])]
     #[case(vec![(0, (2, 2)), (1, (1, 1)), (0, (3, 3))], vec![(3, 3), (2, 2), (1, 1)])]
     fn test_inorder_traversal(#[case] inserts: Vec<(usize, Pair)>, #[case] expected: Vec<Pair>) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         for (index, value) in inserts {
             tree.insert(index, value);
         }
@@ -256,14 +271,14 @@ mod tests {
 
     #[rstest]
     fn test_empty_tree() {
-        let tree = AVLTree::new();
+        let tree = AVLTree::default();
         assert!(tree.inorder_traversal().is_empty());
     }
 
     #[rstest]
     #[case((0, (1, 1)), vec![(1, 1)])]
     fn test_single_element_insert(#[case] insert: (usize, Pair), #[case] expected: Vec<Pair>) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         tree.insert(insert.0, insert.1);
         assert_eq!(tree.inorder_traversal(), expected);
     }
@@ -272,7 +287,7 @@ mod tests {
     #[case(vec![(0, (1, 1)), (1, (2, 2))], vec![(1, 1), (2, 2)])]
     #[case(vec![(1, (1, 1)), (0, (2, 2))], vec![(2, 2), (1, 1)])]
     fn test_two_elements_insert(#[case] inserts: Vec<(usize, Pair)>, #[case] expected: Vec<Pair>) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         for (index, value) in inserts {
             tree.insert(index, value);
         }
@@ -294,7 +309,7 @@ mod tests {
     #[rstest]
     #[case(vec![(0, (1, 1)), (1, (1, 1)), (2, (1, 1))], vec![(1, 1), (1, 1), (1, 1)])]
     fn test_insert_duplicates(#[case] inserts: Vec<(usize, Pair)>, #[case] expected: Vec<Pair>) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         for (index, value) in inserts {
             tree.insert(index, value);
         }
@@ -302,23 +317,11 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![(0, (1, 1)), (1, (2, 2)), (2, (3, 3))], vec![(1, 1), (2, 2), (3, 3)])]
-    #[case(vec![(0, (3, 3)), (0, (2, 2)), (0, (1, 1))], vec![(1, 1), (2, 2), (3, 3)])]
-    #[case(vec![(0, (2, 2)), (1, (1, 1)), (0, (3, 3))], vec![(3, 3), (2, 2), (1, 1)])]
-    fn test_get_pairs(#[case] inserts: Vec<(usize, Pair)>, #[case] expected: Vec<Pair>) {
-        let mut tree = AVLTree::new();
-        for (index, value) in inserts {
-            tree.insert(index, value);
-        }
-        assert_eq!(tree.get_pairs(), expected);
-    }
-
-    #[rstest]
     #[case(vec![0, 1, 2, 3, 4, 5])]
     #[case(vec![5, 4, 3, 2, 1, 0])]
     #[case(vec![3, 1, 4, 0, 2, 5])]
     fn test_balance_after_insert(#[case] insert_order: Vec<usize>) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
         for (i, &index) in insert_order.iter().enumerate() {
             tree.insert(index, (i, i));
         }
@@ -329,7 +332,7 @@ mod tests {
     #[rstest]
     #[case(vec![5, 3, 7, 2, 4, 6, 8])]
     fn test_balance_after_insert_granular(#[case] inserts: Vec<usize>) {
-        let mut tree = AVLTree::new();
+        let mut tree = AVLTree::default();
 
         for &index in inserts.iter() {
             tree.insert(index, (index, index));

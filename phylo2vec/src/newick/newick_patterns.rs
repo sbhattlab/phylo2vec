@@ -7,7 +7,7 @@
 /// # Example
 ///
 /// ```
-/// use phylo2vec::tree_vec::ops::newick::NewickPatterns;
+/// use phylo2vec::newick::NewickPatterns;
 ///
 /// let newick_patterns = NewickPatterns::new();
 /// let newick = "(1,2)3";
