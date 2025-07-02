@@ -1,7 +1,8 @@
-use extendr_api::prelude::*;
-use ndarray::Array2;
 use std::collections::HashMap;
 use std::result::Result;
+
+use extendr_api::prelude::*;
+use ndarray::{Array2, ArrayView2};
 
 use phylo2vec::matrix::base as mbase;
 use phylo2vec::matrix::convert as mconvert;
@@ -20,8 +21,8 @@ fn as_i32(v: Vec<usize>) -> Vec<i32> {
     v.iter().map(|&x| x as i32).collect()
 }
 
-// Convert R matrix to Rust Vec<Vec<f32>>
-fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f32>, &'static str> {
+// Convert R matrix to Rust Array2<f64>.
+fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f64>, &'static str> {
     let data = matrix.as_real_slice().ok_or("Expected numeric matrix")?;
     let dims = matrix.dim().ok_or("Matrix is missing dimensions")?;
 
@@ -31,28 +32,14 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f32>, &'static str> {
         return Err("Matrix dimensions do not match data length");
     }
     // Create a 2D array with the specified dimensions
-    let mut array = Array2::<f32>::zeros((nrows, ncols));
-    // for (i, mut row) in array.axis_iter_mut(Axis(0)).enumerate() {
-    //     for j in 0..ncols {
-    //         row[j] = data[] as f32; // Convert to f32
-    //     }
-    // }
+    let mut array = Array2::<f64>::zeros((nrows, ncols));
     for i in 0..nrows {
         for j in 0..ncols {
-            array[[i, j]] = data[j * nrows + i] as f32; // Convert to f32
+            array[[i, j]] = data[j * nrows + i];
         }
     }
 
     Ok(array)
-
-    // Convert column-major to row-major Vec<Vec<f32>>
-    // Ok((0..nrows)
-    //     .map(|row| {
-    //         (0..ncols)
-    //             .map(|col| data[col * nrows + row] as f32)
-    //             .collect()
-    //     })
-    //     .collect())
 }
 
 /// Sample a random tree topology via Phylo2Vec
@@ -69,7 +56,7 @@ fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<i32> {
 fn sample_matrix(n_leaves: usize, ordered: bool) -> RMatrix<f64> {
     let matrix = mbase::sample_matrix(n_leaves, ordered);
     let shape = matrix.shape();
-    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]] as f64)
+    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]])
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
@@ -102,7 +89,7 @@ fn to_vector(newick: &str) -> Vec<i32> {
 fn to_matrix(newick: &str) -> RMatrix<f64> {
     let matrix = mconvert::from_newick(newick);
     let shape = matrix.shape();
-    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]] as f64)
+    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]])
 }
 
 /// Validate a Phylo2Vec vector
@@ -231,32 +218,38 @@ fn remove_leaf(vector: Vec<i32>, leaf: i32) -> Robj {
     list!(v = as_i32(new_v), branch = branch as i32).into()
 }
 
-/// Get the topological cophenetic distance matrix of a Phylo2Vec vector
+// Get the first recent common ancestor between two nodes in a Phylo2Vec tree
+// node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+// Similar to ape's `getMRCA` function in R (for leaf nodes)
+// and ETE's `get_common_ancestor` in Python (for all nodes), but for Phylo2Vec vectors.
+
 /// @export
 #[extendr]
-fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
+fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
     let v_usize: Vec<usize> = as_usize(vector);
-    let k = v_usize.len();
-    let coph_usize = vgraph::cophenetic_distances(&v_usize);
-    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_usize[[r, c]] as i32);
-    let dimnames = (0..=k).map(|x| x as i32).collect::<Vec<i32>>();
-    coph.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
-
-    coph
+    let common_ancestor = vops::get_common_ancestor(&v_usize, node1 as usize, node2 as usize);
+    common_ancestor as i32
 }
 
-/// Get the cophenetic distance matrix of a Phylo2Vec matrix
+/// Produce an ordered version (i.e., birth-death process version)
+/// of a Phylo2Vec vector using the Queue Shuffle algorithm.
+///
+/// Queue Shuffle ensures that the output tree is ordered,
+/// while also ensuring a smooth path through the space of orderings
+///
+/// for more details, see https://doi.org/10.1093/gbe/evad213
+///
+/// @param vector A Phylo2Vec vector (i.e., a vector of integers)
+/// @param shuffle_cherries If true, the algorithm will shuffle cherries (i.e., pairs of leaves)
+/// @return A list with two elements:
+/// - `v`: The ordered Phylo2Vec vector
+/// - `mapping`: A mapping of the original labels to the new labels
 /// @export
 #[extendr]
-fn cophenetic_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
-    let matrix_f32 = convert_from_rmatrix(&matrix).unwrap();
-    let k = matrix_f32.shape()[0];
-    let coph_f32 = mgraph::cophenetic_distances(&matrix_f32.view());
-    let mut coph = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_f32[[r, c]] as f64);
-    let dimnames = (0..k + 1).map(|x| x as i32).collect::<Vec<i32>>();
-    coph.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
-
-    coph
+fn queue_shuffle(vector: Vec<i32>, shuffle_cherries: bool) -> List {
+    let v_usize: Vec<usize> = as_usize(vector);
+    let (v_new, label_mapping) = vops::queue_shuffle(&v_usize, shuffle_cherries);
+    list!(v = as_i32(v_new), mapping = as_i32(label_mapping))
 }
 
 /// Check if a newick string has branch lengths
@@ -311,38 +304,87 @@ fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String 
     newick::apply_label_mapping(newick, &label_mapping_hash).unwrap()
 }
 
-// Get the first recent common ancestor between two nodes in a Phylo2Vec tree
-// node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
-// Similar to ape's `getMRCA` function in R (for leaf nodes)
-// and ETE's `get_common_ancestor` in Python (for all nodes), but for Phylo2Vec vectors.
-
+/// Get the topological cophenetic distance matrix of a Phylo2Vec vector
 /// @export
 #[extendr]
-fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
+fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
     let v_usize: Vec<usize> = as_usize(vector);
-    let common_ancestor = vops::get_common_ancestor(&v_usize, node1 as usize, node2 as usize);
-    common_ancestor as i32
+    let k = v_usize.len();
+    let coph_rs = vgraph::cophenetic_distances(&v_usize);
+    let mut coph_r = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_rs[[r, c]] as i32);
+    let dimnames = (0..=k).map(|x| x as i32).collect::<Vec<i32>>();
+    coph_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    coph_r
 }
 
-/// Produce an ordered version (i.e., birth-death process version)
-/// of a Phylo2Vec vector using the Queue Shuffle algorithm.
-///
-/// Queue Shuffle ensures that the output tree is ordered,
-/// while also ensuring a smooth path through the space of orderings
-///
-/// for more details, see https://doi.org/10.1093/gbe/evad213
-///
-/// @param vector A Phylo2Vec vector (i.e., a vector of integers)
-/// @param shuffle_cherries If true, the algorithm will shuffle cherries (i.e., pairs of leaves)
-/// @return A list with two elements:
-/// - `v`: The ordered Phylo2Vec vector
-/// - `mapping`: A mapping of the original labels to the new labels
+/// Get the cophenetic distance matrix of a Phylo2Vec matrix
 /// @export
 #[extendr]
-fn queue_shuffle(vector: Vec<i32>, shuffle_cherries: bool) -> List {
+fn cophenetic_from_matrix(matrix: ArrayView2<f64>) -> RMatrix<f64> {
+    let coph_rs = mgraph::cophenetic_distances(&matrix.view());
+    let n_leaves = coph_rs.shape()[0];
+    let mut coph_r = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| coph_rs[[r, c]]);
+    let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
+    coph_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    coph_r
+}
+
+/// Get the precision matrix of a Phylo2Vec vector
+/// @export
+#[extendr]
+fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     let v_usize: Vec<usize> = as_usize(vector);
-    let (v_new, label_mapping) = vops::queue_shuffle(&v_usize, shuffle_cherries);
-    list!(v = as_i32(v_new), mapping = as_i32(label_mapping))
+    let pre_precision_rs = vgraph::pre_precision(&v_usize);
+    let n = pre_precision_rs.shape()[0];
+    let mut preprecision_r = RMatrix::new_matrix(n, n, |r, c| pre_precision_rs[[r, c]]);
+    let dimnames = (0..n).map(|x| x as i32).collect::<Vec<i32>>();
+    preprecision_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    preprecision_r
+}
+
+/// Get the precision matrix of a Phylo2Vec matrix
+/// @export
+#[extendr]
+fn pre_precision_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
+    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
+    let pre_precision_rs = mgraph::pre_precision(&matrix_rs.view());
+    let n = pre_precision_rs.shape()[0];
+    let mut pre_precision_r = RMatrix::new_matrix(n, n, |r, c| pre_precision_rs[[r, c]]);
+    let dimnames = (0..n).map(|x| x as i32).collect::<Vec<i32>>();
+    pre_precision_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    pre_precision_r
+}
+
+/// Get the variance-covariance matrix of a Phylo2Vec vector
+/// @export
+#[extendr]
+fn vcov_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
+    let v_usize: Vec<usize> = as_usize(vector);
+    let vcv_rs = vgraph::vcv(&v_usize);
+    let n_leaves = vcv_rs.shape()[0];
+    let mut vcv_r = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| vcv_rs[[r, c]]);
+    let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
+    vcv_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    vcv_r
+}
+
+/// Get the variance-covariance matrix of a Phylo2Vec matrix
+/// @export
+#[extendr]
+fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
+    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
+    let vcv_rs = mgraph::vcv(&matrix_rs.view());
+    let n_leaves = vcv_rs.shape()[0];
+    let mut vcv_matrix = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| vcv_rs[[r, c]]);
+    let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
+    vcv_matrix.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    vcv_matrix
 }
 
 // Macro to generate exports.
@@ -362,6 +404,8 @@ extendr_module! {
     fn from_pairs;
     fn get_common_ancestor;
     fn has_branch_lengths;
+    fn pre_precision_from_matrix;
+    fn pre_precision_from_vector;
     fn queue_shuffle;
     fn remove_leaf;
     fn sample_matrix;
@@ -373,4 +417,6 @@ extendr_module! {
     fn to_pairs;
     fn to_matrix;
     fn to_vector;
+    fn vcov_from_matrix;
+    fn vcov_from_vector;
 }

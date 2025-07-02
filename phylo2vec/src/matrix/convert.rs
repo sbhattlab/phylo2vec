@@ -9,7 +9,7 @@ use crate::vector::convert::{
 };
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
-pub fn to_newick(m: &ArrayView2<f32>) -> String {
+pub fn to_newick(m: &ArrayView2<f64>) -> String {
     // First, check the matrix structure for validity
     check_m(m);
 
@@ -19,7 +19,7 @@ pub fn to_newick(m: &ArrayView2<f32>) -> String {
 }
 
 /// Build newick string from the ancestry matrix and branch lengths
-fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> String {
+fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f64; 2]]) -> String {
     let num_leaves = pairs.len() + 1;
 
     let mut cache = prepare_cache(pairs);
@@ -51,7 +51,7 @@ fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> String {
 ///
 /// # Returns
 ///
-/// An `Array2<f32>` where each row contains the tree's vector representation value and associated branch lengths.
+/// An `Array2<f64>` where each row contains the tree's vector representation value and associated branch lengths.
 ///
 /// # Example
 ///
@@ -67,7 +67,7 @@ fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f32; 2]]) -> String {
 /// # Notes
 ///
 /// Assumes a valid Newick string. Relies on helper functions for processing.
-pub fn from_newick(newick: &str) -> Array2<f32> {
+pub fn from_newick(newick: &str) -> Array2<f64> {
     // Get the cherries and branch lengths
     let (mut cherries, mut bls) =
         parse_with_bls(newick).expect("failed to get cherries with branch lengths and no parents");
@@ -91,15 +91,15 @@ pub fn from_newick(newick: &str) -> Array2<f32> {
     }
 
     // Reorder the branch lengths based on the sorted indices
-    let reordered_bls: Vec<[f32; 2]> = row_idxs
+    let reordered_bls: Vec<[f64; 2]> = row_idxs
         .iter()
         .map(|&idx| bls[idx]) // Access each element of `bls` using the index from `indices`
         .collect();
 
-    let mut matrix = Array2::<f32>::zeros((vector.len(), 3));
+    let mut matrix = Array2::<f64>::zeros((vector.len(), 3));
 
     for (i, mut row) in matrix.axis_iter_mut(Axis(0)).enumerate() {
-        row[0] = vector[i] as f32; // Ancestry value
+        row[0] = vector[i] as f64; // Ancestry value
         row[1] = reordered_bls[i][0]; // Branch length 1
         row[2] = reordered_bls[i][1]; // Branch length 2
     }
@@ -134,7 +134,7 @@ mod tests {
         [0.0, 0.0017238181, 0.34410468],
         [4.0, 0.2021168, 0.7084421]
     ])]
-    fn test_from_newick(#[case] newick: String, #[case] expected_matrix: Array2<f32>) {
+    fn test_from_newick(#[case] newick: String, #[case] expected_matrix: Array2<f64>) {
         let matrix = from_newick(&newick);
         // Check if the matrix matches the expected matrix
         assert_eq!(matrix, expected_matrix);
@@ -152,7 +152,7 @@ mod tests {
     ])]
     fn test_from_newick_no_parents(
         #[case] newick_no_parents: String,
-        #[case] expected_matrix: Array2<f32>,
+        #[case] expected_matrix: Array2<f64>,
     ) {
         let matrix = from_newick(&newick_no_parents);
 
@@ -163,8 +163,8 @@ mod tests {
     // Test for an empty Newick string in the `from_newick` function
     // Ensures that an empty Newick string results in an empty matrix.
     #[rstest]
-    #[case("".to_string(), Array2::<f32>::zeros((0, 3)))]
-    fn test_empty_newick_from_newick(#[case] newick: String, #[case] expected_matrix: Array2<f32>) {
+    #[case("".to_string(), Array2::<f64>::zeros((0, 3)))]
+    fn test_empty_newick_from_newick(#[case] newick: String, #[case] expected_matrix: Array2<f64>) {
         let matrix = from_newick(&newick);
 
         // Empty Newick should result in an empty matrix
@@ -184,7 +184,7 @@ mod tests {
         [0.0, 0.1, 0.2],
         [1.0, 0.5, 0.7],
     ], "((0:0.1,2:0.2)5:0.5,(1:1,3:3)4:0.7)6;")]
-    fn test_to_newick(#[case] m: Array2<f32>, #[case] expected: &str) {
+    fn test_to_newick(#[case] m: Array2<f64>, #[case] expected: &str) {
         let newick = to_newick(&m.view());
         assert_eq!(newick, expected);
     }

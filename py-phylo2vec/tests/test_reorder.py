@@ -8,12 +8,8 @@ from itertools import product
 import numpy as np
 import pytest
 
-from ete3 import Tree
-
-from phylo2vec.base.ancestry import from_ancestry, to_ancestry
-from phylo2vec.base.newick import to_newick
+from phylo2vec.base.ancestry import to_ancestry
 from phylo2vec.base.pairs import from_pairs
-from phylo2vec.utils.newick import apply_label_mapping
 from phylo2vec.utils.vector import queue_shuffle, sample_vector
 from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
 
@@ -115,26 +111,6 @@ def legacy_queue_shuffle(
     ancestry_new = ancestry_new[ancestry_new[:, 0].argsort()[::-1]]
 
     return np.flip(ancestry_new), label_mapping_new, node_code
-
-
-# def to_pairs(ancestry):
-#     num_cherries = ancestry.shape[0]
-#     ancestry = ancestry[np.argsort(ancestry[:, 2])]
-#     num_nodes = 2 * num_cherries + 2
-#     MAX = np.iinfo(np.int32).max
-#     min_desc = np.ones(num_nodes, dtype=np.int32) * MAX
-#     pairs = []
-
-#     for i, cherry in enumerate(ancestry):
-#         c1, c2, p = cherry
-
-#         min_desc1 = min_desc[c1] if min_desc[c1] != MAX else c1
-#         min_desc2 = min_desc[c2] if min_desc[c2] != MAX else c2
-
-#         desc_min, _ = sorted([min_desc1, min_desc2])
-#         min_desc[p] = desc_min
-#         pairs.append((int(min_desc1), int(min_desc2)))
-#     return pairs
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES))

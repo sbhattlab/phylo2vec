@@ -6,17 +6,16 @@ import pytest
 from ete3 import Tree
 
 from phylo2vec.base.newick import to_newick
-from phylo2vec.metrics import cophenetic_distances, pairwise_distances
+from phylo2vec.stats import cophenetic_distances, pairwise_distances, precision, cov
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, N_REPEATS
 
-# Function is currently a bit slow for large trees,
-# so we limit the number of leaves to 50
-MAX_N_LEAVES_COPH = 50
+
+MAX_N_LEAVES_STATS = 50
 
 
-def _cophenetic(n_leaves, sample_fn):
+def _test_cophenetic(n_leaves, sample_fn):
     """Helper function to test cophenetic distances using a sample function."""
 
     def coph_ete3(tr, n_leaves):
@@ -45,7 +44,7 @@ def _cophenetic(n_leaves, sample_fn):
         assert np.allclose(dmat_p2v, dmat_ete3)
 
 
-@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1))
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_vector(n_leaves):
     """Test that v to newick to converted_v leads to v == converted_v
 
@@ -55,10 +54,10 @@ def test_cophenetic_vector(n_leaves):
         Number of leaves
     """
 
-    _cophenetic(n_leaves, sample_vector)
+    _test_cophenetic(n_leaves, sample_vector)
 
 
-@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1))
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_matrix(n_leaves):
     """Test that v to newick to converted_v leads to v == converted_v
 
@@ -68,10 +67,10 @@ def test_cophenetic_matrix(n_leaves):
         Number of leaves
     """
 
-    _cophenetic(n_leaves, sample_matrix)
+    _test_cophenetic(n_leaves, sample_matrix)
 
 
-@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES_COPH + 1])
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1])
 def test_pairwise_distances_cophenetic(n_leaves):
     """Test the `pairwise_distances` function with cophenetic distances.
 
@@ -91,6 +90,41 @@ def test_pairwise_distances_cophenetic(n_leaves):
     dmat_matrix = pairwise_distances(matrix, metric="cophenetic")
     dmat_matrix2 = cophenetic_distances(matrix)
     assert np.array_equal(dmat_matrix, dmat_matrix2)
+
+
+def _test_cov_and_precision(n_leaves, sample_fn):
+    for _ in range(N_REPEATS):
+        vector_or_matrix = sample_fn(n_leaves)
+        cov_matrix = cov(vector_or_matrix)
+        precision_matrix = precision(vector_or_matrix)
+        identity = np.eye(n_leaves, dtype=cov_matrix.dtype)
+        # Note: this test might fail for larger n_leaves due to numerical precision issues
+        assert np.allclose(cov_matrix @ precision_matrix, identity)
+        assert np.allclose(precision_matrix @ cov_matrix, identity)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_cov_vector(n_leaves):
+    """Test covariance matrix for vector input.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    _test_cov_and_precision(n_leaves, sample_vector)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_cov_matrix(n_leaves):
+    """Test covariance matrix for matrix input.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    _test_cov_and_precision(n_leaves, sample_matrix)
 
 
 if __name__ == "__main__":

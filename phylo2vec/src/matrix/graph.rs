@@ -1,6 +1,7 @@
 /// Functions to derive common graph/tree theory objects from Phylo2Vec matrices
 use crate::matrix::base::parse_matrix;
-use crate::vector::graph::_cophenetic_distances;
+use crate::vector::graph::{_cophenetic_distances, _pre_precision, _vcv};
+
 use ndarray::{Array2, ArrayView2};
 
 /// Get the cophenetic distances from a Phylo2Vec matrix.
@@ -18,9 +19,19 @@ use ndarray::{Array2, ArrayView2};
 ///    ];
 /// let dist = cophenetic_distances(&m.view());
 /// ```
-pub fn cophenetic_distances(m: &ArrayView2<f32>) -> Array2<f32> {
+pub fn cophenetic_distances(m: &ArrayView2<f64>) -> Array2<f64> {
     let (v, bls) = parse_matrix(m);
     _cophenetic_distances(&v, Some(&bls))
+}
+
+pub fn pre_precision(m: &ArrayView2<f64>) -> Array2<f64> {
+    let (v, bls) = parse_matrix(m);
+    _pre_precision(&v, Some(&bls))
+}
+
+pub fn vcv(m: &ArrayView2<f64>) -> Array2<f64> {
+    let (v, bls) = parse_matrix(m);
+    _vcv(&v, Some(&bls))
 }
 
 #[cfg(test)]
@@ -28,6 +39,24 @@ mod tests {
     use super::*;
     use ndarray::{array, Array2};
     use rstest::rstest;
+
+    fn allclose(a: ArrayView2<f64>, b: ArrayView2<f64>) -> bool {
+        let rtol = 1e-5;
+        let atol = 1e-8;
+        // Check if the distances match the expected distances
+        let (r, c) = a.dim();
+        for i in 0..r {
+            for j in 0..c {
+                let diff = (a[[i, j]] - b[[i, j]]).abs();
+
+                if diff > (atol + rtol * b[[i, j]].abs()) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
 
     // Test cophenetic distances with branch lengths in the `cophenetic_distances_with_bls` function
     // Verifies correct cophenetic distance calculation from a matrix with branch lengths.
@@ -89,24 +118,45 @@ mod tests {
         ]
     )]
     fn test_cophenetic_distances_with_bls(
-        #[case] matrix: Array2<f32>,
+        #[case] matrix: Array2<f64>,
         //#[case] unrooted: bool,
-        #[case] expected_distances: Array2<f32>,
+        #[case] expected_distances: Array2<f64>,
     ) {
         let distances = cophenetic_distances(&matrix.view());
 
-        let rtol = 1e-5;
-        let atol = 1e-8;
+        assert!(allclose(distances.view(), expected_distances.view()));
+    }
 
-        // Check if the distances match the expected distances
-        // assert_eq!(distances, expected_distances);
-        let n_leaves = distances.shape()[0];
-        for i in 0..n_leaves {
-            for j in 0..n_leaves {
-                let diff = (distances[[i, j]] - expected_distances[[i, j]]).abs();
+    #[rstest]
+    #[case(array![[0.0, 1.0, 10.0]], array![[1.0, 0.0], [0.0, 10.0]])]
+    #[case(array![
+        [0.0, 0.4, 0.5],
+        [2.0, 0.1, 0.2],
+        [2.0, 0.3, 0.6],
+    ], array![
+        [0.4, 0.3, 0.0, 0.0],
+        [0.3, 0.5, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.6],
+        [0.0, 0.0, 0.6, 1.1]
+    ])]
+    #[case(array!
+        [[0.0, 0.5, 0.5],
+         [2.0, 1.5, 1.5],
+         [2.0, 1.0, 2.0]
+        ],
+        array![[2.5, 1.0, 0.0, 0.0],
+               [1.0, 2.5, 0.0, 0.0],
+               [0.0, 0.0, 2.5, 2.0],
+               [0.0, 0.0, 2.0, 2.5]]
 
-                assert!(diff <= (atol + rtol * expected_distances[[i, j]].abs()));
-            }
-        }
+    )]
+    fn test_vcv(#[case] matrix: Array2<f64>, #[case] expected_vcv: Array2<f64>) {
+        let try_vcv = vcv(&matrix.view());
+        assert!(
+            allclose(try_vcv.view(), expected_vcv.view()),
+            "VCV mismatch: Computed VCV = {:?}, Expected VCV = {:?}",
+            try_vcv,
+            expected_vcv
+        );
     }
 }

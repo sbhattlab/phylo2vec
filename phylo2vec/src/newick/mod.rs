@@ -146,14 +146,14 @@ pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
 /// assert_eq!(bls, vec![[0.1, 0.2], [0.5, 0.7], [0.3, 0.4]]);
 /// ```
 ///
-pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickError> {
+pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickError> {
     if newick.is_empty() {
         return Ok((Vec::new(), Vec::new())); // Return empty ancestry and branch length vectors
     }
     let mut ancestry: Ancestry = Vec::new();
-    let mut bls: Vec<[f32; 2]> = Vec::new();
+    let mut bls: Vec<[f64; 2]> = Vec::new();
     let mut stack: Vec<usize> = Vec::new();
-    let mut bl_stack: Vec<f32> = Vec::new();
+    let mut bl_stack: Vec<f64> = Vec::new();
 
     let mut i: usize = 0;
 
@@ -168,8 +168,8 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickE
             let c1: usize = stack.pop().ok_or(NewickError::StackUnderflow)?;
 
             // Pop the BLs from the BL stack
-            let bl2: f32 = bl_stack.pop().ok_or(NewickError::StackUnderflow)?;
-            let bl1: f32 = bl_stack.pop().ok_or(NewickError::StackUnderflow)?;
+            let bl2: f64 = bl_stack.pop().ok_or(NewickError::StackUnderflow)?;
+            let bl1: f64 = bl_stack.pop().ok_or(NewickError::StackUnderflow)?;
             bls.push([bl1, bl2]);
 
             let (annotation, end) = node_substr(newick, i + 1);
@@ -187,7 +187,7 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickE
                     // to represent this internal node going forward
                     stack.push(c_ordered[0]);
                     // Push the parent BL to the BL stack
-                    bl_stack.push(blp.parse::<f32>().map_err(NewickError::ParseFloatError)?);
+                    bl_stack.push(blp.parse::<f64>().map_err(NewickError::ParseFloatError)?);
                 }
                 Some((p, blp)) => {
                     // Case 2: Parent node present
@@ -198,7 +198,7 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickE
                     // Push the parent node to the stack
                     stack.push(p_int);
                     // Push the parent BL to the BL stack
-                    bl_stack.push(blp.parse::<f32>().map_err(NewickError::ParseFloatError)?);
+                    bl_stack.push(blp.parse::<f64>().map_err(NewickError::ParseFloatError)?);
                 }
                 None => {
                     if end == newick.len() - 1 {
@@ -234,7 +234,7 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f32; 2]>), NewickE
             let (node, bln) = annotated_node.split_once(':').unwrap();
 
             stack.push(node.parse::<usize>().map_err(NewickError::ParseIntError)?);
-            bl_stack.push(bln.parse::<f32>().map_err(NewickError::ParseFloatError)?);
+            bl_stack.push(bln.parse::<f64>().map_err(NewickError::ParseFloatError)?);
         }
 
         i += 1;
@@ -633,7 +633,7 @@ mod tests {
     fn test_parse_with_bls(
         #[case] newick: &str,
         #[case] expected_ancestry: Vec<[usize; 3]>,
-        #[case] expected_bls: Vec<[f32; 2]>,
+        #[case] expected_bls: Vec<[f64; 2]>,
     ) {
         let (ancestry, bls) =
             parse_with_bls(newick).expect("failed to get cherries with branch lengths");
