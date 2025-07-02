@@ -152,8 +152,9 @@ mod tests {
     )]
     fn test_vcv(#[case] matrix: Array2<f64>, #[case] expected_vcv: Array2<f64>) {
         let try_vcv = vcv(&matrix.view());
-        println!("Computed VCV:\n{:?}", try_vcv);
-        println!("Expected VCV:\n{:?}", expected_vcv);
-        assert!(allclose(try_vcv.view(), expected_vcv.view()));
+        assert!(
+            allclose(try_vcv.view(), expected_vcv.view()),
+            "VCV mismatch: Computed VCV = {:?}, Expected VCV = {:?}", try_vcv, expected_vcv
+        );
     }
 }
