@@ -21,7 +21,7 @@ fn as_i32(v: Vec<usize>) -> Vec<i32> {
     v.iter().map(|&x| x as i32).collect()
 }
 
-// Convert R matrix to Rust Vec<Vec<f64>>
+// Convert R matrix to Rust Array2<f64>.
 fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f64>, &'static str> {
     let data = matrix.as_real_slice().ok_or("Expected numeric matrix")?;
     let dims = matrix.dim().ok_or("Matrix is missing dimensions")?;
@@ -362,7 +362,7 @@ fn pre_precision_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
 /// Get the variance-covariance matrix of a Phylo2Vec vector
 /// @export
 #[extendr]
-fn vcv_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
+fn vcov_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     let v_usize: Vec<usize> = as_usize(vector);
     let vcv_rs = vgraph::vcv(&v_usize);
     let n_leaves = vcv_rs.shape()[0];
@@ -376,7 +376,7 @@ fn vcv_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
 /// Get the variance-covariance matrix of a Phylo2Vec matrix
 /// @export
 #[extendr]
-fn vcv_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
+fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
     let vcv_rs = mgraph::vcv(&matrix_rs.view());
     let n_leaves = vcv_rs.shape()[0];
@@ -417,6 +417,6 @@ extendr_module! {
     fn to_pairs;
     fn to_matrix;
     fn to_vector;
-    fn vcv_from_matrix;
-    fn vcv_from_vector;
+    fn vcov_from_matrix;
+    fn vcov_from_vector;
 }

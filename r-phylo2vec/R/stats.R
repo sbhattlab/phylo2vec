@@ -22,7 +22,7 @@ cophenetic_distances <- function(vector_or_matrix) {
 #' @param vector_or_matrix Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 #' @return Variance-covariance matrix
 #' @export
-cov <- function(vector_or_matrix) {
+vcovp <- function(vector_or_matrix) {
   if (is.vector(vector_or_matrix)) {
     # If the input is a vector, call the C function for vector
     .Call(wrap__vcv_from_vector, vector_or_matrix)

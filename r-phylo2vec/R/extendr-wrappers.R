@@ -139,11 +139,11 @@ to_vector <- function(newick) .Call(wrap__to_vector, newick)
 
 #' Get the variance-covariance matrix of a Phylo2Vec matrix
 #' @export
-vcv_from_matrix <- function(matrix) .Call(wrap__vcv_from_matrix, matrix)
+vcov_from_matrix <- function(matrix) .Call(wrap__vcov_from_matrix, matrix)
 
 #' Get the variance-covariance matrix of a Phylo2Vec vector
 #' @export
-vcv_from_vector <- function(vector) .Call(wrap__vcv_from_vector, vector)
+vcov_from_vector <- function(vector) .Call(wrap__vcov_from_vector, vector)
 
 
 # nolint end

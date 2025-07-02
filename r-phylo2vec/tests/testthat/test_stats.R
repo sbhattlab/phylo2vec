@@ -65,8 +65,8 @@ test_that(desc = "vcv_vector", {
       # Generate a random vector
       v <- sample_vector(n_leaves, FALSE)
 
-      # Variance-covariance matrix from a matrix
-      vcv_p2v <- cov(v)
+      # Variance-covariance matrix from a vector
+      vcv_p2v <- vcovp(v)
 
       # Variance-covariance matrix from a tree using ape
       newick <- to_newick(v)
@@ -89,7 +89,7 @@ test_that(desc = "vcv_matrix", {
       m <- sample_matrix(n_leaves, FALSE)
 
       # Variance-covariance matrix from a matrix
-      vcv_p2v <- cov(m)
+      vcv_p2v <- vcovp(m)
 
       # Variance-covariance matrix from a tree using ape
       newick <- to_newick(m)
@@ -110,7 +110,7 @@ test_that(desc = "vcv_and_precision", {
       m <- sample_matrix(n_leaves, FALSE)
 
       # Test that the variance-covariance and precision matrices are inverses
-      vcv_p2v <- cov(m)
+      vcv_p2v <- vcovp(m)
       prec_p2v <- precision(m)
       identity <- diag(nrow(vcv_p2v))
 
