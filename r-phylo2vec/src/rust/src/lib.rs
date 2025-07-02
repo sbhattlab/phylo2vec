@@ -35,7 +35,7 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f64>, &'static str> {
     let mut array = Array2::<f64>::zeros((nrows, ncols));
     for i in 0..nrows {
         for j in 0..ncols {
-            array[[i, j]] = data[j * nrows + i]; // Convert to f32
+            array[[i, j]] = data[j * nrows + i];
         }
     }
 
