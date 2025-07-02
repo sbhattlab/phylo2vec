@@ -11,6 +11,6 @@ crate-type = [ 'staticlib' ]
 name = 'phylo2vec'
 
 [dependencies]
-extendr-api = '0.7.1'
+extendr-api = {version = '0.8.0' , features = ["ndarray"]}
 ndarray = "0.16.1"
 phylo2vec = { workspace = true }

@@ -152,7 +152,8 @@ class EigenDecompositionCube:
                     self.gCMatrices[eigenIndex][ll] = inEigvec[i, k] * inInvEigvec[k, j]
                     ll += 1
 
-    def eig(self, model, x=1 / 3):
+    @staticmethod
+    def eig(model, x=1 / 3):
         """Get eigenvalues and eigenvectors for a given model
 
         Parameters
@@ -753,7 +754,6 @@ def parse_matrix(m):
     return v, edge_lengths_flattened
 
 
-# @nb.njit(cache=True)
 def beagle_jc69_loss(m, data, model):
     v, edgeLengths = parse_matrix(m)
 
@@ -770,8 +770,6 @@ def beagle_jc69_loss(m, data, model):
         n_transition_buffers=nEdges,
         n_rate_cats=1,
         n_scaling_buffers=0,
-        # device="cpu",
-        # n_devices=-1,
     )
 
     states = [createStates(x) for x in data]

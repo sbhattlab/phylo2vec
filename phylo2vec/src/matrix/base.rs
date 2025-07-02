@@ -17,7 +17,7 @@ use crate::vector::base::{check_v, sample_vector};
 /// let v = sample_matrix(10, false);
 /// let v2 = sample_matrix(5, true);
 /// ```
-pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f32> {
+pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f64> {
     // Use the existing sample function to generate v
     let v = sample_vector(n_leaves, ordered);
     let bl_size = (v.len(), 2); // 2 columns for the branch lengths
@@ -31,16 +31,16 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f32> {
     for _ in 0..bl_size.0 {
         let mut row = Vec::with_capacity(bl_size.1);
         for _ in 0..bl_size.1 {
-            row.push(uniform_dist.sample(&mut rng) as f32);
+            row.push(uniform_dist.sample(&mut rng));
         }
         bls.push(row);
     }
 
     // Combine `v` and `bls` into a matrix
-    let mut m = Array2::<f32>::zeros((v.len(), 3));
+    let mut m = Array2::<f64>::zeros((v.len(), 3));
 
     for (i, mut row) in m.axis_iter_mut(Axis(0)).enumerate() {
-        row[0] = v[i] as f32; // First column is the vector part
+        row[0] = v[i] as f64; // First column is the vector part
         row[1] = bls[i][0]; // Second column is the first branch length
         row[2] = bls[i][1]; // Third column is the second branch length
     }
@@ -71,7 +71,7 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f32> {
 ///     [1.0, 0.5, 0.7]].view()
 /// );
 ///
-pub fn check_m(matrix: &ArrayView2<f32>) {
+pub fn check_m(matrix: &ArrayView2<f64>) {
     assert!(!matrix.is_empty(), "Matrix should not be empty");
 
     // Validate the vector part (first column)
@@ -103,7 +103,7 @@ pub fn check_m(matrix: &ArrayView2<f32>) {
 /// * `vector` - the tree's vector representation
 /// * `branch_lengths` - the vector's associated branch lengths
 ///
-pub fn parse_matrix(matrix: &ArrayView2<f32>) -> (Vec<usize>, Vec<[f32; 2]>) {
+pub fn parse_matrix(matrix: &ArrayView2<f64>) -> (Vec<usize>, Vec<[f64; 2]>) {
     let vector = matrix
         .slice(s![.., 0])
         .iter()
@@ -113,7 +113,7 @@ pub fn parse_matrix(matrix: &ArrayView2<f32>) -> (Vec<usize>, Vec<[f32; 2]>) {
         .slice(s![.., 1..3])
         .outer_iter()
         .map(|row| [row[0], row[1]])
-        .collect::<Vec<[f32; 2]>>();
+        .collect::<Vec<[f64; 2]>>();
 
     (vector, branch_lengths)
 }
@@ -165,7 +165,7 @@ mod tests {
         [1.0, 0.12, 0.34],
         [8.0, -0.78, 0.23]
     ])]
-    fn test_check_m(#[case] m: Array2<f32>) {
+    fn test_check_m(#[case] m: Array2<f64>) {
         check_m(&m.view());
     }
 

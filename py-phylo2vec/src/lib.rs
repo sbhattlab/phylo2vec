@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use numpy::{IntoPyArray, PyArray2, PyReadonlyArray2};
+use pyo3::exceptions::PyAssertionError;
 use pyo3::prelude::*;
 
 use phylo2vec::matrix::base as mbase;
@@ -13,13 +15,65 @@ use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
 #[pyfunction]
+fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
+    vbase::sample_vector(n_leaves, ordered)
+}
+
+#[pyfunction]
+fn sample_matrix(py: Python<'_>, n_leaves: usize, ordered: bool) -> Bound<'_, PyArray2<f64>> {
+    mbase::sample_matrix(n_leaves, ordered).into_pyarray(py)
+}
+
+#[pyfunction]
+fn check_v(input_vector: Vec<usize>) -> PyResult<()> {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        vbase::check_v(&input_vector);
+    }));
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(payload) => {
+            let msg = if let Some(s) = payload.downcast_ref::<String>() {
+                s.clone()
+            } else {
+                "Rust panic occurred, but couldn't extract message".to_string()
+            };
+
+            Err(PyAssertionError::new_err(msg))
+        }
+    }
+}
+
+#[pyfunction]
+fn check_m(input_matrix: PyReadonlyArray2<f64>) -> PyResult<()> {
+    let m = input_matrix.as_array();
+
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        mbase::check_m(&m);
+    }));
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(payload) => {
+            let msg = if let Some(s) = payload.downcast_ref::<String>() {
+                s.clone()
+            } else {
+                "Rust panic occurred, but couldn't extract message".to_string()
+            };
+
+            Err(PyAssertionError::new_err(msg))
+        }
+    }
+}
+
+#[pyfunction]
 fn to_newick_from_vector(input_vector: Vec<usize>) -> PyResult<String> {
     let newick = vconvert::to_newick(&input_vector);
     Ok(newick)
 }
 
 #[pyfunction]
-fn to_newick_from_matrix(input_matrix: PyReadonlyArray2<f32>) -> PyResult<String> {
+fn to_newick_from_matrix(input_matrix: PyReadonlyArray2<f64>) -> PyResult<String> {
     let arr = input_matrix.as_array();
     let newick = mconvert::to_newick(&arr);
     Ok(newick)
@@ -31,21 +85,18 @@ fn to_vector(newick: &str) -> Vec<usize> {
 }
 
 #[pyfunction]
-fn to_matrix<'py>(py: Python<'py>, newick: &str) -> Bound<'py, PyArray2<f32>> {
+fn to_matrix<'py>(py: Python<'py>, newick: &str) -> Bound<'py, PyArray2<f64>> {
     mconvert::from_newick(newick).into_pyarray(py)
 }
 
 #[pyfunction]
 fn get_ancestry(input_vector: Vec<usize>) -> Vec<[usize; 3]> {
-    let ancestry: Vec<[usize; 3]> = vconvert::to_ancestry(&input_vector);
-
-    ancestry
+    vconvert::to_ancestry(&input_vector)
 }
 
 #[pyfunction]
 fn from_ancestry(input_ancestry: Vec<[usize; 3]>) -> Vec<usize> {
-    let vector: Vec<usize> = vconvert::from_ancestry(&input_ancestry);
-    vector
+    vconvert::from_ancestry(&input_ancestry)
 }
 
 #[pyfunction]
@@ -75,38 +126,45 @@ fn build_newick(input_pairs: Vec<(usize, usize)>) -> String {
 }
 
 #[pyfunction]
-fn cophenetic_distances(py: Python<'_>, input_vector: Vec<usize>) -> Bound<'_, PyArray2<f32>> {
+fn cophenetic_distances(py: Python<'_>, input_vector: Vec<usize>) -> Bound<'_, PyArray2<f64>> {
     vgraph::cophenetic_distances(&input_vector).into_pyarray(py)
 }
 
 #[pyfunction]
 fn cophenetic_distances_with_bls<'py>(
     py: Python<'py>,
-    input_matrix: PyReadonlyArray2<f32>,
-) -> Bound<'py, PyArray2<f32>> {
+    input_matrix: PyReadonlyArray2<f64>,
+) -> Bound<'py, PyArray2<f64>> {
     let m = input_matrix.as_array();
     mgraph::cophenetic_distances(&m).into_pyarray(py)
 }
 
 #[pyfunction]
-fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
-    vbase::sample_vector(n_leaves, ordered)
+fn pre_precision(py: Python<'_>, input_vector: Vec<usize>) -> PyResult<Bound<'_, PyArray2<f64>>> {
+    Ok(vgraph::pre_precision(&input_vector).into_pyarray(py))
 }
 
 #[pyfunction]
-fn sample_matrix(py: Python<'_>, n_leaves: usize, ordered: bool) -> Bound<'_, PyArray2<f32>> {
-    mbase::sample_matrix(n_leaves, ordered).into_pyarray(py)
-}
-
-#[pyfunction]
-fn check_v(input_vector: Vec<usize>) {
-    vbase::check_v(&input_vector);
-}
-
-#[pyfunction]
-fn check_m(input_matrix: PyReadonlyArray2<f32>) {
+fn pre_precision_with_bls<'py>(
+    py: Python<'py>,
+    input_matrix: PyReadonlyArray2<f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
     let m = input_matrix.as_array();
-    mbase::check_m(&m);
+    Ok(mgraph::pre_precision(&m).into_pyarray(py))
+}
+
+#[pyfunction]
+fn vcv(py: Python<'_>, input_vector: Vec<usize>) -> PyResult<Bound<'_, PyArray2<f64>>> {
+    Ok(vgraph::vcv(&input_vector).into_pyarray(py))
+}
+
+#[pyfunction]
+fn vcv_with_bls<'py>(
+    py: Python<'py>,
+    input_matrix: PyReadonlyArray2<f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let m = input_matrix.as_array();
+    Ok(mgraph::vcv(&m).into_pyarray(py))
 }
 
 #[pyfunction]
@@ -196,6 +254,8 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;
+    m.add_function(wrap_pyfunction!(pre_precision, m)?)?;
+    m.add_function(wrap_pyfunction!(pre_precision_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;
     m.add_function(wrap_pyfunction!(remove_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;
@@ -206,6 +266,8 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(to_newick_from_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(to_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(to_vector, m)?)?;
+    m.add_function(wrap_pyfunction!(vcv, m)?)?;
+    m.add_function(wrap_pyfunction!(vcv_with_bls, m)?)?;
     // Metadata about the package bindings
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())

@@ -1,4 +1,4 @@
-"""Pairwise distance metrics for nodes within phylogenetic trees."""
+"""Pairwise distance metrics/statistics between nodes within phylogenetic trees."""
 
 import warnings
 import numpy as np
@@ -41,10 +41,10 @@ def cophenetic_distances(vector_or_matrix, unrooted=False):
         raise ValueError(
             "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
         )
-    return np.asarray(coph)
+    return coph
 
 
-PAIRWISE_DISTANCES = {"cophenetic": cophenetic_distances}
+NODEWISE_DISTANCES = {"cophenetic": cophenetic_distances}
 
 
 def pairwise_distances(vector_or_matrix, metric="cophenetic"):
@@ -75,6 +75,67 @@ def pairwise_distances(vector_or_matrix, metric="cophenetic"):
             "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
         )
 
-    func = PAIRWISE_DISTANCES[metric]
+    func = NODEWISE_DISTANCES[metric]
 
     return func(vector_or_matrix)
+
+
+def cov(vector_or_matrix):
+    """
+    Compute the covariance matrix of a Phylo2Vec vector or matrix.
+
+    Adapted from `vcv.phylo` in <https://github.com/emmanuelparadis/ape>
+
+    Parameters
+    ----------
+    vector_or_matrix : numpy.ndarray
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+
+    Returns
+    -------
+    vcv : numpy.ndarray
+        Covariance matrix
+    """
+    if vector_or_matrix.ndim == 2:
+        vcv = core.vcv_with_bls(vector_or_matrix)
+    elif vector_or_matrix.ndim == 1:
+        vcv = core.vcv(vector_or_matrix)
+    else:
+        raise ValueError(
+            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
+        )
+    return vcv
+
+
+def precision(vector_or_matrix):
+    """
+    Compute the precision matrix of a Phylo2Vec vector or matrix.
+
+    Adapted from: `inverseA.R` in <https://github.com/cran/MCMCglmm>
+
+    Parameters
+    ----------
+    vector_or_matrix : numpy.ndarray
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+
+    Returns
+    -------
+    precicion: numpy.ndarray
+        Precision matrix
+    """
+    if vector_or_matrix.ndim == 2:
+        precursor = core.pre_precision_with_bls(vector_or_matrix)
+    elif vector_or_matrix.ndim == 1:
+        precursor = core.pre_precision(vector_or_matrix)
+    else:
+        raise ValueError(
+            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
+        )
+
+    n_leaves = vector_or_matrix.shape[0] + 1
+    a = precursor[:n_leaves, :n_leaves].astype(np.float64)
+    b = precursor[:n_leaves, n_leaves:].astype(np.float64)
+    c = precursor[n_leaves:, n_leaves:].astype(np.float64)
+    d = precursor[n_leaves:, :n_leaves].astype(np.float64)  # b.T
+
+    return a - b @ np.linalg.solve(c, d)

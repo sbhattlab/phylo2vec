@@ -73,6 +73,14 @@ get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_anc
 #' @export
 has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
 
+#' Get the precision matrix of a Phylo2Vec matrix
+#' @export
+pre_precision_from_matrix <- function(matrix) .Call(wrap__pre_precision_from_matrix, matrix)
+
+#' Get the precision matrix of a Phylo2Vec vector
+#' @export
+pre_precision_from_vector <- function(vector) .Call(wrap__pre_precision_from_vector, vector)
+
 #' Produce an ordered version (i.e., birth-death process version)
 #' of a Phylo2Vec vector using the Queue Shuffle algorithm.
 #'
@@ -128,6 +136,14 @@ to_matrix <- function(newick) .Call(wrap__to_matrix, newick)
 #' Convert a newick string to a Phylo2Vec vector
 #' @export
 to_vector <- function(newick) .Call(wrap__to_vector, newick)
+
+#' Get the variance-covariance matrix of a Phylo2Vec matrix
+#' @export
+vcv_from_matrix <- function(matrix) .Call(wrap__vcv_from_matrix, matrix)
+
+#' Get the variance-covariance matrix of a Phylo2Vec vector
+#' @export
+vcv_from_vector <- function(vector) .Call(wrap__vcv_from_vector, vector)
 
 
 # nolint end
