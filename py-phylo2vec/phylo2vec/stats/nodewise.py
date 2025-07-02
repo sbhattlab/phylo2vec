@@ -132,6 +132,7 @@ def precision(vector_or_matrix):
             "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
         )
 
+    # Schur complement of the precursor matrix
     n_leaves = vector_or_matrix.shape[0] + 1
     a = precursor[:n_leaves, :n_leaves].astype(np.float64)
     b = precursor[:n_leaves, n_leaves:].astype(np.float64)
