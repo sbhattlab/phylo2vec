@@ -6,10 +6,8 @@
 #' @export
 cophenetic_distances <- function(vector_or_matrix) {
   if (is.vector(vector_or_matrix)) {
-    # If the input is a vector, call the C function for vector
     .Call(wrap__cophenetic_from_vector, vector_or_matrix)
   } else if (is.matrix(vector_or_matrix)) {
-    # If the input is a matrix, call the C function for matrix
     .Call(wrap__cophenetic_from_matrix, vector_or_matrix)
   } else {
     stop("Input must be either a vector or a 2D matrix.")
@@ -24,11 +22,9 @@ cophenetic_distances <- function(vector_or_matrix) {
 #' @export
 vcovp <- function(vector_or_matrix) {
   if (is.vector(vector_or_matrix)) {
-    # If the input is a vector, call the C function for vector
-    .Call(wrap__vcv_from_vector, vector_or_matrix)
+    .Call(wrap__vcov_from_vector, vector_or_matrix)
   } else if (is.matrix(vector_or_matrix)) {
-    # If the input is a matrix, call the C function for matrix
-    .Call(wrap__vcv_from_matrix, vector_or_matrix)
+    .Call(wrap__vcov_from_matrix, vector_or_matrix)
   } else {
     stop("Input must be either a vector or a 2D matrix.")
   }
@@ -44,10 +40,8 @@ vcovp <- function(vector_or_matrix) {
 #' @export
 precision <- function(vector_or_matrix) {
   if (is.vector(vector_or_matrix)) {
-    # If the input is a vector, call the C function for vector
     precursor <- .Call(wrap__pre_precision_from_vector, vector_or_matrix)
   } else if (is.matrix(vector_or_matrix)) {
-    # If the input is a matrix, call the C function for matrix
     precursor <- .Call(wrap__pre_precision_from_matrix, vector_or_matrix)
   } else {
     stop("Input must be either a vector or a 2D matrix.")
