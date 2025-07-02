@@ -1,5 +1,6 @@
 """
-Methods to convert Phylo2Mat matrices to Newick format and vice-versa.
+Methods to compute statistics between nodes in phylogenetic trees, such as cophenetic distances,
+variance-covariance matrices, and precision matrices, and between trees (upcoming).
 """
 
 from .nodewise import cophenetic_distances, cov, pairwise_distances, precision

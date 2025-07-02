@@ -1,4 +1,4 @@
-"""Pairwise distance metrics/statistics between nodes within phylogenetic trees."""
+"""Nodewise metrics/statistics between nodes within phylogenetic trees."""
 
 import warnings
 import numpy as np
