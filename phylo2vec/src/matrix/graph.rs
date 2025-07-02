@@ -154,7 +154,9 @@ mod tests {
         let try_vcv = vcv(&matrix.view());
         assert!(
             allclose(try_vcv.view(), expected_vcv.view()),
-            "VCV mismatch: Computed VCV = {:?}, Expected VCV = {:?}", try_vcv, expected_vcv
+            "VCV mismatch: Computed VCV = {:?}, Expected VCV = {:?}",
+            try_vcv,
+            expected_vcv
         );
     }
 }
