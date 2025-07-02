@@ -120,7 +120,7 @@ def precision(vector_or_matrix):
 
     Returns
     -------
-    precicion: numpy.ndarray
+    precision: numpy.ndarray
         Precision matrix
     """
     if vector_or_matrix.ndim == 2:
