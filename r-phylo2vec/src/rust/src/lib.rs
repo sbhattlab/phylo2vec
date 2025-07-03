@@ -401,7 +401,7 @@ fn incidence_dense(input_vector: Vec<i32>) -> RMatrix<i32> {
     dense_r
 }
 
-/// Get the incidence matrix of a Phylo2Vec vector in COO format
+/// Get the incidence matrix of a Phylo2Vec vector in COUP format
 /// @export
 #[extendr]
 fn incidence_coo(input_vector: Vec<i32>) -> RMatrix<i32> {

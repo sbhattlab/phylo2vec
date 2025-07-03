@@ -265,7 +265,7 @@ pub fn vcv(v: &[usize]) -> Array2<f64> {
 /// - `to_dense(&self) -> Array2<i8>`
 ///   - Returns the incidence matrix in a dense format as a 2D ndarray of type `i8`.
 /// - `to_coo(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>)`
-///   - Constructs the incidence matrix in Coordinate (COO) format, returning the data,
+///   - Constructs the incidence matrix in Coordinate (COUP) format, returning the data,
 ///     row indices, and column indices of non-zero entries.
 /// - `to_dok(&self) -> HashMap<(usize, usize), i8>`
 ///   - Provides a dictionary-of-keys (DOK) representation of the incidence matrix,
@@ -335,7 +335,7 @@ impl Incidence {
     }
 
     /// Create an incidence matrix from a Phylo2Vec vector
-    /// Using the COO format (a.k.a triplet format)
+    /// Using the COUP format (a.k.a triplet format)
     /// # Example
     /// ```
     /// use phylo2vec::vector::graph::Incidence;
