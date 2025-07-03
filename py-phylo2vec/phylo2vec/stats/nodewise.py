@@ -140,3 +140,35 @@ def precision(vector_or_matrix):
     d = precursor[n_leaves:, :n_leaves].astype(np.float64)  # b.T
 
     return a - b @ np.linalg.solve(c, d)
+
+
+# pylint: disable=redefined-builtin
+def incidence(vector, format="dok"):
+    """
+    Compute the incidence matrix of a Phylo2Vec vector.
+
+    Parameters
+    ----------
+    vector : numpy.ndarray
+        Phylo2Vec vector (ndim == 1)
+    format : str, optional
+        Format of the incidence matrix, by default "dok"
+
+    Returns
+    -------
+    numpy.ndarray or List[List[int], List[int], List[int]] or Dict[Tuple[int, int], int]
+        Incidence matrix in the specified format
+    """
+    if vector.ndim != 1:
+        raise ValueError("vector should be a 1D array")
+
+    if format == "coo":
+        return core.incidence_coo(vector)
+    if format == "csr":
+        return core.incidence_csr(vector)
+    if format == "dense":
+        return core.incidence_dense(vector)
+    if format == "dok":
+        return core.incidence_dok(vector)
+
+    raise ValueError(f"Unknown format: {format}")

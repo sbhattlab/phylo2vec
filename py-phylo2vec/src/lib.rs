@@ -168,6 +168,28 @@ fn vcv_with_bls<'py>(
 }
 
 #[pyfunction]
+fn incidence_dense(py: Python<'_>, input_vector: Vec<usize>) -> PyResult<Bound<'_, PyArray2<i8>>> {
+    Ok(vgraph::Incidence::new(&input_vector)
+        .to_dense()
+        .into_pyarray(py))
+}
+
+#[pyfunction]
+fn incidence_coo(input_vector: Vec<usize>) -> PyResult<(Vec<i8>, Vec<usize>, Vec<usize>)> {
+    Ok(vgraph::Incidence::new(&input_vector).to_coo())
+}
+
+#[pyfunction]
+fn incidence_csr(input_vector: Vec<usize>) -> PyResult<(Vec<i8>, Vec<usize>, Vec<usize>)> {
+    Ok(vgraph::Incidence::new(&input_vector).to_csr())
+}
+
+#[pyfunction]
+fn incidence_dok(input_vector: Vec<usize>) -> PyResult<HashMap<(usize, usize), i8>> {
+    Ok(vgraph::Incidence::new(&input_vector).to_dok())
+}
+
+#[pyfunction]
 fn find_num_leaves(newick: &str) -> usize {
     newick::find_num_leaves(newick)
 }
@@ -254,6 +276,10 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;
+    m.add_function(wrap_pyfunction!(incidence_coo, m)?)?;
+    m.add_function(wrap_pyfunction!(incidence_csr, m)?)?;
+    m.add_function(wrap_pyfunction!(incidence_dense, m)?)?;
+    m.add_function(wrap_pyfunction!(incidence_dok, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;

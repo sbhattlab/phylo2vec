@@ -387,6 +387,48 @@ fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     vcv_matrix
 }
 
+/// Get the incidence matrix of a Phylo2Vec vector in dense format
+/// @export
+#[extendr]
+fn incidence_dense(input_vector: Vec<i32>) -> RMatrix<i32> {
+    let v_usize = as_usize(input_vector);
+    let dense_rs = vgraph::Incidence::new(&v_usize).to_dense();
+    let n_leaves = dense_rs.shape()[0];
+    let mut dense_r = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| dense_rs[[r, c]] as i32);
+    let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
+    dense_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
+
+    dense_r
+}
+
+/// Get the incidence matrix of a Phylo2Vec vector in COO format
+/// @export
+#[extendr]
+fn incidence_coo(input_vector: Vec<i32>) -> RMatrix<i32> {
+    let k = input_vector.len();
+    let v_usize = as_usize(input_vector);
+    let (data, rows, cols) = vgraph::Incidence::new(&v_usize).to_coo();
+    RMatrix::new_matrix(4 * k, 3, |r, c| match c {
+        0 => data[r] as i32,
+        1 => rows[r] as i32,
+        2 => cols[r] as i32,
+        _ => unreachable!(),
+    })
+}
+
+/// Get the incidence matrix of a Phylo2Vec vector in CSR format
+/// @export
+#[extendr]
+fn incidence_csr(input_vector: Vec<i32>) -> List {
+    let v_usize = as_usize(input_vector);
+    let (data, indices, indptr) = vgraph::Incidence::new(&v_usize).to_csr();
+    list!(
+        data = data.iter().map(|&x| x as i32).collect::<Vec<i32>>(),
+        indices = as_i32(indices),
+        indptr = as_i32(indptr)
+    )
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -404,6 +446,9 @@ extendr_module! {
     fn from_pairs;
     fn get_common_ancestor;
     fn has_branch_lengths;
+    fn incidence_coo;
+    fn incidence_csr;
+    fn incidence_dense;
     fn pre_precision_from_matrix;
     fn pre_precision_from_vector;
     fn queue_shuffle;
