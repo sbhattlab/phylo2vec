@@ -156,8 +156,7 @@ def gradme_loss(weights, dm, rooted):
     if weights.ndim == 1:
         weights = make_W(weights, dm.shape[0])
 
-    assert (
-        weights.ndim == 2 and weights.shape[0] == weights.shape[1]
-    ), "Input must be a square matrix."
+    if not (weights.ndim == 2 and weights.shape[0] == weights.shape[1]):
+        raise ValueError("Input must be a square matrix.")
 
     return _gradme_loss(weights, dm, rooted)

@@ -1,7 +1,5 @@
 """Phylo2Vec: A Python package for phylogenetic vector representations."""
 
-import sys
-
 from phylo2vec._phylo2vec_core import __version__  # pylint: disable=no-name-in-module
 
 from phylo2vec.base.ancestry import from_ancestry, to_ancestry

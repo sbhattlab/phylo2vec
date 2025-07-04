@@ -3,9 +3,8 @@
 import multiprocessing
 import random
 import time
-
 from dataclasses import dataclass
-from typing import Dict, List, Final
+from typing import Dict, Final, List
 
 import numpy as np
 
@@ -53,8 +52,9 @@ class BaseOptimizer:
     """
 
     def __init__(self, mode="vector", random_seed=None, verbose=False, n_jobs=None):
+        if mode not in ("vector", "matrix"):
+            raise ValueError("Mode must be either 'vector' or 'matrix'.")
 
-        assert mode in ["vector", "matrix"], "Mode must be either 'vector' or 'matrix'."
         self.mode = mode
 
         self.random_seed = random_seed or random.randint(0, MAX_SEED)

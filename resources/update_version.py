@@ -1,8 +1,10 @@
-import sys
-import os
-import subprocess
-import re
 import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+
 from pathlib import Path
 from typing import Tuple
 
@@ -16,6 +18,7 @@ except ImportError:
 
 
 # ---- Common utility functions ----
+
 
 def increment_patch_version(version_str: str) -> str:
     """
@@ -32,16 +35,18 @@ def increment_patch_version(version_str: str) -> str:
         Version with incremented patch number
     """
     # Extract the base version (remove any suffixes like -rc.xxx or .devxxx)
-    base_version = re.match(r'(\d+\.\d+\.\d+)', version_str).group(1)
+    base_version = re.match(r"(\d+\.\d+\.\d+)", version_str).group(1)
 
     if not base_version:
         print(f"Warning: Could not parse version string '{version_str}'")
         return version_str
 
     # Split into major, minor, patch
-    parts = base_version.split('.')
+    parts = base_version.split(".")
     if len(parts) != 3:
-        print(f"Warning: Version '{base_version}' doesn't follow semver major.minor.patch format")
+        print(
+            f"Warning: Version '{base_version}' doesn't follow semver major.minor.patch format"
+        )
         return version_str
 
     # Increment patch version
@@ -69,23 +74,35 @@ def get_distance_from_version_tag(version_str):
         The distance from the tag, or an empty string if git command fails
     """
     try:
+        git_executable = shutil.which("git")
+        if not git_executable:
+            raise RuntimeError("`git` command not found. Please install Git.")
+
         # Clean version string for tag matching (remove any suffixes)
-        base_version = re.match(r'(\d+\.\d+\.\d+)', version_str).group(1)
+        base_version = re.match(r"(\d+\.\d+\.\d+)", version_str).group(1)
 
         # Format for tag search
         tag_prefix = f"v{base_version}"
 
         # First check if the tag exists
-        result = subprocess.run(['git', 'tag', '-l', tag_prefix],  # skipcq: BAN-B607
-                               capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            [git_executable, "tag", "-l", tag_prefix],  # skipcq: BAN-B607
+            capture_output=True,
+            text=True,
+            check=True,
+        )
 
         if not result.stdout.strip():
             print(f"Warning: No tag found matching '{tag_prefix}'")
             return "0"  # Return 0 if no tag found
 
         # Get the distance from tag to HEAD
-        result = subprocess.run(['git', 'rev-list', f'{tag_prefix}..HEAD', '--count'],  # skipcq: BAN-B607
-                               capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            [git_executable, "rev-list", f"{tag_prefix}..HEAD", "--count"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
         distance = result.stdout.strip()
         return distance
     except (subprocess.SubprocessError, FileNotFoundError):
@@ -94,6 +111,7 @@ def get_distance_from_version_tag(version_str):
 
 
 # ---- Python/Cargo.toml handling ----
+
 
 def get_python_cargo_path() -> Path:
     """Get the path to the Python binding's Cargo.toml file."""
@@ -128,12 +146,13 @@ def get_python_version(cargo_path: Path) -> str:
 
     try:
         toml_dict = tomllib.loads(content)
-        if 'package' in toml_dict and 'version' in toml_dict['package']:
-            return toml_dict['package']['version']
-        else:
-            raise ValueError("No version field found in the package section of the TOML file")
-    except Exception as e:
-        raise ValueError(f"Failed to parse TOML file: {e}")
+        if "package" in toml_dict and "version" in toml_dict["package"]:
+            return toml_dict["package"]["version"]
+        raise ValueError(
+            "No version field found in the package section of the TOML file"
+        )
+    except Exception as err:
+        raise ValueError(f"Failed to parse TOML file: {err}") from err
 
 
 def update_python_version(cargo_path: Path, new_version: str) -> None:
@@ -171,8 +190,8 @@ def update_python_version(cargo_path: Path, new_version: str) -> None:
         toml_dict = tomllib.loads(content)
 
         # Check if the version key exists in the package section
-        if 'package' in toml_dict and 'version' in toml_dict['package']:
-            old_version = toml_dict['package']['version']
+        if "package" in toml_dict and "version" in toml_dict["package"]:
+            old_version = toml_dict["package"]["version"]
 
             # If version hasn't changed, no need to update
             if old_version == new_version:
@@ -186,12 +205,14 @@ def update_python_version(cargo_path: Path, new_version: str) -> None:
 
             # Write the updated content back to the file
             cargo_path.write_text(new_content)
-            print(f"Successfully updated Python version from {old_version} to {new_version}")
+            print(
+                f"Successfully updated Python version from {old_version} to {new_version}"
+            )
         else:
             print("No version field found in the package section of the TOML file")
 
-    except Exception as e:
-        raise ValueError(f"Failed to parse or update TOML file: {e}")
+    except Exception as err:
+        raise ValueError(f"Failed to parse or update TOML file: {err}") from err
 
 
 def generate_python_version_with_distance(base_version: str) -> str:
@@ -211,8 +232,8 @@ def generate_python_version_with_distance(base_version: str) -> str:
         where 5 is the number of commits since the tag matching base_version
     """
     # Clean the base version first (remove any existing rc or dev tags)
-    if '-rc.' in base_version:
-        base_version = base_version.split('-rc.')[0]
+    if "-rc." in base_version:
+        base_version = base_version.split("-rc.")[0]
 
     # Increment the patch version
     incremented_version = increment_patch_version(base_version)
@@ -242,12 +263,12 @@ def extract_and_print_python_version(cargo_path: Path) -> str | None:
         print(f"Current Python version: {version}")
 
         # For GitHub Actions: set as output
-        if 'GITHUB_OUTPUT' in os.environ:
-            with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+        if "GITHUB_OUTPUT" in os.environ:
+            with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
                 f.write(f"version={version}\n")
 
         # For regular environments: set an environment variable
-        os.environ['PHYLO2VEC_VERSION'] = version
+        os.environ["PHYLO2VEC_VERSION"] = version
         print(f"Set environment variable PHYLO2VEC_VERSION={version}")
 
         return version
@@ -257,6 +278,7 @@ def extract_and_print_python_version(cargo_path: Path) -> str | None:
 
 
 # ---- R/DESCRIPTION handling ----
+
 
 def get_r_description_path() -> Path:
     """Get the path to the R package's DESCRIPTION file."""
@@ -290,7 +312,7 @@ def get_r_version(description_path: Path) -> str:
     content = description_path.read_text()
 
     # Find the current version line
-    version_pattern = re.compile(r'^Version:\s*([\d\.]+)', re.MULTILINE)
+    version_pattern = re.compile(r"^Version:\s*([\d\.]+)", re.MULTILINE)
     match = version_pattern.search(content)
 
     if not match:
@@ -328,7 +350,7 @@ def update_r_version(description_path: Path, new_version: str) -> None:
     content = description_path.read_text()
 
     # Find the current version line
-    version_pattern = re.compile(r'^Version:\s*([\d\.]+)', re.MULTILINE)
+    version_pattern = re.compile(r"^Version:\s*([\d\.]+)", re.MULTILINE)
     match = version_pattern.search(content)
 
     if not match:
@@ -342,7 +364,7 @@ def update_r_version(description_path: Path, new_version: str) -> None:
         return
 
     # Replace the version string in the content
-    new_content = version_pattern.sub(f'Version: {new_version}', content)
+    new_content = version_pattern.sub(f"Version: {new_version}", content)
 
     # Write the updated content back to the file
     description_path.write_text(new_content)
@@ -367,16 +389,20 @@ def generate_r_version_with_distance(base_version: str) -> str:
         the original base version
     """
     # Clean the base version first (remove any existing fourth digit)
-    base_parts = base_version.split('.')
+    base_parts = base_version.split(".")
     if len(base_parts) > 3:
-        base_version = '.'.join(base_parts[:3])
+        base_version = ".".join(base_parts[:3])
 
     # Increment the patch version
     incremented_version = increment_patch_version(base_version)
 
     # Add the distance from version tag as the fourth digit
     distance = get_distance_from_version_tag(base_version)
-    return f"{incremented_version}.{distance}" if distance and distance != "0" else incremented_version
+    return (
+        f"{incremented_version}.{distance}"
+        if distance and distance != "0"
+        else incremented_version
+    )
 
 
 def extract_and_print_r_version(description_path: Path) -> str | None:
@@ -399,12 +425,12 @@ def extract_and_print_r_version(description_path: Path) -> str | None:
         print(f"Current R version: {version}")
 
         # For GitHub Actions: set as output
-        if 'GITHUB_OUTPUT' in os.environ:
-            with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+        if "GITHUB_OUTPUT" in os.environ:
+            with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
                 f.write(f"r_version={version}\n")
 
         # For regular environments: set an environment variable
-        os.environ['PHYLO2VEC_R_VERSION'] = version
+        os.environ["PHYLO2VEC_R_VERSION"] = version
         print(f"Set environment variable PHYLO2VEC_R_VERSION={version}")
 
         return version
@@ -415,7 +441,10 @@ def extract_and_print_r_version(description_path: Path) -> str | None:
 
 # ---- Main functions ----
 
-def process_python_version(new_version: str = None, extract_only: bool = False) -> str | None:
+
+def process_python_version(
+    new_version: str = None, extract_only: bool = False
+) -> str | None:
     """Process the Python package version."""
     cargo_path = get_python_cargo_path()
 
@@ -443,7 +472,9 @@ def process_python_version(new_version: str = None, extract_only: bool = False) 
         return None
 
 
-def process_r_version(new_version: str = None, extract_only: bool = False) -> str | None:
+def process_r_version(
+    new_version: str = None, extract_only: bool = False
+) -> str | None:
     """Process the R package version."""
     description_path = get_r_description_path()
 
@@ -483,13 +514,24 @@ def parse_args() -> Tuple[bool, bool, str, bool]:
           (set specific version for both)
         - python update_version.py --python --extract-only
           (extract Python version without modification)
-        """
+        """,
     )
 
-    parser.add_argument('--python', action='store_true', help='Update Python package version')
-    parser.add_argument('--r', action='store_true', help='Update R package version')
-    parser.add_argument('--version', type=str, help='Set a specific version (applied to all selected packages)', required=False)
-    parser.add_argument('--extract-only', action='store_true', help='Only extract and print versions, no modifications')
+    parser.add_argument(
+        "--python", action="store_true", help="Update Python package version"
+    )
+    parser.add_argument("--r", action="store_true", help="Update R package version")
+    parser.add_argument(
+        "--version",
+        type=str,
+        help="Set a specific version (applied to all selected packages)",
+        required=False,
+    )
+    parser.add_argument(
+        "--extract-only",
+        action="store_true",
+        help="Only extract and print versions, no modifications",
+    )
 
     args = parser.parse_args()
 

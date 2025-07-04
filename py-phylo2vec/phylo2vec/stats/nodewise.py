@@ -134,10 +134,10 @@ def precision(vector_or_matrix):
 
     # Schur complement of the precursor matrix
     n_leaves = vector_or_matrix.shape[0] + 1
-    a = precursor[:n_leaves, :n_leaves].astype(np.float64)
-    b = precursor[:n_leaves, n_leaves:].astype(np.float64)
-    c = precursor[n_leaves:, n_leaves:].astype(np.float64)
-    d = precursor[n_leaves:, :n_leaves].astype(np.float64)  # b.T
+    a = precursor[:n_leaves, :n_leaves]
+    b = precursor[:n_leaves, n_leaves:]
+    c = precursor[n_leaves:, n_leaves:]
+    d = precursor[n_leaves:, :n_leaves]  # b.T
 
     return a - b @ np.linalg.solve(c, d)
 

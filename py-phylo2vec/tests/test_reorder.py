@@ -3,7 +3,7 @@
 import random
 import string
 
-from itertools import product
+from itertools import islice, product
 
 import numpy as np
 import pytest
@@ -11,7 +11,8 @@ import pytest
 from phylo2vec.base.ancestry import to_ancestry
 from phylo2vec.base.pairs import from_pairs
 from phylo2vec.utils.vector import queue_shuffle, sample_vector
-from .config import MIN_N_LEAVES, MAX_N_LEAVES, N_REPEATS
+
+from .config import MAX_N_LEAVES, MIN_N_LEAVES, N_REPEATS
 
 
 def legacy_queue_shuffle(
@@ -126,8 +127,12 @@ def test_queue_shuffle(n_leaves):
         # Sample a vector and convert it to an ancestry matrix
         v = sample_vector(n_leaves)
 
-        taxa = product(string.ascii_lowercase, repeat=2)
-        dict_mapping_old = {i: "".join(next(taxa)) for i in range(n_leaves)}
+        dict_mapping_old = {
+            i: "".join(taxa)
+            for i, taxa in enumerate(
+                islice(product(string.ascii_lowercase, repeat=2), n_leaves)
+            )
+        }
 
         ancestry_old = to_ancestry(v)
         # the output ancestry is difficult to use without adding more dependencies
