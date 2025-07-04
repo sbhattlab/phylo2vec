@@ -180,13 +180,13 @@ fn incidence_coo(input_vector: Vec<usize>) -> PyResult<(Vec<i8>, Vec<usize>, Vec
 }
 
 #[pyfunction]
-fn incidence_csr(input_vector: Vec<usize>) -> PyResult<(Vec<i8>, Vec<usize>, Vec<usize>)> {
-    Ok(vgraph::Incidence::new(&input_vector).to_csr())
+fn incidence_csc(input_vector: Vec<usize>) -> PyResult<(Vec<i8>, Vec<usize>, Vec<usize>)> {
+    Ok(vgraph::Incidence::new(&input_vector).to_csc())
 }
 
 #[pyfunction]
-fn incidence_dok(input_vector: Vec<usize>) -> PyResult<HashMap<(usize, usize), i8>> {
-    Ok(vgraph::Incidence::new(&input_vector).to_dok())
+fn incidence_csr(input_vector: Vec<usize>) -> PyResult<(Vec<i8>, Vec<usize>, Vec<usize>)> {
+    Ok(vgraph::Incidence::new(&input_vector).to_csr())
 }
 
 #[pyfunction]
@@ -277,9 +277,9 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;
     m.add_function(wrap_pyfunction!(incidence_coo, m)?)?;
+    m.add_function(wrap_pyfunction!(incidence_csc, m)?)?;
     m.add_function(wrap_pyfunction!(incidence_csr, m)?)?;
     m.add_function(wrap_pyfunction!(incidence_dense, m)?)?;
-    m.add_function(wrap_pyfunction!(incidence_dok, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;

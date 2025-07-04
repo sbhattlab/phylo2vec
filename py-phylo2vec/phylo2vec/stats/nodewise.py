@@ -143,7 +143,7 @@ def precision(vector_or_matrix):
 
 
 # pylint: disable=redefined-builtin
-def incidence(vector, format="dok"):
+def incidence(vector, format="coo"):
     """
     Compute the incidence matrix of a Phylo2Vec vector.
 
@@ -152,7 +152,7 @@ def incidence(vector, format="dok"):
     vector : numpy.ndarray
         Phylo2Vec vector (ndim == 1)
     format : str, optional
-        Format of the incidence matrix, by default "dok"
+        Format of the incidence matrix, by default "coo"
 
     Returns
     -------
@@ -162,13 +162,13 @@ def incidence(vector, format="dok"):
     if vector.ndim != 1:
         raise ValueError("vector should be a 1D array")
 
-    if format == "coup":
+    if format == "coo":
         return core.incidence_coo(vector)
     if format == "csr":
         return core.incidence_csr(vector)
+    if format == "csc":
+        return core.incidence_csc(vector)
     if format == "dense":
         return core.incidence_dense(vector)
-    if format == "dok":
-        return core.incidence_dok(vector)
 
     raise ValueError(f"Unknown format: {format}")
