@@ -162,7 +162,7 @@ def incidence(vector, format="dok"):
     if vector.ndim != 1:
         raise ValueError("vector should be a 1D array")
 
-    if format == "coo":
+    if format == "coup":
         return core.incidence_coo(vector)
     if format == "csr":
         return core.incidence_csr(vector)
