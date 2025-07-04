@@ -154,7 +154,8 @@ fn min_common_ancestor(path1: &[usize], path2: &[usize]) -> usize {
 ///
 /// Similar to `get_common_ancestor` in ETE (Python).
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use phylo2vec::vector::ops::get_common_ancestor;
 ///
@@ -189,7 +190,7 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
 /// Queue Shuffle ensures that the output tree is ordered,
 /// while also ensuring a smooth path through the space of orderings
 ///
-/// for more details, see https://doi.org/10.1093/gbe/evad213
+/// for more details, see <https://doi.org/10.1093/gbe/evad213>
 ///
 /// Illustration of the algorithm with a simple case:
 ///                  ////-3
@@ -244,7 +245,8 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
 ///   which could switch the processing order of rows in the ancestry array.
 ///
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use phylo2vec::vector::ops::queue_shuffle;
 ///

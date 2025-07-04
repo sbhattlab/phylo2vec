@@ -76,7 +76,8 @@ pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2
 /// Output is a pairwise distance matrix of dimensions n x n
 /// where n = number of leaves.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use ndarray::array;
 /// use phylo2vec::vector::graph::cophenetic_distances;
@@ -135,10 +136,16 @@ pub fn _pre_precision(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
     out
 }
 
+/// Get a precursor of the precision matrix
+/// for a Phylo2Vec vector.
+/// Output is a matrix of dimensions 2 * (n - 1) x 2 * (n - 1)
+/// where n = number of leaves.
+/// The precision matrix can be obtained using Schur's complement
 pub fn pre_precision(v: &[usize]) -> Array2<f64> {
     _pre_precision(v, None)
 }
 
+/// Get all leaves under each internal node as well as all edges from a list of pairs
 fn get_descendants_and_edges(pairs: &Pairs) -> (HashMap<usize, BitSet>, Vec<(usize, usize)>) {
     let k = pairs.len();
 
@@ -221,11 +228,13 @@ pub fn _vcv(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
     out
 }
 
-/// Get variance-covariance matrix
+/// Get the variance-covariance matrix
 /// for a Phylo2Vec vector.
 /// Output is a matrix of dimensions n x n
 /// where n = number of leaves.
-/// Example:
+///
+/// # Examples
+///
 /// ```
 /// use ndarray::array;
 /// use phylo2vec::vector::graph::vcv;
@@ -301,7 +310,8 @@ impl Incidence {
 
     /// Create an incidence matrix from a Phylo2Vec vector
     /// Using a dense representation.
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// use ndarray::array;
     /// use phylo2vec::vector::graph::Incidence;
@@ -336,7 +346,8 @@ impl Incidence {
 
     /// Create an incidence matrix from a Phylo2Vec vector
     /// Using the COO format (a.k.a triplet format)
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// use phylo2vec::vector::graph::Incidence;
     /// let v = vec![0, 1, 2];
@@ -377,7 +388,8 @@ impl Incidence {
 
     /// Create an incidence matrix from a Phylo2Vec vector
     /// Using the DOK (dictionary-of-keys) format
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// use std::collections::HashMap;
     /// use phylo2vec::vector::graph::Incidence;
@@ -410,7 +422,8 @@ impl Incidence {
 
     /// Create an incidence matrix from a Phylo2Vec vector
     /// Using the CSR (compressed sparse row) format
-    /// # Example
+    /// # Examples
+    ///
     /// ```
     /// use std::collections::HashMap;
     /// use phylo2vec::vector::graph::Incidence;
@@ -459,6 +472,20 @@ impl Incidence {
         (data, indices, indptr)
     }
 
+    /// Create an incidence matrix from a Phylo2Vec vector
+    /// Using the CSC (compressed sparse columm) format
+    /// # Examples
+    ///
+    /// ```
+    /// use std::collections::HashMap;
+    /// use phylo2vec::vector::graph::Incidence;
+    /// let v = vec![0, 1, 2];
+    /// let inc = Incidence::new(&v);
+    /// let (data, indices, indptr) = inc.to_csc();
+    /// assert_eq!(data, vec![1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1]);
+    /// assert_eq!(indices, vec![0, 6, 1, 5, 2, 4, 3, 4, 4, 5, 5, 6]);
+    /// assert_eq!(indptr, vec![0, 2, 4, 6, 8, 10, 12]);
+    /// ```
     pub fn to_csc(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>) {
         // Each edge yields two nonzero entries
         let mut triplets: Vec<(usize, usize, i8)> = Vec::with_capacity(2 * self.n_edges);

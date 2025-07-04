@@ -4,7 +4,7 @@
 /// used to parse newick trees such as the left node, right node, pairs,
 /// branch lengths, and parents.
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use phylo2vec::newick::NewickPatterns;

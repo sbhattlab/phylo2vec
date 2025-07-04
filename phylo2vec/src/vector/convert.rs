@@ -6,6 +6,20 @@ use crate::types::{Ancestry, Pair, Pairs};
 use crate::vector::avl::AVLTree;
 use crate::vector::base::is_unordered;
 
+/// Retrieve a Phylo2Vec vector from a list of pairs.
+/// A pair is a tuple of nodes (c1, c2) where:
+///   - c1 denotes the node from where the branch leading to c2 originates
+///   - c2 is the leaf node
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::from_pairs;
+///
+/// let pairs = vec![(1, 4), (0, 3), (0, 2), (0, 1)];
+/// let v = from_pairs(&pairs);
+/// assert_eq!(v, vec![0, 0, 0, 1]);
+/// ```
 pub fn from_pairs(pairs: &Pairs) -> Vec<usize> {
     let mut cherries: Ancestry = Vec::with_capacity(pairs.len());
     for &(c1, c2) in pairs.iter() {
@@ -77,12 +91,14 @@ fn to_pairs_avl(v: &[usize]) -> Pairs {
 /// AVL trees are faster for unordered trees.
 /// A simple for loop is faster for ordered trees.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use phylo2vec::vector::convert::to_pairs;
 ///
-/// let v = vec![0, 0, 0, 1, 3, 3, 1, 4, 4];
+/// let v = vec![0, 0, 0, 1];
 /// let pairs = to_pairs(&v);
+/// assert_eq!(pairs, vec![(1, 4), (0, 3), (0, 2), (0, 1)]);
 /// ```
 pub fn to_pairs(v: &[usize]) -> Pairs {
     if is_unordered(v) {
@@ -92,6 +108,24 @@ pub fn to_pairs(v: &[usize]) -> Pairs {
     }
 }
 
+/// Retrieve a Phylo2Vec vector from an ancestry representation.
+/// The ancestry is a list of cherries, where each cherry is represented as
+/// a triplet [c1, c2, p], where:
+///     - c1 and c2 are the indices of the leaves in the cherry
+///     - p is the index of the parent node of the cherry
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::from_ancestry;
+/// let ancestry = vec![
+///    [2, 3, 4], // Cherry with leaves 0 and 1, parent 4
+///    [0, 1, 5], // Cherry with leaves 0 and 2, parent 5
+///    [5, 4, 6], // Cherry with nodes 4 and 5, parent 6
+/// ];
+/// let v = from_ancestry(&ancestry);
+/// assert_eq!(v, vec![0, 2, 2]);
+/// ```
 pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
     let mut cherries = ancestry.clone();
 
@@ -102,7 +136,7 @@ pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
 }
 
 /// Get the ancestry of the Phylo2Vec vector
-/// v[i] = which BRANCH we do the pairing from
+/// v\[i\] = which BRANCH we do the pairing from
 ///
 /// The initial situation looks like this:
 ///                  R
@@ -112,11 +146,24 @@ pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
 ///  branch 0 <-- //   \\  --> branch 1
 ///               0     1
 ///
-/// For v[1], we have 3 possible branches too choose from.
-/// v[1] = 0 or 1 indicates that we branch out from branch 0 or 1, respectively.
+/// For v\[1\], we have 3 possible branches too choose from.
+/// v\[1\] = 0 or 1 indicates that we branch out from branch 0 or 1, respectively.
 /// The new branch yields leaf 2 (like in ordered trees)
 ///
-/// v[1] = 2 is somewhat similar: we create a new branch from R that yields leaf 2
+/// v\[1\] = 2 is somewhat similar: we create a new branch from R that yields leaf 2.
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::to_ancestry;
+/// let v = vec![0, 2, 2];
+/// let ancestry = to_ancestry(&v);
+/// assert_eq!(ancestry, vec![
+///   [2, 3, 4], // Cherry with leaves 2 and 3, parent 4
+///   [0, 1, 5], // Cherry with leaves 0 and 1, parent 5
+///   [5, 4, 6], // Cherry with nodes 4 and 5, parent 6
+/// ]);
+/// ```
 pub fn to_ancestry(v: &[usize]) -> Ancestry {
     let k = v.len();
     let pairs: Pairs = to_pairs(v);
@@ -140,6 +187,17 @@ pub fn to_ancestry(v: &[usize]) -> Ancestry {
     ancestry
 }
 
+/// Retrieve a Phylo2Vec vector from a list of edges.
+/// An edge is a tuple of nodes (child, parent).
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::from_edges;
+/// let edges = vec![(2, 4), (3, 4), (0, 5), (1, 5), (4, 6), (5, 6)];
+/// let v = from_edges(&edges);
+/// assert_eq!(v, vec![0, 2, 2]);
+/// ```
 pub fn from_edges(edges: &[(usize, usize)]) -> Vec<usize> {
     assert!(edges.len() % 2 == 0, "The number of edges must be even");
 
@@ -154,8 +212,21 @@ pub fn from_edges(edges: &[(usize, usize)]) -> Vec<usize> {
     build_vector(&ancestry)
 }
 
-fn to_edges_from_pairs(pairs: &Pairs) -> Vec<(usize, usize)> {
-    let k = pairs.len();
+/// Convert a Phylo2Vec vector to a list of edges.
+/// An edge is a tuple of nodes (child, parent).
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::to_edges;
+///
+/// let v = vec![0, 2, 2];
+/// let edges = to_edges(&v);
+/// assert_eq!(edges, vec![(2, 4), (3, 4), (0, 5), (1, 5), (5, 6), (4, 6)]);
+/// ```
+pub fn to_edges(v: &[usize]) -> Vec<(usize, usize)> {
+    let k = v.len();
+    let pairs: Pairs = to_pairs(v);
 
     let mut edges: Vec<(usize, usize)> = Vec::with_capacity(2 * k);
 
@@ -176,12 +247,24 @@ fn to_edges_from_pairs(pairs: &Pairs) -> Vec<(usize, usize)> {
     edges
 }
 
-pub fn to_edges(v: &[usize]) -> Vec<(usize, usize)> {
-    let pairs: Pairs = to_pairs(v);
-
-    to_edges_from_pairs(&pairs)
-}
-
+/// Retrieve a Phylo2Vec vector from a Newick string.
+/// The Newick string should only describe a tree topology
+/// with or without parental labels.
+/// For a tree with n leaves, leaves are labelled 0 to n-1,
+/// and internal nodes are labelled n to 2 * (n-1).
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::from_newick;
+/// let newick = "((0,1)5,(2,3)4)6;";
+/// let v = from_newick(newick);
+/// assert_eq!(v, vec![0, 2, 2]);
+///
+/// let newick_no_parents = "((0,1),(2,3));";
+/// let v2 = from_newick(newick_no_parents);
+/// assert_eq!(v2, vec![0, 2, 2]);
+/// ```
 pub fn from_newick(newick: &str) -> Vec<usize> {
     let mut ancestry: Ancestry = parse(newick).expect("failed to get cherries");
 
@@ -232,6 +315,8 @@ impl Fenwick {
     }
 }
 
+/// Utility function to build a Phylo2Vec vector from an intermediate
+/// `cherry` representation.
 pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     let num_cherries = cherries.len();
     let num_leaves = num_cherries + 1;
@@ -252,7 +337,8 @@ pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     v
 }
 
-/// Prepare the cache for building the Newick string
+/// Prepare a vector cache to build a Newick string
+/// from a vector of pairs.
 pub fn prepare_cache(pairs: &Pairs) -> Vec<String> {
     let num_leaves = pairs.len() + 1;
 
@@ -272,7 +358,7 @@ pub fn prepare_cache(pairs: &Pairs) -> Vec<String> {
     cache
 }
 
-/// Build newick string from a vector of pairs
+/// Build a Newick string from a vector of pairs
 pub fn build_newick(pairs: &Pairs) -> String {
     let num_leaves = pairs.len() + 1;
 
@@ -295,7 +381,17 @@ pub fn build_newick(pairs: &Pairs) -> String {
     format!("{};", cache[0])
 }
 
-/// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
+/// Build a Newick string from a Phylo2Vec vector.
+/// The Newick string formed by a vector is a tree topology
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::convert::to_newick;
+/// let v = vec![0, 2, 2];
+/// let newick = to_newick(&v);
+/// assert_eq!(newick, "((0,1)5,(2,3)4)6;");
+/// ```
 pub fn to_newick(v: &[usize]) -> String {
     let pairs: Pairs = to_pairs(v);
     build_newick(&pairs)
@@ -397,7 +493,7 @@ pub fn order_cherries(ancestry: &mut Ancestry) -> (Vec<usize>, Vec<usize>) {
 /// So we apply the following rule for each cherry:
 ///  * Determine the minimum (c_min) and maximum (c_max) cherry values.
 ///  * if c_min was visited beforehand:
-///    * its "sorting index" will be the minimum of its previous sister node (visited[c_min]) and the current sister node (c_max)
+///    * its "sorting index" will be the minimum of its previous sister node (visited\[c_min\]) and the current sister node (c_max)
 ///  * otherwise, set it to c_max
 ///
 /// We thus obtain a sorting index list (```leaves```) as such

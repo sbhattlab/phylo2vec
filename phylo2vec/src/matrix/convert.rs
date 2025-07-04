@@ -9,6 +9,19 @@ use crate::vector::convert::{
 };
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
+///
+/// # Examples
+///
+/// ```
+/// use ndarray::array;
+/// use phylo2vec::matrix::convert::to_newick;
+/// let m = array![
+///     [0.0, 0.5, 0.8],
+///     [1.0, 0.7, 0.6],
+/// ];
+/// let newick = to_newick(&m.view());
+/// assert_eq!(newick, "(0:0.7,(1:0.5,2:0.8)3:0.6)4;");
+/// ```
 pub fn to_newick(m: &ArrayView2<f64>) -> String {
     // First, check the matrix structure for validity
     check_m(m);
@@ -53,7 +66,7 @@ fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f64; 2]]) -> String {
 ///
 /// An `Array2<f64>` where each row contains the tree's vector representation value and associated branch lengths.
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use ndarray::array;

@@ -53,7 +53,8 @@ fn node_substr(s: &str, start: usize) -> (&str, usize) {
 /// A vector of triplets representing the cherries in the tree.
 /// Throws a `NewickError` if the Newick string is invalid.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use phylo2vec::newick::parse;
 ///
@@ -133,7 +134,8 @@ pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
 /// A vector of triplets representing the cherries in the tree.
 /// Throws a `NewickError` if the Newick string is invalid.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use phylo2vec::newick::parse_with_bls;
 ///
@@ -245,7 +247,7 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickE
 
 /// Remove parent labels from the Newick string
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use phylo2vec::newick::remove_parent_labels;
@@ -261,7 +263,7 @@ pub fn remove_parent_labels(newick: &str) -> String {
 
 /// Remove branch length annotations from the Newick string
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use phylo2vec::newick::remove_branch_lengths;
@@ -280,7 +282,7 @@ pub fn remove_branch_lengths(newick: &str) -> String {
 
 /// Check if the Newick string has parent labels
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use phylo2vec::newick::has_parents;
@@ -300,7 +302,7 @@ pub fn has_parents(newick: &str) -> bool {
 
 /// Check if the Newick string has branch lengths
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use phylo2vec::newick::has_branch_lengths;
@@ -319,7 +321,7 @@ pub fn has_branch_lengths(newick: &str) -> bool {
 
 /// Find the number of leaves in the Newick string
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// use phylo2vec::newick::find_num_leaves;
@@ -351,7 +353,8 @@ pub fn find_num_leaves(newick: &str) -> usize {
 /// Note 2: the parent nodes are removed from the output,
 /// but the branch lengths/annotations are kept.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use phylo2vec::newick::create_label_mapping;
 ///
@@ -445,7 +448,8 @@ pub fn create_label_mapping(newick: &str) -> (String, HashMap<usize, String>) {
 /// Note 2: the parent nodes are removed from the output,
 /// but the branch lengths/annotations are kept.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use std::collections::HashMap;
 /// use phylo2vec::newick::apply_label_mapping;
