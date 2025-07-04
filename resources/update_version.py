@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 import sys
+import warnings
 
 from pathlib import Path
 from typing import Tuple
@@ -38,7 +39,10 @@ def increment_patch_version(version_str: str) -> str:
     match = re.match(r"(\d+\.\d+\.\d+)", version_str)
 
     if not match:
-        print(f"Warning: Could not parse version string '{version_str}'")
+        warnings.warn(
+            f"Could not parse version string '{version_str}'. Returning original version string.",
+            UserWarning,
+        )
         return version_str
 
     base_version = match.group(1)
@@ -46,8 +50,10 @@ def increment_patch_version(version_str: str) -> str:
     # Split into major, minor, patch
     parts = base_version.split(".")
     if len(parts) != 3:
-        print(
-            f"Warning: Version '{base_version}' doesn't follow semver major.minor.patch format"
+        warnings.warn(
+            f"Version '{base_version}' does not follow semver major.minor.patch format. "
+            "Returning original version string.",
+            UserWarning,
         )
         return version_str
 
@@ -57,7 +63,13 @@ def increment_patch_version(version_str: str) -> str:
         new_patch = int(patch) + 1
         return f"{major}.{minor}.{new_patch}"
     except (ValueError, IndexError) as e:
-        print(f"Warning: Failed to increment patch version: {e}")
+        warnings.warn(
+            (
+                f"Failed to increment patch version from '{version_str}': {e}. "
+                "Returning original version string."
+            ),
+            UserWarning,
+        )
         return version_str
 
 
@@ -84,7 +96,13 @@ def get_distance_from_version_tag(version_str):
         match = re.match(r"(\d+\.\d+\.\d+)", version_str)
 
         if not match:
-            print(f"Warning: Could not parse version string '{version_str}'")
+            warnings.warn(
+                (
+                    f"Could not parse version string '{version_str}'. "
+                    "Returning original version string."
+                ),
+                UserWarning,
+            )
             return version_str
 
         base_version = match.group(1)
@@ -101,7 +119,10 @@ def get_distance_from_version_tag(version_str):
         )
 
         if not result.stdout.strip():
-            print(f"Warning: No tag found matching '{tag_prefix}'")
+            warnings.warn(
+                f"No tag found matching '{tag_prefix}'. Returning '0'",
+                UserWarning,
+            )
             return "0"  # Return 0 if no tag found
 
         # Get the distance from tag to HEAD
@@ -113,8 +134,11 @@ def get_distance_from_version_tag(version_str):
         )
         distance = result.stdout.strip()
         return distance
-    except (subprocess.SubprocessError, FileNotFoundError):
-        print("Warning: Could not calculate distance from version tag")
+    except (subprocess.SubprocessError, FileNotFoundError, RuntimeError) as err:
+        warnings.warn(
+            f"Error calculating distance from version tag: {err}. Returning '0'",
+            UserWarning,
+        )
         return "0"  # Default to 0 if there's an error
 
 
