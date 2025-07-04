@@ -473,7 +473,7 @@ impl Incidence {
     }
 
     /// Create an incidence matrix from a Phylo2Vec vector
-    /// Using the CSC (compressed sparse columm) format
+    /// Using the CSC (compressed sparse column) format
     /// # Examples
     ///
     /// ```
