@@ -178,20 +178,6 @@ fn get_descendants_and_edges(pairs: &Pairs) -> (HashMap<usize, BitSet>, Vec<(usi
 /// Output is a matrix of dimensions n x n
 /// where n = number of leaves.
 /// Adapted from `vcv.phylo` function in the `ape` package: <https://github.com/emmanuelparadis/ape>
-/// Example:
-/// ```
-/// use ndarray::array;
-/// use phylo2vec::vector::graph::vcv;
-/// let v = vec![0, 1, 2];
-/// let vcv_matrix = vcv(&v);
-/// let arr = array![
-///     [1.0, 0.0, 0.0, 0.0],
-///     [0.0, 2.0, 1.0, 1.0],
-///     [0.0, 1.0, 3.0, 2.0],
-///     [0.0, 1.0, 2.0, 3.0]
-/// ];
-/// assert_eq!(vcv_matrix, arr);
-/// ```
 pub fn _vcv(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
     let k = v.len();
     let n_leaves = k + 1;
@@ -235,8 +221,280 @@ pub fn _vcv(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
     out
 }
 
+/// Get variance-covariance matrix
+/// for a Phylo2Vec vector.
+/// Output is a matrix of dimensions n x n
+/// where n = number of leaves.
+/// Example:
+/// ```
+/// use ndarray::array;
+/// use phylo2vec::vector::graph::vcv;
+/// let v = vec![0, 1, 2];
+/// let vcv_matrix = vcv(&v);
+/// let arr = array![
+///     [1.0, 0.0, 0.0, 0.0],
+///     [0.0, 2.0, 1.0, 1.0],
+///     [0.0, 1.0, 3.0, 2.0],
+///     [0.0, 1.0, 2.0, 3.0]
+/// ];
+/// assert_eq!(vcv_matrix, arr);
+/// ```
 pub fn vcv(v: &[usize]) -> Array2<f64> {
     _vcv(v, None)
+}
+
+/// The `Incidence` struct represents an incidence matrix for a phylogenetic tree
+/// derived from a Phylo2Vec vector.
+/// Note that the Phylo2Vec vector represents a rooted binary tree, which can be
+/// viewed as a directed acyclic graph (DAG). Duplicates are not allowed.
+///
+/// # Fields
+///
+/// - `n_nodes`: The total number of nodes in the tree. This is calculated as `2*k + 1`,
+///   where `k` is the length of the input Phylo2Vec vector.
+/// - `n_edges`: The total number of edges in the tree. This is calculated as `2*k`,
+///   where `k` is the length of the input Phylo2Vec vector.
+/// - `edges`: A vector of tuples where each tuple `(usize, usize)` represents a directed
+///   edge in the tree. In each tuple, the first element is the child node and the second
+///   element is the parent node.
+///
+/// # Methods
+///
+/// - `new(v: &[usize]) -> Self`
+///   - Constructs a new `Incidence` instance from a Phylo2Vec vector `v`.
+/// - `to_dense(&self) -> Array2<i8>`
+///   - Returns the incidence matrix in a dense format as a 2D ndarray of type `i8`.
+/// - `to_coo(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>)`
+///   - Constructs the incidence matrix in Coordinate (COO) format, returning the data,
+///     row indices, and column indices of non-zero entries.
+/// - `to_dok(&self) -> HashMap<(usize, usize), i8>`
+///   - Provides a dictionary-of-keys (DOK) representation of the incidence matrix,
+///     where the keys are `(row, column)` pairs mapping to their corresponding non-zero value.
+/// - `to_csr(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>)`
+///   - Produces the incidence matrix in Compressed Sparse Row (CSR) format, returning
+///     the non-zero values, column indices, and row pointer array.
+///
+/// # Usage
+///
+/// The `Incidence` struct is useful for converting a phylogenetic tree represented
+/// by a Phylo2Vec vector into various matrix formats, which can then be used in further
+/// algorithms that require a graph representation of the tree, such as network flow
+/// computations, spectral analysis, or other numerical methods on sparse matrices.
+pub struct Incidence {
+    n_nodes: usize,
+    n_edges: usize,
+    edges: Vec<(usize, usize)>,
+}
+
+impl Incidence {
+    pub fn new(v: &[usize]) -> Self {
+        let k = v.len();
+        let edges = to_edges(v);
+        let n_nodes = 2 * k + 1;
+        let n_edges = 2 * k;
+        Incidence {
+            n_nodes,
+            n_edges,
+            edges,
+        }
+    }
+
+    /// Create an incidence matrix from a Phylo2Vec vector
+    /// Using a dense representation.
+    /// # Example
+    /// ```
+    /// use ndarray::array;
+    /// use phylo2vec::vector::graph::Incidence;
+    /// let v = vec![0, 1, 2];
+    /// let inc = Incidence::new(&v);
+    /// let dense_matrix = inc.to_dense();
+    /// assert_eq!(
+    ///   dense_matrix,
+    ///   array![[ 1,  0,  0,  0,  0,  0],
+    ///          [ 0,  1,  0,  0,  0,  0],
+    ///          [ 0,  0,  1,  0,  0,  0],
+    ///          [ 0,  0,  0,  1,  0,  0],
+    ///          [ 0,  0, -1, -1,  1,  0],
+    ///          [ 0, -1,  0,  0, -1,  1],
+    ///          [-1,  0,  0,  0,  0, -1]
+    ///         ]
+    /// );
+    /// ```
+    pub fn to_dense(&self) -> Array2<i8> {
+        // n_nodes x n_edges
+        let mut out = Array2::<i8>::zeros((self.n_nodes, self.n_edges));
+
+        for &(u, v) in self.edges.iter() {
+            // edge u leaves node v
+            out[[v, u]] = -1;
+            // edge u enters node u
+            out[[u, u]] = 1;
+        }
+
+        out
+    }
+
+    /// Create an incidence matrix from a Phylo2Vec vector
+    /// Using the COO format (a.k.a triplet format)
+    /// # Example
+    /// ```
+    /// use phylo2vec::vector::graph::Incidence;
+    /// let v = vec![0, 1, 2];
+    /// let inc = Incidence::new(&v);
+    /// let (data, rows, cols) = inc.to_coo();
+    /// assert_eq!(
+    ///   data,
+    ///   vec![-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1]
+    /// );
+    /// assert_eq!(
+    ///  rows,
+    ///  vec![4, 2, 4, 3, 5, 1, 5, 4, 6, 0, 6, 5]
+    /// );
+    /// assert_eq!(
+    /// cols,
+    /// vec![2, 2, 3, 3, 1, 1, 4, 4, 0, 0, 5, 5]
+    /// );
+    /// ```
+    pub fn to_coo(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>) {
+        let mut data: Vec<i8> = Vec::with_capacity(2 * self.n_edges);
+        let mut rows: Vec<usize> = Vec::with_capacity(2 * self.n_edges);
+        let mut cols: Vec<usize> = Vec::with_capacity(2 * self.n_edges);
+
+        for &(u, v) in self.edges.iter() {
+            // edge u leaves node v
+            data.push(-1);
+            rows.push(v);
+            cols.push(u);
+
+            // edge u enters node u
+            data.push(1);
+            rows.push(u);
+            cols.push(u);
+        }
+
+        (data, rows, cols)
+    }
+
+    /// Create an incidence matrix from a Phylo2Vec vector
+    /// Using the DOK (dictionary-of-keys) format
+    /// # Example
+    /// ```
+    /// use std::collections::HashMap;
+    /// use phylo2vec::vector::graph::Incidence;
+    /// let v = vec![0, 1];
+    /// let inc = Incidence::new(&v);
+    /// let dok = inc.to_dok();
+    /// assert_eq!(dok, HashMap::from([
+    ///     ((0, 0), 1),
+    ///     ((1, 1), 1),
+    ///     ((2, 2), 1),
+    ///     ((3, 3), 1),
+    ///     ((4, 0), -1),
+    ///     ((3, 2), -1),
+    ///     ((3, 1), -1),
+    ///     ((4, 3), -1)
+    /// ]));
+    /// ```
+    pub fn to_dok(&self) -> HashMap<(usize, usize), i8> {
+        let mut out: HashMap<(usize, usize), i8> = HashMap::with_capacity(2 * self.n_edges);
+
+        for &(u, v) in self.edges.iter() {
+            // edge u leaves node v
+            out.entry((v, u)).or_insert(-1);
+            // edge u enters node u
+            out.entry((u, u)).or_insert(1);
+        }
+
+        out
+    }
+
+    /// Create an incidence matrix from a Phylo2Vec vector
+    /// Using the CSR (compressed sparse row) format
+    /// # Example
+    /// ```
+    /// use std::collections::HashMap;
+    /// use phylo2vec::vector::graph::Incidence;
+    /// let v = vec![0, 1];
+    /// let inc = Incidence::new(&v);
+    /// let (data, indices, indptr) = inc.to_csr();
+    /// assert_eq!(data, vec![1, 1, 1, -1, -1, 1, -1, -1]);
+    /// assert_eq!(indices, vec![0, 1, 2, 1, 2, 3, 0, 3]);
+    /// assert_eq!(indptr, vec![0, 1, 2, 3, 6, 8]);
+    /// ```
+    pub fn to_csr(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>) {
+        // Each edge yields two nonzero entries
+        let mut triplets: Vec<(usize, usize, i8)> = Vec::with_capacity(2 * self.n_edges);
+        for &(u, v) in self.edges.iter() {
+            // Entry from edge leaving node v_node: row = v_node, col = u, value = -1
+            triplets.push((v, u, -1));
+            // Entry from edge entering node i: row = i, col = i, value = 1
+            triplets.push((u, u, 1));
+        }
+        // Sort triplets by row index
+        triplets.sort_unstable_by_key(|&(row, _, _)| row);
+
+        let nnz = triplets.len();
+        let mut data: Vec<i8> = Vec::with_capacity(nnz);
+        let mut indices: Vec<usize> = Vec::with_capacity(nnz);
+        // Initialize row pointer with zeros; length: n_nodes+1
+        let mut indptr = vec![0; self.n_nodes + 1];
+
+        // Build CSR structure: iterate over rows in order
+        let mut current_row = 0;
+        for &(row, col, value) in triplets.iter() {
+            // Update indptr for rows with no entries until the current row
+            while current_row < row {
+                indptr[current_row + 1] = data.len();
+                current_row += 1;
+            }
+            data.push(value);
+            indices.push(col);
+        }
+        // Finalize remaining row pointers
+        while current_row < self.n_nodes {
+            indptr[current_row + 1] = data.len();
+            current_row += 1;
+        }
+
+        (data, indices, indptr)
+    }
+
+    pub fn to_csc(&self) -> (Vec<i8>, Vec<usize>, Vec<usize>) {
+        // Each edge yields two nonzero entries
+        let mut triplets: Vec<(usize, usize, i8)> = Vec::with_capacity(2 * self.n_edges);
+        for &(u, v) in self.edges.iter() {
+            // Entry from edge entering node i: row = i, col = i, value = 1
+            triplets.push((u, u, 1));
+            // Entry from edge leaving node v_node: row = v_node, col = u, value = -1
+            triplets.push((v, u, -1));
+        }
+        // Sort triplets by row index
+        triplets.sort_unstable_by_key(|&(_, col, _)| col);
+
+        let nnz = triplets.len();
+        let mut data: Vec<i8> = Vec::with_capacity(nnz);
+        let mut row_indices: Vec<usize> = Vec::with_capacity(nnz);
+        let mut col_ptrs = vec![0; self.n_edges + 1];
+
+        let mut current_col = 0;
+        for &(row, col, value) in triplets.iter() {
+            // Fill in any columns without entries
+            while current_col < col {
+                col_ptrs[current_col + 1] = data.len();
+                current_col += 1;
+            }
+            data.push(value);
+            row_indices.push(row);
+        }
+
+        // Finalize remaining column pointers
+        while current_col < self.n_edges {
+            col_ptrs[current_col + 1] = data.len();
+            current_col += 1;
+        }
+
+        (data, row_indices, col_ptrs)
+    }
 }
 
 #[cfg(test)]
@@ -247,8 +505,8 @@ mod tests {
 
     #[rstest]
     #[case(vec![0], array![[0.0, 2.0], [2.0, 0.0]])]
-    #[case(vec![0, 1, 2], array![[0.0, 3.0, 4.0, 4.0], [3.0, 0.0, 3.0, 3.0], [4.0, 3.0, 0.0, 2.0], [4.0, 3.0, 2.0, 0.0]])]
     #[case(vec![0, 0, 1], array![[0.0, 4.0, 2.0, 4.0], [4.0, 0.0, 4.0, 2.0], [2.0, 4.0, 0.0, 4.0], [4.0, 2.0, 4.0, 0.0]])]
+    #[case(vec![0, 1, 2], array![[0.0, 3.0, 4.0, 4.0], [3.0, 0.0, 3.0, 3.0], [4.0, 3.0, 0.0, 2.0], [4.0, 3.0, 2.0, 0.0]])]
     #[case(vec![0, 1, 0, 4, 4, 2, 6], array![
         [0.0, 5.0, 6.0, 2.0, 4.0, 4.0, 7.0, 7.0],
         [5.0, 0.0, 3.0, 5.0, 5.0, 5.0, 4.0, 4.0],
@@ -269,6 +527,7 @@ mod tests {
 
     #[rstest]
     #[case(vec![0], array![[1.0, 0.0], [0.0, 1.0]])]
+    #[case(vec![0, 0, 1], array![[2.0, 0.0, 1.0, 0.0], [0.0, 2.0, 0.0, 1.0], [1.0, 0.0, 2.0, 0.0], [0.0, 1.0, 0.0, 2.0]])]
     #[case(vec![0, 1, 2], array![
         [1.0, 0.0, 0.0, 0.0],
         [0.0, 2.0, 1.0, 1.0],
@@ -282,35 +541,178 @@ mod tests {
         [0.0, 3.0, 1.0, 4.0, 2.0],
         [0.0, 2.0, 1.0, 2.0, 3.0]
     ])]
-    fn test_vcv(
-        #[case] v: Vec<usize>,
-        // #[case] unrooted: bool,
-        #[case] expected: Array2<f64>,
-    ) {
+    #[case(vec![0, 1, 0, 4, 4, 2, 6], array![
+        [3.0, 0.0, 0.0, 2.0, 1.0, 1.0, 0.0, 0.0],
+        [0.0, 2.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0],
+        [0.0, 1.0, 3.0, 0.0, 0.0, 0.0, 2.0, 2.0],
+        [2.0, 0.0, 0.0, 3.0, 1.0, 1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0, 1.0, 3.0, 2.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0, 1.0, 2.0, 3.0, 0.0, 0.0],
+        [0.0, 1.0, 2.0, 0.0, 0.0, 0.0, 4.0, 3.0],
+        [0.0, 1.0, 2.0, 0.0, 0.0, 0.0, 3.0, 4.0]])]
+    fn test_vcv(#[case] v: Vec<usize>, #[case] expected: Array2<f64>) {
         assert_eq!(vcv(&v), expected);
     }
 
     #[rstest]
     #[case(vec![0], array![[1.0, 0.0], [0.0, 1.0]])]
-    #[case(vec![0, 1, 2], array![[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0, 0.0, -1.0],
-        [0.0, 0.0, 1.0, 0.0, -1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0, -1.0, 0.0],
-        [0.0, 0.0, -1.0, -1.0, 3.0, -1.0],
-        [0.0, -1.0, 0.0, 0.0, -1.0, 3.0]])]
-    #[case(vec![0, 1, 1, 4], array![[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0],
-        [0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0],
-        [0.0, -1.0, 0.0, -1.0, 0.0, 3.0, -1.0, 0.0],
-        [0.0, 0.0, 0.0, 0.0, -1.0, -1.0, 3.0, -1.0],
-        [0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0, 3.0]])]
-    fn test_pre_precision(
-        #[case] v: Vec<usize>,
-        // #[case] unrooted: bool,
-        #[case] expected: Array2<f64>,
-    ) {
+    #[case(vec![0, 1, 2], array![
+        [1.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [0.0,  1.0,  0.0,  0.0,  0.0, -1.0],
+        [0.0,  0.0,  1.0,  0.0, -1.0,  0.0],
+        [0.0,  0.0,  0.0,  1.0, -1.0,  0.0],
+        [0.0,  0.0, -1.0, -1.0,  3.0, -1.0],
+        [0.0, -1.0,  0.0,  0.0, -1.0,  3.0]])]
+    #[case(vec![0, 1, 1, 4], array![
+        [1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+        [0.0,  1.0,  0.0,  0.0,  0.0, -1.0,  0.0,  0.0],
+        [0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+        [0.0,  0.0,  0.0,  1.0,  0.0, -1.0,  0.0,  0.0],
+        [0.0,  0.0,  0.0,  0.0,  1.0,  0.0, -1.0,  0.0],
+        [0.0, -1.0,  0.0, -1.0,  0.0,  3.0, -1.0,  0.0],
+        [0.0,  0.0,  0.0,  0.0, -1.0, -1.0,  3.0, -1.0],
+        [0.0,  0.0, -1.0,  0.0,  0.0,  0.0, -1.0,  3.0]])]
+    fn test_pre_precision(#[case] v: Vec<usize>, #[case] expected: Array2<f64>) {
         assert_eq!(pre_precision(&v), expected);
+    }
+
+    #[rstest]
+    #[case(vec![0], array![[1, 0], [0, 1], [-1, -1]])]
+    #[case(vec![0, 1], array![
+        [ 1,  0,  0,  0],
+        [ 0,  1,  0,  0],
+        [ 0,  0,  1,  0],
+        [ 0, -1, -1,  1],
+        [-1,  0,  0, -1]
+    ])]
+    #[case(vec![0, 1, 2], array![
+        [ 1,  0,  0,  0,  0,  0],
+        [ 0,  1,  0,  0,  0,  0],
+        [ 0,  0,  1,  0,  0,  0],
+        [ 0,  0,  0,  1,  0,  0],
+        [ 0,  0, -1, -1,  1,  0],
+        [ 0, -1,  0,  0, -1,  1],
+        [-1,  0,  0,  0,  0, -1]
+    ])]
+    #[case(vec![0, 2, 2], array![
+        [ 1,   0,  0,  0,  0,  0],
+        [ 0,   1,  0,  0,  0,  0],
+        [ 0,   0,  1,  0,  0,  0],
+        [ 0,   0,  0,  1,  0,  0],
+        [ 0,   0, -1, -1,  1,  0],
+        [-1,  -1,  0,  0,  0,  1],
+        [ 0,   0,  0,  0, -1, -1]])]
+    fn test_incidence_dense(#[case] v: Vec<usize>, #[case] expected: Array2<i8>) {
+        let incid = Incidence::new(&v);
+        assert_eq!(incid.to_dense(), expected);
+    }
+
+    #[rstest]
+    #[case(vec![0], vec![-1, 1, -1, 1], vec![2, 0, 2, 1], vec![0, 0, 1, 1])]
+    #[case(vec![0, 1], vec![-1, 1, -1, 1, -1, 1, -1, 1], vec![3, 1, 3, 2, 4, 0, 4, 3], vec![1, 1, 2, 2, 0, 0, 3, 3])]
+    #[case(vec![0, 1, 2], vec![-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1], vec![4, 2, 4, 3, 5, 1, 5, 4, 6, 0, 6, 5], vec![2, 2, 3, 3, 1, 1, 4, 4, 0, 0, 5, 5])]
+    #[case(vec![0, 2, 2], vec![-1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1], vec![4, 2, 4, 3, 5, 0, 5, 1, 6, 5, 6, 4], vec![2, 2, 3, 3, 0, 0, 1, 1, 5, 5, 4, 4])]
+    fn test_incidence_coo(
+        #[case] v: Vec<usize>,
+        #[case] expected_data: Vec<i8>,
+        #[case] expected_rows: Vec<usize>,
+        #[case] expected_cols: Vec<usize>,
+    ) {
+        let incid = Incidence::new(&v);
+        let (data, rows, cols) = incid.to_coo();
+        assert_eq!(data, expected_data);
+        assert_eq!(rows, expected_rows);
+        assert_eq!(cols, expected_cols);
+    }
+
+    #[rstest]
+    #[case(
+        vec![0],
+        HashMap::from(
+            [
+                ((0, 0), 1),
+                ((2, 0), -1),
+                ((2, 1), -1),
+                ((1, 1), 1)
+            ]
+        )
+    )]
+    #[case(
+        vec![0, 1, 2],
+        HashMap::from(
+            [
+                ((0, 0), 1),
+                ((1, 1), 1),
+                ((2, 2), 1),
+                ((3, 3), 1),
+                ((4, 4), 1),
+                ((5, 5), 1),
+                ((4, 2), -1),
+                ((4, 3), -1),
+                ((5, 1), -1),
+                ((5, 4), -1),
+                ((6, 0), -1),
+                ((6, 5), -1)
+            ]
+        )
+    )]
+    #[case(
+        vec![0, 2, 2],
+        HashMap::from(
+            [
+                ((0, 0), 1),
+                ((1, 1), 1),
+                ((2, 2), 1),
+                ((3, 3), 1),
+                ((4, 4), 1),
+                ((5, 5), 1),
+                ((4, 2), -1),
+                ((4, 3), -1),
+                ((5, 0), -1),
+                ((5, 1), -1),
+                ((6, 5), -1),
+                ((6, 4), -1)
+            ]
+        )
+    )]
+    fn test_incidence_dok(#[case] v: Vec<usize>, #[case] expected: HashMap<(usize, usize), i8>) {
+        let incid = Incidence::new(&v);
+        assert_eq!(incid.to_dok(), expected);
+    }
+
+    #[rstest]
+    #[case(vec![0], vec![1, 1, -1, -1], vec![0, 1, 0, 1], vec![0, 1, 2, 4])]
+    #[case(vec![0, 1], vec![1, 1, 1, -1, -1, 1, -1, -1], vec![0, 1, 2, 1, 2, 3, 0, 3], vec![0, 1, 2, 3, 6, 8])]
+    #[case(vec![0, 1, 2], vec![ 1,  1,  1,  1, -1, -1,  1, -1, -1,  1, -1, -1], vec![0, 1, 2, 3, 2, 3, 4, 1, 4, 5, 0, 5], vec![ 0,  1,  2,  3,  4,  7, 10, 12])]
+    #[case(vec![0, 2, 2], vec![ 1,  1,  1,  1, -1, -1,  1, -1, -1,  1, -1, -1], vec![0, 1, 2, 3, 2, 3, 4, 0, 1, 5, 5, 4], vec![ 0,  1,  2,  3,  4,  7, 10, 12])]
+    fn test_incidence_csr(
+        #[case] v: Vec<usize>,
+        #[case] expected_data: Vec<i8>,
+        #[case] expected_indices: Vec<usize>,
+        #[case] expected_indptr: Vec<usize>,
+    ) {
+        let incid = Incidence::new(&v);
+        let (data, indices, indptr) = incid.to_csr();
+        assert_eq!(data, expected_data);
+        assert_eq!(indices, expected_indices);
+        assert_eq!(indptr, expected_indptr);
+    }
+
+    #[rstest]
+    #[case(vec![0], vec![1, -1, 1, -1], vec![0, 2, 1, 2], vec![0, 2, 4])]
+    #[case(vec![0, 1], vec![1, -1, 1, -1, 1, -1, 1, -1], vec![0, 4, 1, 3, 2, 3, 3, 4], vec![0, 2, 4, 6, 8])]
+    #[case(vec![0, 1, 2], vec![1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1], vec![0, 6, 1, 5, 2, 4, 3, 4, 4, 5, 5, 6], vec![0, 2, 4, 6, 8, 10, 12])]
+    #[case(vec![0, 2, 2], vec![1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1], vec![0, 5, 1, 5, 2, 4, 3, 4, 4, 6, 5, 6], vec![0, 2, 4, 6, 8, 10, 12])]
+    fn test_incidence_csc(
+        #[case] v: Vec<usize>,
+        #[case] expected_data: Vec<i8>,
+        #[case] expected_indices: Vec<usize>,
+        #[case] expected_indptr: Vec<usize>,
+    ) {
+        let incid = Incidence::new(&v);
+        let (data, indices, indptr) = incid.to_csc();
+        assert_eq!(data, expected_data);
+        assert_eq!(indices, expected_indices);
+        assert_eq!(indptr, expected_indptr);
     }
 }

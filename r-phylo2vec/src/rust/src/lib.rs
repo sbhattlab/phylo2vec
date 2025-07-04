@@ -387,6 +387,61 @@ fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     vcv_matrix
 }
 
+/// Get the incidence matrix of a Phylo2Vec vector in dense format
+/// @export
+#[extendr]
+fn incidence_dense(input_vector: Vec<i32>) -> RMatrix<i32> {
+    let v_usize = as_usize(input_vector);
+    let k = v_usize.len();
+    let dense_rs = vgraph::Incidence::new(&v_usize).to_dense();
+    let mut dense_r = RMatrix::new_matrix(2 * k + 1, 2 * k, |r, c| dense_rs[[r, c]] as i32);
+    let colnames = (0..2 * k).map(|x| x as i32).collect::<Vec<i32>>();
+    let mut rownames = colnames.clone();
+    rownames.push(2 * k as i32);
+    dense_r.set_dimnames(List::from_values(vec![rownames, colnames]));
+
+    dense_r
+}
+
+/// Get the incidence matrix of a Phylo2Vec vector in COO format
+/// @export
+#[extendr]
+fn incidence_coo(input_vector: Vec<i32>) -> List {
+    let v_usize = as_usize(input_vector);
+    let (data, rows, cols) = vgraph::Incidence::new(&v_usize).to_coo();
+    list!(
+        data = data.iter().map(|&x| x as i32).collect::<Vec<i32>>(),
+        rows = as_i32(rows),
+        cols = as_i32(cols)
+    )
+}
+
+/// Get the incidence matrix of a Phylo2Vec vector in CSR format
+/// @export
+#[extendr]
+fn incidence_csc(input_vector: Vec<i32>) -> List {
+    let v_usize = as_usize(input_vector);
+    let (data, indices, indptr) = vgraph::Incidence::new(&v_usize).to_csc();
+    list!(
+        data = data.iter().map(|&x| x as i32).collect::<Vec<i32>>(),
+        indices = as_i32(indices),
+        indptr = as_i32(indptr)
+    )
+}
+
+/// Get the incidence matrix of a Phylo2Vec vector in CSR format
+/// @export
+#[extendr]
+fn incidence_csr(input_vector: Vec<i32>) -> List {
+    let v_usize = as_usize(input_vector);
+    let (data, indices, indptr) = vgraph::Incidence::new(&v_usize).to_csr();
+    list!(
+        data = data.iter().map(|&x| x as i32).collect::<Vec<i32>>(),
+        indices = as_i32(indices),
+        indptr = as_i32(indptr)
+    )
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -404,6 +459,10 @@ extendr_module! {
     fn from_pairs;
     fn get_common_ancestor;
     fn has_branch_lengths;
+    fn incidence_coo;
+    fn incidence_csc;
+    fn incidence_csr;
+    fn incidence_dense;
     fn pre_precision_from_matrix;
     fn pre_precision_from_vector;
     fn queue_shuffle;

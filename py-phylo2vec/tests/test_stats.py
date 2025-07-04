@@ -4,9 +4,16 @@ import numpy as np
 import pytest
 
 from ete3 import Tree
+from scipy import sparse
 
 from phylo2vec.base.newick import to_newick
-from phylo2vec.stats import cophenetic_distances, pairwise_distances, precision, cov
+from phylo2vec.stats.nodewise import (
+    cophenetic_distances,
+    cov,
+    incidence,
+    pairwise_distances,
+    precision,
+)
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
 from .config import MIN_N_LEAVES, N_REPEATS
@@ -125,6 +132,66 @@ def test_cov_matrix(n_leaves):
         Number of leaves
     """
     _test_cov_and_precision(n_leaves, sample_matrix)
+
+
+@pytest.mark.parametrize(
+    "v, d",
+    [
+        (np.array([0]), np.array([[1, 0], [0, 1], [-1, -1]])),
+        (
+            np.array([0, 1]),
+            np.array(
+                [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, -1, -1, 1],
+                    [-1, 0, 0, -1],
+                ]
+            ),
+        ),
+        (
+            np.array([0, 1, 2]),
+            np.array(
+                [
+                    [1, 0, 0, 0, 0, 0],
+                    [0, 1, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0],
+                    [0, 0, -1, -1, 1, 0],
+                    [0, -1, 0, 0, -1, 1],
+                    [-1, 0, 0, 0, 0, -1],
+                ]
+            ),
+        ),
+    ],
+)
+def test_incidence(v, d):
+    """Test incidence matrix for different formats.
+
+    Parameters
+    ----------
+    v : np.ndarray
+        Input vector.
+    d : np.ndarray
+        Expected incidence matrix.
+    """
+    format_fns = {
+        "coo": sparse.coo_matrix,
+        "csr": sparse.csr_matrix,
+        "csc": sparse.csc_matrix,
+        "dense": lambda x: x,
+    }
+    for f, func in format_fns.items():
+        inc = incidence(v, format=f)
+        if f == "dense":
+            assert np.array_equal(inc, d)
+        elif f == "coo":
+            data, rows, cols = inc
+            assert np.array_equal(func((data, (rows, cols))).toarray(), d)
+        else:
+            assert np.array_equal(func(inc).toarray(), d)
+    # assert np.array_equal(incidence(v, format="dense"), d)
 
 
 if __name__ == "__main__":
