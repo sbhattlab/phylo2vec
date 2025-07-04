@@ -146,7 +146,7 @@ pub fn from_ancestry(ancestry: &Ancestry) -> Vec<usize> {
 ///  branch 0 <-- //   \\  --> branch 1
 ///               0     1
 ///
-/// For v\[1\], we have 3 possible branches too choose from.
+/// For v\[1\], we have 3 possible branches to choose from.
 /// v\[1\] = 0 or 1 indicates that we branch out from branch 0 or 1, respectively.
 /// The new branch yields leaf 2 (like in ordered trees)
 ///
