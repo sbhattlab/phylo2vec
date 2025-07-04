@@ -8,7 +8,8 @@ use ndarray::{Array2, ArrayView2};
 /// Output is a pairwise distance matrix of dimensions n x n
 /// where n = number of leaves.
 ///
-/// # Example
+/// # Examples
+///
 /// ```
 /// use ndarray::array;
 /// use phylo2vec::matrix::graph::cophenetic_distances;
@@ -24,11 +25,39 @@ pub fn cophenetic_distances(m: &ArrayView2<f64>) -> Array2<f64> {
     _cophenetic_distances(&v, Some(&bls))
 }
 
+/// Get a precursor of the precision matrix
+/// for a Phylo2Vec matrix.
+/// Output is a matrix of dimensions 2 * (n - 1) x 2 * (n - 1)
+/// where n = number of leaves.
+/// The precision matrix can be obtained using Schur's complement
 pub fn pre_precision(m: &ArrayView2<f64>) -> Array2<f64> {
     let (v, bls) = parse_matrix(m);
     _pre_precision(&v, Some(&bls))
 }
 
+/// Get the variance-covariance matrix
+/// for a Phylo2Vec matrix.
+/// Output is a matrix of dimensions n x n
+/// where n = number of leaves.
+///
+/// # Examples
+///
+/// ```
+/// use ndarray::array;
+/// use phylo2vec::matrix::graph::vcv;
+/// let m = array![
+/// [0.0, 0.4, 0.5],
+/// [2.0, 0.1, 0.2],
+/// [2.0, 0.3, 0.6],
+/// ];
+/// let vcv_matrix = vcv(&m.view());
+/// assert_eq!(vcv_matrix, array![
+/// [0.4, 0.3, 0.0, 0.0],
+/// [0.3, 0.5, 0.0, 0.0],
+/// [0.0, 0.0, 1.0, 0.6],
+/// [0.0, 0.0, 0.6, 1.1]
+/// ]);
+/// ```
 pub fn vcv(m: &ArrayView2<f64>) -> Array2<f64> {
     let (v, bls) = parse_matrix(m);
     _vcv(&v, Some(&bls))

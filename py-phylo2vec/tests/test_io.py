@@ -14,6 +14,33 @@ from phylo2vec.utils.vector import sample_vector
 from .config import MAX_N_LEAVES, MIN_N_LEAVES
 
 
+def _test_save_and_load(tmp_path, n_leaves, sample_fn):
+    """Test the read and write functions for Phylo2Vec objects
+
+    Parameters
+    ----------
+    tmp_path : Path
+        Temporary path for saving files
+    n_leaves : int
+        Number of leaves
+    sample_fn : function
+        Function to sample a vector or matrix
+    """
+    vector_or_matrix = sample_fn(n_leaves)
+
+    csv_path = tmp_path / "test.csv"
+    save(vector_or_matrix, csv_path)
+    loaded_vector_or_matrix = load(csv_path)
+    assert np.array_equal(vector_or_matrix, loaded_vector_or_matrix)
+
+    # Unallowed file extension should trigger an AssertionError
+    random_path = tmp_path / "test.random"
+    np.savetxt(random_path, vector_or_matrix, delimiter=",")
+    with pytest.raises(ValueError):
+        save(vector_or_matrix, random_path)
+        _ = load(random_path)
+
+
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])
 def test_save_and_load_vector(tmp_path, n_leaves):
     """Test the read and write functions for Phylo2Vec objects
@@ -23,19 +50,7 @@ def test_save_and_load_vector(tmp_path, n_leaves):
     n_leaves : int
         Number of leaves
     """
-    v = sample_vector(n_leaves)
-
-    csv_path = tmp_path / "test.csv"
-    save(v, csv_path)
-    v2 = load(csv_path)
-    assert np.array_equal(v, v2)
-
-    # Unallowed file extension should trigger an AssertionError
-    random_path = tmp_path / "test.random"
-    np.savetxt(random_path, v, delimiter=",")
-    with pytest.raises(AssertionError):
-        save(v, random_path)
-        _ = load(random_path)
+    _test_save_and_load(tmp_path, n_leaves, sample_vector)
 
 
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])
@@ -47,19 +62,23 @@ def test_save_and_load_matrix(tmp_path, n_leaves):
     n_leaves : int
         Number of leaves
     """
-    m = sample_matrix(n_leaves)
+    _test_save_and_load(tmp_path, n_leaves, sample_matrix)
 
-    csv_path = tmp_path / "test.csv"
-    save(m, csv_path)
-    m2 = load(csv_path)
-    assert np.allclose(m, m2)
+
+def _test_and_save_load_newick(tmp_path, n_leaves, sample_fn):
+    vector_or_matrix = sample_fn(n_leaves)
+
+    newick_path = tmp_path / "test.newick"
+    save_newick(vector_or_matrix, newick_path)
+    m2 = load_newick(newick_path)
+    assert np.array_equal(vector_or_matrix, m2)
 
     # Unallowed file extension should trigger an AssertionError
     random_path = tmp_path / "test.random"
-    np.savetxt(random_path, m, delimiter=",")
-    with pytest.raises(AssertionError):
-        save(m, random_path)
-        _ = load(random_path)
+    np.savetxt(random_path, vector_or_matrix, delimiter=",")
+    with pytest.raises(ValueError):
+        save_newick(vector_or_matrix, random_path)
+        _ = load_newick(random_path)
 
 
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])
@@ -71,19 +90,7 @@ def test_save_and_load_newick_vector(tmp_path, n_leaves):
     n_leaves : int
         Number of leaves
     """
-    v = sample_vector(n_leaves)
-
-    newick_path = tmp_path / "test.newick"
-    save_newick(v, newick_path)
-    v2 = load_newick(newick_path)
-    assert np.array_equal(v, v2)
-
-    # Unallowed file extension should trigger an AssertionError
-    random_path = tmp_path / "test.random"
-    np.savetxt(random_path, v, delimiter=",")
-    with pytest.raises(AssertionError):
-        save_newick(v, random_path)
-        _ = load_newick(random_path)
+    _test_and_save_load_newick(tmp_path, n_leaves, sample_vector)
 
 
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])
@@ -95,19 +102,7 @@ def test_save_and_load_newick_matrix(tmp_path, n_leaves):
     n_leaves : int
         Number of leaves
     """
-    m = sample_matrix(n_leaves)
-
-    newick_path = tmp_path / "test.newick"
-    save_newick(m, newick_path)
-    m2 = load_newick(newick_path)
-    assert np.array_equal(m, m2)
-
-    # Unallowed file extension should trigger an AssertionError
-    random_path = tmp_path / "test.random"
-    np.savetxt(random_path, m, delimiter=",")
-    with pytest.raises(AssertionError):
-        save_newick(m, random_path)
-        _ = load_newick(random_path)
+    _test_and_save_load_newick(tmp_path, n_leaves, sample_matrix)
 
 
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])

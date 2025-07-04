@@ -1,3 +1,4 @@
+/// An object implementing a phylogenetic tree in phylo2vec vector format
 use crate::types::Ancestry;
 use crate::vector::base::sample_vector;
 use crate::vector::convert;

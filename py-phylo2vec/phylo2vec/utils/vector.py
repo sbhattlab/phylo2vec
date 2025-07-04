@@ -251,7 +251,8 @@ def get_common_ancestor(v, node1, node2):
     mrca : int
         Most recent common ancestor node between node1 and node2
     """
-    assert node1 >= 0 and node2 >= 0, "Nodes must be greater than 0"
+    if not (node1 >= 0 and node2 >= 0):
+        raise ValueError("Nodes must be greater than or equal to 0")
     return core.get_common_ancestor(v, node1, node2)
 
 

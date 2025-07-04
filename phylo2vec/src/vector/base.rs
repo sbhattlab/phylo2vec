@@ -3,8 +3,10 @@ use rand::Rng;
 
 /// Sample a vector with `n_leaves` elements.
 ///
-/// If ordering is True, sample an ordered tree, by default ordering is False
+/// If ordering is True, sample an ordered tree, by default ordering is False.
+///
 /// ordering=True: v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
+///
 /// ordering=False: v_i in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
 ///
 /// # Examples

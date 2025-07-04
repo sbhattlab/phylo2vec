@@ -26,6 +26,7 @@ import numpy as np
 
 from numba import int64, float64
 from numba.experimental import jitclass
+
 from phylo2vec.base.ancestry import to_ancestry
 
 BEAGLE_OP_NONE = -1

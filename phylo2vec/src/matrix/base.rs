@@ -7,7 +7,9 @@ use crate::vector::base::{check_v, sample_vector};
 /// Sample a matrix with `n_leaves` elements.
 ///
 /// If ordering is True, sample an ordered tree, by default ordering is False
+///
 /// ordering=True: v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
+///
 /// ordering=False: v_i in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
 ///
 /// # Examples
@@ -70,7 +72,7 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f64> {
 ///     [0.0, 0.1, 0.2],
 ///     [1.0, 0.5, 0.7]].view()
 /// );
-///
+/// ```
 pub fn check_m(matrix: &ArrayView2<f64>) {
     assert!(!matrix.is_empty(), "Matrix should not be empty");
 

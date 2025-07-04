@@ -16,6 +16,7 @@ from phylo2vec.stats.nodewise import (
 )
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
+
 from .config import MIN_N_LEAVES, N_REPEATS
 
 
@@ -191,7 +192,6 @@ def test_incidence(v, d):
             assert np.array_equal(func((data, (rows, cols))).toarray(), d)
         else:
             assert np.array_equal(func(inc).toarray(), d)
-    # assert np.array_equal(incidence(v, format="dense"), d)
 
 
 if __name__ == "__main__":
