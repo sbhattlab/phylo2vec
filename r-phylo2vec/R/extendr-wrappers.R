@@ -73,7 +73,7 @@ get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_anc
 #' @export
 has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
 
-#' Get the incidence matrix of a Phylo2Vec vector in COUP format
+#' Get the incidence matrix of a Phylo2Vec vector in COO format
 #' @export
 incidence_coo <- function(input_vector) .Call(wrap__incidence_coo, input_vector)
 

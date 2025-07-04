@@ -2,10 +2,10 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{incidence_coo}
 \alias{incidence_coo}
-\title{Get the incidence matrix of a Phylo2Vec vector in COUP format}
+\title{Get the incidence matrix of a Phylo2Vec vector in COO format}
 \usage{
 incidence_coo(input_vector)
 }
 \description{
-Get the incidence matrix of a Phylo2Vec vector in COUP format
+Get the incidence matrix of a Phylo2Vec vector in COO format
 }
