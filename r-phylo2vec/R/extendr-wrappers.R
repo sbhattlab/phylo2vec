@@ -79,6 +79,10 @@ incidence_coo <- function(input_vector) .Call(wrap__incidence_coo, input_vector)
 
 #' Get the incidence matrix of a Phylo2Vec vector in CSR format
 #' @export
+incidence_csc <- function(input_vector) .Call(wrap__incidence_csc, input_vector)
+
+#' Get the incidence matrix of a Phylo2Vec vector in CSR format
+#' @export
 incidence_csr <- function(input_vector) .Call(wrap__incidence_csr, input_vector)
 
 #' Get the incidence matrix of a Phylo2Vec vector in dense format

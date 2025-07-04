@@ -118,3 +118,53 @@ test_that(desc = "vcv_and_precision", {
     }
   }
 })
+
+test_incidence_single <- function(v, d) {
+  k <- length(v)
+  expect_equal(incidence(v, "C"), incidence(v, "R"))
+  expect_equal(incidence(v, "C"), incidence(v, "T"))
+  d_from_c <- as.matrix(incidence(v, "C"))
+  expect_equal(d_from_c, d)
+  rownames(d_from_c) <- 0:(2 * k)
+  colnames(d_from_c) <- 0:(2 * k - 1)
+  expect_equal(incidence(v, "D"), d_from_c)
+}
+
+test_that(desc = "incidence_all_format", {
+  v1 <- as.integer(c(0))
+  d1 <- matrix(
+    c(
+      1, 0,
+      0, 1,
+      -1, -1
+    ),
+    nrow = 3, ncol = 2, byrow = TRUE
+  )
+  v2 <- as.integer(c(0, 1))
+  d2 <- matrix(
+    c(
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, -1, -1, 1,
+      -1, 0, 0, -1
+    ),
+    nrow = 5, ncol = 4, byrow = TRUE
+  )
+  v3 <- as.integer(c(0, 1, 2))
+  d3 <- matrix(
+    c(
+      1, 0, 0, 0, 0, 0,
+      0, 1, 0, 0, 0, 0,
+      0, 0, 1, 0, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, -1, -1, 1, 0,
+      0, -1, 0, 0, -1, 1,
+      -1, 0, 0, 0, 0, -1
+    ),
+    nrow = 7, ncol = 6, byrow = TRUE
+  )
+  test_incidence_single(v1, d1)
+  test_incidence_single(v2, d2)
+  test_incidence_single(v3, d3)
+})
