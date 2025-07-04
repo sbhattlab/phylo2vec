@@ -35,11 +35,13 @@ def increment_patch_version(version_str: str) -> str:
         Version with incremented patch number
     """
     # Extract the base version (remove any suffixes like -rc.xxx or .devxxx)
-    base_version = re.match(r"(\d+\.\d+\.\d+)", version_str).group(1)
+    match = re.match(r"(\d+\.\d+\.\d+)", version_str)
 
-    if not base_version:
+    if not match:
         print(f"Warning: Could not parse version string '{version_str}'")
         return version_str
+
+    base_version = match.group(1)
 
     # Split into major, minor, patch
     parts = base_version.split(".")
@@ -79,7 +81,13 @@ def get_distance_from_version_tag(version_str):
             raise RuntimeError("`git` command not found. Please install Git.")
 
         # Clean version string for tag matching (remove any suffixes)
-        base_version = re.match(r"(\d+\.\d+\.\d+)", version_str).group(1)
+        match = re.match(r"(\d+\.\d+\.\d+)", version_str)
+
+        if not match:
+            print(f"Warning: Could not parse version string '{version_str}'")
+            return version_str
+
+        base_version = match.group(1)
 
         # Format for tag search
         tag_prefix = f"v{base_version}"
