@@ -319,10 +319,9 @@ impl Fenwick {
 /// `cherry` representation.
 pub fn build_vector(cherries: &Ancestry) -> Vec<usize> {
     let num_cherries = cherries.len();
-    let num_leaves = num_cherries + 1;
 
     let mut v = vec![0; num_cherries];
-    let mut bit = Fenwick::new(num_leaves);
+    let mut bit = Fenwick::new(num_cherries);
 
     for [c1, c2, c_max] in cherries.iter().copied() {
         let idx = bit.prefix_sum(c_max - 1);
@@ -450,13 +449,25 @@ fn build_cherries(ancestry: &mut Ancestry, row_idxs: &[usize]) -> Vec<usize> {
 pub fn order_cherries(ancestry: &mut Ancestry) -> (Vec<usize>, Vec<usize>) {
     let num_cherries = ancestry.len();
 
-    let mut row_idxs: Vec<usize> = (0..num_cherries).collect();
-    row_idxs.sort_by_key(|&i| ancestry[i][2]);
+    // Set offset as max(ancestry[, 2]) - 2 * num_cherries + 1
+    // offset = 1 for most cases, except add_leaf where it is 2
+    // as we update the ancestry with a new leaf
+    let offset: usize = ancestry
+        .iter()
+        .map(|x| x[2])
+        .max()
+        .expect("No max found. Malformed ancestry?")
+        - 2 * num_cherries
+        + 1;
 
-    // Sort by the parent node (ascending order)
-    let mut new_ancestry: Ancestry = Vec::with_capacity(num_cherries);
-    for i in &row_idxs {
-        new_ancestry.push(ancestry[*i]);
+    let mut row_idxs: Vec<usize> = (0..num_cherries).collect();
+
+    let mut new_ancestry: Ancestry = ancestry.clone();
+    for (i, cherry) in ancestry.iter().enumerate() {
+        // Swap rows in the new ancestry according to the parental label (cherry[2])
+        let idx = cherry[2] - num_cherries - offset;
+        new_ancestry[idx] = *cherry;
+        row_idxs[idx] = i;
     }
     *ancestry = new_ancestry;
 
@@ -539,10 +550,10 @@ pub fn order_cherries_no_parents(ancestry: &mut Ancestry) -> (Vec<usize>, Vec<us
     }
 
     // argsort with descending order
+    // Note: using a stable sort is important to keep the order of cherries
     let mut row_idxs: Vec<usize> = (0..num_cherries).collect();
     row_idxs.sort_by_key(|&i| std::cmp::Reverse(to_sort[i]));
 
-    // Note: using a stable sort is important to keep the order of cherries
     let mut temp = Ancestry::with_capacity(num_cherries);
     for i in &row_idxs {
         // Swap the branch lengths if c1 > c2
