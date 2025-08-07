@@ -32,7 +32,7 @@ def sample_vector(n_leaves: int, ordered: bool = False) -> np.ndarray:
     Parameters
     ----------
     n_leaves : int
-        Number of leaves
+        Number of leaves (>= 2)
     ordered : bool, optional
         If True, sample an ordered tree, by default False
 
