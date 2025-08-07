@@ -162,7 +162,8 @@ hc_result = hc.fit("/path/to/your_fasta_file.fa")
 
 #### Command-line interface (CLI)
 
-We also provide a command-line interface for quick experimentation on phylo2vec-derived objects.
+We also provide a command-line interface for quick experimentation on
+phylo2vec-derived objects.
 
 To see the available functions, run:
 
