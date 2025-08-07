@@ -1,6 +1,5 @@
 """Nodewise metrics/statistics between nodes within phylogenetic trees."""
 
-import warnings
 import numpy as np
 
 from phylo2vec import _phylo2vec_core as core

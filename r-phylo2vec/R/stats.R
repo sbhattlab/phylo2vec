@@ -4,6 +4,8 @@ library(Matrix)
 #' vector (topological) or matrix (from branch lengths).
 #'
 #' @param vector_or_matrix Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+#' @param unrooted Logical indicating whether applying the cophenetic distance
+#'  to an unrooted tree or not (see ete3). Default is FALSE.
 #' @return Cophenetic distance matrix
 #' @export
 cophenetic_distances <- function(vector_or_matrix, unrooted = FALSE) {

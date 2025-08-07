@@ -1,6 +1,6 @@
 Package: phylo2vec
 Title: Phylo2Vec: integer vector representation of binary (phylogenetic) trees
-Version: 1.1.0
+Version: 1.2.0
 Authors@R:
     person("Neil", "Scheidwasser", "", "neil.clow@sund.ku.dk", role = c("aut", "cre"))
 Description: A tool for working with binary (phylogenetic) trees
