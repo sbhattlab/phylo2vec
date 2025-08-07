@@ -4,7 +4,7 @@
 \alias{cophenetic_from_vector}
 \title{Get the topological cophenetic distance matrix of a Phylo2Vec vector}
 \usage{
-cophenetic_from_vector(vector)
+cophenetic_from_vector(vector, unrooted)
 }
 \description{
 Get the topological cophenetic distance matrix of a Phylo2Vec vector

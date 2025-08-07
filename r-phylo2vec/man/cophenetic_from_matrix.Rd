@@ -4,7 +4,7 @@
 \alias{cophenetic_from_matrix}
 \title{Get the cophenetic distance matrix of a Phylo2Vec matrix}
 \usage{
-cophenetic_from_matrix(matrix)
+cophenetic_from_matrix(matrix, unrooted)
 }
 \description{
 Get the cophenetic distance matrix of a Phylo2Vec matrix

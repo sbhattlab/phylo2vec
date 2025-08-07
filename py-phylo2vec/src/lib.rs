@@ -138,17 +138,22 @@ fn build_newick(input_pairs: Vec<(usize, usize)>) -> String {
 }
 
 #[pyfunction]
-fn cophenetic_distances(py: Python<'_>, input_vector: Vec<usize>) -> Bound<'_, PyArray2<f64>> {
-    vgraph::cophenetic_distances(&input_vector).into_pyarray(py)
+fn cophenetic_distances(
+    py: Python<'_>,
+    input_vector: Vec<usize>,
+    unrooted: bool,
+) -> Bound<'_, PyArray2<f64>> {
+    vgraph::cophenetic_distances(&input_vector, unrooted).into_pyarray(py)
 }
 
 #[pyfunction]
 fn cophenetic_distances_with_bls<'py>(
     py: Python<'py>,
     input_matrix: PyReadonlyArray2<f64>,
+    unrooted: bool,
 ) -> Bound<'py, PyArray2<f64>> {
     let m = input_matrix.as_array();
-    mgraph::cophenetic_distances(&m).into_pyarray(py)
+    mgraph::cophenetic_distances(&m, unrooted).into_pyarray(py)
 }
 
 #[pyfunction]

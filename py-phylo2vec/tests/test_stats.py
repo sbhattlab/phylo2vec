@@ -23,7 +23,7 @@ from .config import MIN_N_LEAVES, N_REPEATS
 MAX_N_LEAVES_STATS = 50
 
 
-def _test_cophenetic(n_leaves, sample_fn):
+def _test_cophenetic(n_leaves, sample_fn, unrooted=False):
     """Helper function to test cophenetic distances using a sample function."""
 
     def coph_ete3(tr, n_leaves):
@@ -40,11 +40,22 @@ def _test_cophenetic(n_leaves, sample_fn):
     for _ in range(N_REPEATS):
         vector_or_matrix = sample_fn(n_leaves)
 
-        # tree with all branch lengths = 1
-        tr = Tree(to_newick(vector_or_matrix))
-
         # Our distance matrix
-        dmat_p2v = cophenetic_distances(vector_or_matrix)
+        dmat_p2v = cophenetic_distances(vector_or_matrix, unrooted=unrooted)
+
+        # tree with all branch lengths = 1
+        tr = Tree(to_newick(vector_or_matrix), format=1)
+
+        if unrooted:
+            # Unroot by deleting the max node
+            # ete3 systematically unroot by removing the first non-leaf node
+            # Our approach is to remove the node with the highest index
+            # (see rust implementation)
+            names = [int(tr.children[0].name), int(tr.children[1].name)]
+            if names[0] > names[1]:
+                tr.children[0].delete()
+            else:
+                tr.children[1].delete()
 
         # ete3 distance matrix
         dmat_ete3 = coph_ete3(tr, n_leaves)
@@ -54,7 +65,9 @@ def _test_cophenetic(n_leaves, sample_fn):
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_vector(n_leaves):
-    """Test that v to newick to converted_v leads to v == converted_v
+    """
+    Test that the cophenetic distance matrix matches the ete3 implementation
+    for rooted trees without branch lengths.
 
     Parameters
     ----------
@@ -66,8 +79,25 @@ def test_cophenetic_vector(n_leaves):
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_cophenetic_vector_unrooted(n_leaves):
+    """
+    Test that the cophenetic distance matrix matches the ete3 implementation
+    for unrooted trees without branch lengths.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+
+    _test_cophenetic(n_leaves, sample_vector, unrooted=True)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_matrix(n_leaves):
-    """Test that v to newick to converted_v leads to v == converted_v
+    """
+    Test that the cophenetic distance matrix matches the ete3 implementation
+    for rooted trees with branch lengths.
 
     Parameters
     ----------
@@ -76,6 +106,21 @@ def test_cophenetic_matrix(n_leaves):
     """
 
     _test_cophenetic(n_leaves, sample_matrix)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_cophenetic_matrix_unrooted(n_leaves):
+    """
+    Test that the cophenetic distance matrix matches the ete3 implementation
+    for unrooted trees with branch lengths.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+
+    _test_cophenetic(n_leaves, sample_matrix, unrooted=True)
 
 
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1])

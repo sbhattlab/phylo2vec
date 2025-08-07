@@ -37,11 +37,11 @@ check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
 
 #' Get the cophenetic distance matrix of a Phylo2Vec matrix
 #' @export
-cophenetic_from_matrix <- function(matrix) .Call(wrap__cophenetic_from_matrix, matrix)
+cophenetic_from_matrix <- function(matrix, unrooted) .Call(wrap__cophenetic_from_matrix, matrix, unrooted)
 
 #' Get the topological cophenetic distance matrix of a Phylo2Vec vector
 #' @export
-cophenetic_from_vector <- function(vector) .Call(wrap__cophenetic_from_vector, vector)
+cophenetic_from_vector <- function(vector, unrooted) .Call(wrap__cophenetic_from_vector, vector, unrooted)
 
 #' Create an integer-taxon label mapping (label_mapping)
 #' from a string-based newick (where leaves are strings)
