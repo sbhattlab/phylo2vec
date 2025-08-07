@@ -1,12 +1,11 @@
-import os
-import sys
+"""Tests for the phylo2vec CLI commands."""
 
 from io import StringIO
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
-
-from unittest.mock import patch
 
 from phylo2vec.cli import parse_args, main
 
