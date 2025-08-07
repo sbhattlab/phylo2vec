@@ -544,7 +544,7 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "phylo2vec"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "bit-set",
  "criterion",
@@ -722,7 +722,7 @@ dependencies = [
 
 [[package]]
 name = "r-phylo2vec"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "extendr-api",
  "ndarray",
