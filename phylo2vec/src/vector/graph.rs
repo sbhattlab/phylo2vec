@@ -2,7 +2,7 @@
 use std::collections::HashMap;
 
 use bit_set::BitSet;
-use ndarray::{s, Array1, Array2};
+use ndarray::{array, s, Array1, Array2};
 
 use crate::types::Pairs;
 use crate::vector::convert::{to_ancestry, to_edges, to_pairs};
@@ -17,20 +17,31 @@ fn ones(k: usize) -> Vec<[f64; 2]> {
 /// where n = number of leaves.
 /// Each distance corresponds to the sum of the branch lengths between two leaves
 /// Inspired from the `cophenetic` function in the `ape` package: <https://github.com/emmanuelparadis/ape>
-pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
+pub fn _cophenetic_distances(
+    v: &[usize],
+    bls: Option<&Vec<[f64; 2]>>,
+    unrooted: bool,
+) -> Array2<f64> {
     let k = v.len();
-    let ancestry = to_ancestry(v);
+    let mut ancestry = to_ancestry(v);
 
     let bls = match bls {
         Some(b) => b.to_vec(),
         None => ones(k),
     };
 
-    // Note: unrooted option was removed.
-    // Originally implemented to match tr.unroot() in ete3
-    // But now prefer to operate such that unrooting
-    // preserves total branch lengths (compatible with ape
-    // and ete3, see <https://github.com/etetoolkit/ete/pull/344>)
+    // A 2-leaf tree cannot be unrooted (see ete3)
+    // so we return the sum of their branch lengths
+    // if v.len() == 1, unrooted or not
+    if v.len() == 1 {
+        return array![[0.0, bls[0][0] + bls[0][1]], [bls[0][0] + bls[0][1], 0.0]];
+    }
+
+    if unrooted {
+        let nrows = ancestry.len();
+        let ncols = ancestry[0].len();
+        ancestry[nrows - 1][ncols - 1] = ancestry[nrows - 1].iter().max().unwrap() - 1;
+    }
 
     // Dist shape: N_nodes x N_nodes
     let mut dist = Array2::<f64>::zeros((2 * k + 1, 2 * k + 1));
@@ -83,11 +94,12 @@ pub fn _cophenetic_distances(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2
 /// use phylo2vec::vector::graph::cophenetic_distances;
 ///
 /// let v = vec![0, 1, 2];
-/// let dist = cophenetic_distances(&v);
+/// let unrooted = false;
+/// let dist = cophenetic_distances(&v, unrooted);
 /// assert_eq!(dist, array![[0.0, 3.0, 4.0, 4.0], [3.0, 0.0, 3.0, 3.0], [4.0, 3.0, 0.0, 2.0], [4.0, 3.0, 2.0, 0.0]]);
 /// ```
-pub fn cophenetic_distances(v: &[usize]) -> Array2<f64> {
-    _cophenetic_distances(v, None)
+pub fn cophenetic_distances(v: &[usize], unrooted: bool) -> Array2<f64> {
+    _cophenetic_distances(v, None, unrooted)
 }
 
 /// Generic function to calculate a block matrix
@@ -527,14 +539,36 @@ impl Incidence {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ndarray::array;
     use rstest::rstest;
 
     #[rstest]
-    #[case(vec![0], array![[0.0, 2.0], [2.0, 0.0]])]
-    #[case(vec![0, 0, 1], array![[0.0, 4.0, 2.0, 4.0], [4.0, 0.0, 4.0, 2.0], [2.0, 4.0, 0.0, 4.0], [4.0, 2.0, 4.0, 0.0]])]
-    #[case(vec![0, 1, 2], array![[0.0, 3.0, 4.0, 4.0], [3.0, 0.0, 3.0, 3.0], [4.0, 3.0, 0.0, 2.0], [4.0, 3.0, 2.0, 0.0]])]
-    #[case(vec![0, 1, 0, 4, 4, 2, 6], array![
+    #[case(vec![0], false, array![[0.0, 2.0], [2.0, 0.0]])]
+    #[case(vec![0], true, array![[0.0, 2.0], [2.0, 0.0]])]
+    #[case(vec![0, 0, 1], false, array![
+        [0.0, 4.0, 2.0, 4.0],
+        [4.0, 0.0, 4.0, 2.0],
+        [2.0, 4.0, 0.0, 4.0],
+        [4.0, 2.0, 4.0, 0.0]
+    ])]
+    #[case(vec![0, 0, 1], true, array![
+        [0.0, 3.0, 2.0, 3.0],
+        [3.0, 0.0, 3.0, 2.0],
+        [2.0, 3.0, 0.0, 3.0],
+        [3.0, 2.0, 3.0, 0.0]
+    ])]
+    #[case(vec![0, 1, 2], false, array![
+        [0.0, 3.0, 4.0, 4.0],
+        [3.0, 0.0, 3.0, 3.0],
+        [4.0, 3.0, 0.0, 2.0],
+        [4.0, 3.0, 2.0, 0.0]
+    ])]
+    #[case(vec![0, 1, 2], true, array![
+        [0.0, 2.0, 3.0, 3.0],
+        [2.0, 0.0, 3.0, 3.0],
+        [3.0, 3.0, 0.0, 2.0],
+        [3.0, 3.0, 2.0, 0.0]
+    ])]
+    #[case(vec![0, 1, 0, 4, 4, 2, 6], false, array![
         [0.0, 5.0, 6.0, 2.0, 4.0, 4.0, 7.0, 7.0],
         [5.0, 0.0, 3.0, 5.0, 5.0, 5.0, 4.0, 4.0],
         [6.0, 3.0, 0.0, 6.0, 6.0, 6.0, 3.0, 3.0],
@@ -546,10 +580,10 @@ mod tests {
     ])]
     fn test_cophenetic_distances(
         #[case] v: Vec<usize>,
-        // #[case] unrooted: bool,
+        #[case] unrooted: bool,
         #[case] expected: Array2<f64>,
     ) {
-        assert_eq!(cophenetic_distances(&v), expected);
+        assert_eq!(cophenetic_distances(&v, unrooted), expected);
     }
 
     #[rstest]

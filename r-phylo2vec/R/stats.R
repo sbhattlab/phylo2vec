@@ -6,11 +6,11 @@ library(Matrix)
 #' @param vector_or_matrix Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 #' @return Cophenetic distance matrix
 #' @export
-cophenetic_distances <- function(vector_or_matrix) {
+cophenetic_distances <- function(vector_or_matrix, unrooted = FALSE) {
   if (is.vector(vector_or_matrix)) {
-    .Call(wrap__cophenetic_from_vector, vector_or_matrix)
+    .Call(wrap__cophenetic_from_vector, vector_or_matrix, unrooted)
   } else if (is.matrix(vector_or_matrix)) {
-    .Call(wrap__cophenetic_from_matrix, vector_or_matrix)
+    .Call(wrap__cophenetic_from_matrix, vector_or_matrix, unrooted)
   } else {
     stop("Input must be either a vector or a 2D matrix.")
   }

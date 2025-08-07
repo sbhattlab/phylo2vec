@@ -23,20 +23,10 @@ def cophenetic_distances(vector_or_matrix, unrooted=False):
     numpy.ndarray
         Cophenetic distance matrix
     """
-    if unrooted:
-        warnings.warn(
-            (
-                "Argument `unrooted` is ignored. It is deprecated and "
-                "will be removed in future versions. When ensuring "
-                "compatibility with `ape` and `ete` (mode='keep'), the "
-                "argument becomes unnecessary. "
-            ),
-            FutureWarning,
-        )
     if vector_or_matrix.ndim == 2:
-        coph = core.cophenetic_distances_with_bls(vector_or_matrix)
+        coph = core.cophenetic_distances_with_bls(vector_or_matrix, unrooted=unrooted)
     elif vector_or_matrix.ndim == 1:
-        coph = core.cophenetic_distances(vector_or_matrix)
+        coph = core.cophenetic_distances(vector_or_matrix, unrooted=unrooted)
     else:
         raise ValueError(
             "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"

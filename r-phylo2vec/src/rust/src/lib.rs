@@ -316,10 +316,10 @@ fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String 
 /// Get the topological cophenetic distance matrix of a Phylo2Vec vector
 /// @export
 #[extendr]
-fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
+fn cophenetic_from_vector(vector: Vec<i32>, unrooted: bool) -> RMatrix<i32> {
     let v_usize: Vec<usize> = as_usize(vector);
     let k = v_usize.len();
-    let coph_rs = vgraph::cophenetic_distances(&v_usize);
+    let coph_rs = vgraph::cophenetic_distances(&v_usize, unrooted);
     let mut coph_r = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_rs[[r, c]] as i32);
     let dimnames = (0..=k).map(|x| x as i32).collect::<Vec<i32>>();
     coph_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
@@ -330,8 +330,8 @@ fn cophenetic_from_vector(vector: Vec<i32>) -> RMatrix<i32> {
 /// Get the cophenetic distance matrix of a Phylo2Vec matrix
 /// @export
 #[extendr]
-fn cophenetic_from_matrix(matrix: ArrayView2<f64>) -> RMatrix<f64> {
-    let coph_rs = mgraph::cophenetic_distances(&matrix.view());
+fn cophenetic_from_matrix(matrix: ArrayView2<f64>, unrooted: bool) -> RMatrix<f64> {
+    let coph_rs = mgraph::cophenetic_distances(&matrix.view(), unrooted);
     let n_leaves = coph_rs.shape()[0];
     let mut coph_r = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| coph_rs[[r, c]]);
     let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();

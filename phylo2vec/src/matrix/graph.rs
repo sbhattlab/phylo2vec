@@ -18,11 +18,11 @@ use ndarray::{Array2, ArrayView2};
 ///        [2.0, 0.1, 0.2],
 ///        [2.0, 0.3, 0.6],
 ///    ];
-/// let dist = cophenetic_distances(&m.view());
+/// let dist = cophenetic_distances(&m.view(), false);
 /// ```
-pub fn cophenetic_distances(m: &ArrayView2<f64>) -> Array2<f64> {
+pub fn cophenetic_distances(m: &ArrayView2<f64>, unrooted: bool) -> Array2<f64> {
     let (v, bls) = parse_matrix(m);
-    _cophenetic_distances(&v, Some(&bls))
+    _cophenetic_distances(&v, Some(&bls), unrooted)
 }
 
 /// Get a precursor of the precision matrix
@@ -90,12 +90,33 @@ mod tests {
     // Test cophenetic distances with branch lengths in the `cophenetic_distances_with_bls` function
     // Verifies correct cophenetic distance calculation from a matrix with branch lengths.
     #[rstest]
-    #[case(array![[0.0, 1.0, 10.0]], array![[0.0, 11.0], [11.0, 0.0]])]
+    #[case(array![[0.0, 1.0, 10.0]], false, array![[0.0, 11.0], [11.0, 0.0]])]
+    #[case(array![[0.0, 1.0, 10.0]], true, array![[0.0, 11.0], [11.0, 0.0]])]
+    #[case(array![
+        [0.0, 1.0, 3.0],
+        [0.0, 0.1, 2.0],
+        [1.0, 4.0, 5.0],
+    ], false, array![
+        [0.0, 10.1, 2.1, 12.1],
+        [10.1, 0.0, 12.0, 4.0],
+        [2.1, 12.0, 0.0, 14.0],
+        [12.1, 4.0, 14.0, 0.0]]
+    )]
+    #[case(array![
+        [0.0, 1.0, 3.0],
+        [0.0, 0.1, 2.0],
+        [1.0, 5.0, 4.0],
+    ], true, array![
+        [0.0, 5.1, 2.1, 7.1],
+        [5.1, 0.0, 7.0, 4.0],
+        [2.1, 7.0, 0.0, 9.0],
+        [7.1, 4.0, 9.0, 0.0]]
+    )]
     #[case(array![
         [0.0, 0.4, 0.5],
         [2.0, 0.1, 0.2],
         [2.0, 0.3, 0.6],
-    ], array![
+    ], false, array![
         [0.0, 0.3, 1.4, 1.5],
         [0.3, 0.0, 1.5, 1.6],
         [1.4, 1.5, 0.0, 0.9],
@@ -106,7 +127,7 @@ mod tests {
         [0.0, 0.1, 0.4],
         [2.0, 0.2, 0.6],
         [3.0, 0.8, 0.9],
-    ], array![
+    ], false, array![
         [0.0, 1.9, 0.9, 1.8, 1.4],
         [1.9, 0.0, 2.4, 3.3, 2.9],
         [0.9, 2.4, 0.0, 1.1, 0.7],
@@ -118,7 +139,7 @@ mod tests {
         [2.0, 0.9, 0.7],
         [1.0, 0.1, 0.2],
         [6.0, 0.8, 0.3]
-    ], array![
+    ], false, array![
         [0.0, 2.6, 1.2, 1.8, 2.1],
         [2.6, 0.0, 2.0, 1.2, 2.9],
         [1.2, 2.0, 0.0, 1.2, 1.3],
@@ -134,7 +155,7 @@ mod tests {
             [4.0, 0.1, 0.1],
             [2.0, 0.7, 0.6],
             [6.0, 0.7, 0.3],
-        ],
+        ], false,
         array![
             [0.0, 2.4, 2.8, 1.3, 1.5, 1.7, 3.8, 3.8],
             [2.4, 0.0, 1.8, 2.5, 2.5, 2.7, 2.8, 2.8],
@@ -148,10 +169,11 @@ mod tests {
     )]
     fn test_cophenetic_distances_with_bls(
         #[case] matrix: Array2<f64>,
-        //#[case] unrooted: bool,
+        #[case] unrooted: bool,
         #[case] expected_distances: Array2<f64>,
     ) {
-        let distances = cophenetic_distances(&matrix.view());
+        let distances = cophenetic_distances(&matrix.view(), unrooted);
+        println!("Computed distances:\n{:?}", distances);
 
         assert!(allclose(distances.view(), expected_distances.view()));
     }
