@@ -1,5 +1,6 @@
 """Methods to write Phylo2Vec vectors/matrices."""
 
+from io import StringIO
 from typing import Dict, Optional
 
 import numpy as np
@@ -7,6 +8,20 @@ import numpy as np
 from phylo2vec.base.newick import to_newick
 from phylo2vec.utils.newick import apply_label_mapping
 from ._validation import check_path
+
+
+def write(vector_or_matrix: np.ndarray, delimiter: str = ",") -> str:
+    if vector_or_matrix.ndim == 2:
+        buffer = StringIO()
+        np.savetxt(buffer, vector_or_matrix, delimiter=delimiter)
+        return buffer.getvalue()
+
+    if vector_or_matrix.ndim == 1:
+        return np.array2string(vector_or_matrix, separator=delimiter)[1:-1]
+
+    raise ValueError(
+        "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
+    )
 
 
 def save(vector_or_matrix: np.ndarray, filepath: str, delimiter: str = ",") -> None:

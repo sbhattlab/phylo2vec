@@ -160,6 +160,27 @@ hc = HillClimbing(verbose=True)
 hc_result = hc.fit("/path/to/your_fasta_file.fa")
 ```
 
+#### Command-line interface (CLI)
+
+We also provide a command-line interface for quick experimentation on phylo2vec-derived objects.
+
+To see the available functions, run:
+
+```bash
+phylo2vec --help
+```
+
+Examples:
+
+```bash
+phylo2vec samplev 5 # Sample a vector with 5 leaves
+phylo2vec samplem 5 # Sample a matrix with 5 leaves
+phylo2vec from_newick '((0,1),2);' # Convert a Newick to a vector
+phylo2vec from_newick '((0:0.3,1:0.1):0.5,2:0.4);' # Convert a Newick to a matrix
+phylo2vec to_newick 0,1,2 # Convert a vector to Newick
+phylo2vec to_newick $'0.0,1.0,2.0\n0.0,3.0,4.0' # Convert a matrix to Newick
+```
+
 ## Documentation
 
 For comprehensive documentation, tutorials, and API reference, visit:
