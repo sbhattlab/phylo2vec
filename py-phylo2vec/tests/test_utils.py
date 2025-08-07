@@ -8,6 +8,7 @@ import pytest
 from ete3 import Tree
 
 from phylo2vec.base.newick import to_newick
+from phylo2vec.utils.matrix import check_matrix, sample_matrix
 from phylo2vec.utils.vector import (
     add_leaf,
     check_vector,
@@ -25,8 +26,8 @@ from .config import MAX_N_LEAVES, MIN_N_LEAVES, N_REPEATS
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
-def test_sample(n_leaves):
-    """Test the sample function
+def test_sample_vector(n_leaves):
+    """Test the sample_vector function
 
     Parameters
     ----------
@@ -36,6 +37,37 @@ def test_sample(n_leaves):
     for _ in range(N_REPEATS):
         v = sample_vector(n_leaves)
         check_vector(v)  # Asserts that v is valid
+
+
+class TestSampleVectorEdgeCases:
+    def test_sample_vector_negative(self):
+        """Test the sample_vector function with negative n_leaves"""
+        with pytest.raises(ValueError):
+            sample_vector(-1)
+
+    def test_sample_vector_zero(self):
+        """Test the sample_vector function with zero leaves"""
+        with pytest.raises(ValueError):
+            sample_vector(0)
+
+    def test_sample_vector_two(self):
+        """Test the sample_vector function with two leaves"""
+        v = sample_vector(2)
+        check_vector(v)  # Asserts that v is valid
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_sample_matrix(n_leaves):
+    """Test the sample_vector function
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        check_matrix(m)  # Asserts that m is valid
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))

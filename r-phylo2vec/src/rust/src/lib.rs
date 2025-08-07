@@ -45,18 +45,27 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f64>, &'static str> {
 /// Sample a random tree topology via Phylo2Vec
 /// @export
 #[extendr]
-fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<i32> {
-    let v = vbase::sample_vector(n_leaves, ordered);
-    as_i32(v)
+fn sample_vector(n_leaves: isize, ordered: bool) -> Result<Vec<i32>, Error> {
+    if n_leaves < 2 {
+        Err(Error::OutOfRange("n_leaves must be at least 2".into()))
+    } else {
+        Ok(as_i32(vbase::sample_vector(n_leaves as usize, ordered)))
+    }
 }
 
 /// Sample a random tree with branch lengths via Phylo2Vec
 /// @export
 #[extendr]
-fn sample_matrix(n_leaves: usize, ordered: bool) -> RMatrix<f64> {
-    let matrix = mbase::sample_matrix(n_leaves, ordered);
-    let shape = matrix.shape();
-    RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]])
+fn sample_matrix(n_leaves: isize, ordered: bool) -> Result<RMatrix<f64>, Error> {
+    if n_leaves < 2 {
+        Err(Error::OutOfRange("n_leaves must be at least 2".into()))
+    } else {
+        let matrix = mbase::sample_matrix(n_leaves as usize, ordered);
+        let shape = matrix.shape();
+        Ok(RMatrix::new_matrix(shape[0], shape[1], |r, c| {
+            matrix[[r, c]]
+        }))
+    }
 }
 
 /// Recover a rooted tree (in Newick format) from a Phylo2Vec vector

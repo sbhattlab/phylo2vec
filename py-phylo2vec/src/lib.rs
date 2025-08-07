@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
 use numpy::{IntoPyArray, PyArray2, PyReadonlyArray2};
-use pyo3::exceptions::PyAssertionError;
+use pyo3::exceptions::{PyAssertionError, PyValueError};
 use pyo3::prelude::*;
 
 use phylo2vec::matrix::base as mbase;
@@ -15,13 +15,25 @@ use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
 #[pyfunction]
-fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
-    vbase::sample_vector(n_leaves, ordered)
+fn sample_vector(n_leaves: isize, ordered: bool) -> PyResult<Vec<usize>> {
+    if n_leaves < 2 {
+        Err(PyValueError::new_err("n_leaves must be at least 2"))
+    } else {
+        Ok(vbase::sample_vector(n_leaves as usize, ordered))
+    }
 }
 
 #[pyfunction]
-fn sample_matrix(py: Python<'_>, n_leaves: usize, ordered: bool) -> Bound<'_, PyArray2<f64>> {
-    mbase::sample_matrix(n_leaves, ordered).into_pyarray(py)
+fn sample_matrix(
+    py: Python<'_>,
+    n_leaves: isize,
+    ordered: bool,
+) -> PyResult<Bound<'_, PyArray2<f64>>> {
+    if n_leaves < 2 {
+        Err(PyValueError::new_err("n_leaves must be at least 2"))
+    } else {
+        Ok(mbase::sample_matrix(n_leaves as usize, ordered).into_pyarray(py))
+    }
 }
 
 #[pyfunction]
