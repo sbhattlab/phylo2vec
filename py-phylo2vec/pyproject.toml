@@ -41,6 +41,9 @@ opt = [
     "tqdm"
 ]
 
+[project.scripts]
+phylo2vec = "phylo2vec.cli:main"
+
 [tool.maturin]
 # "extension-module" tells pyo3 we want to build an extension module (skips linking against libpython.so)
 features = ["pyo3/extension-module"]
