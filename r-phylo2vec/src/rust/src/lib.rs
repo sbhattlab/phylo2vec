@@ -313,6 +313,20 @@ fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String 
     newick::apply_label_mapping(newick, &label_mapping_hash).unwrap()
 }
 
+/// Remove parent labels from the Newick string
+/// @export
+#[extendr]
+fn remove_branch_lengths(newick: &str) -> String {
+    newick::remove_branch_lengths(newick)
+}
+
+/// Remove parent labels from the Newick string
+/// @export
+#[extendr]
+fn remove_parent_labels(newick: &str) -> String {
+    newick::remove_parent_labels(newick)
+}
+
 /// Get the topological cophenetic distance matrix of a Phylo2Vec vector
 /// @export
 #[extendr]
@@ -475,6 +489,8 @@ extendr_module! {
     fn pre_precision_from_matrix;
     fn pre_precision_from_vector;
     fn queue_shuffle;
+    fn remove_branch_lengths;
+    fn remove_parent_labels;
     fn remove_leaf;
     fn sample_matrix;
     fn sample_vector;

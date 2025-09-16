@@ -113,6 +113,14 @@ pre_precision_from_vector <- function(vector) .Call(wrap__pre_precision_from_vec
 #' @export
 queue_shuffle <- function(vector, shuffle_cherries) .Call(wrap__queue_shuffle, vector, shuffle_cherries)
 
+#' Remove parent labels from the Newick string
+#' @export
+remove_branch_lengths <- function(newick) .Call(wrap__remove_branch_lengths, newick)
+
+#' Remove parent labels from the Newick string
+#' @export
+remove_parent_labels <- function(newick) .Call(wrap__remove_parent_labels, newick)
+
 #' Remove a leaf from a Phylo2Vec vector
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
