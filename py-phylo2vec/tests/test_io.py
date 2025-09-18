@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from ete3 import Tree
+from ete4 import Tree
 
 from phylo2vec.base.newick import from_newick
 from phylo2vec.io.reader import load, load_newick
@@ -111,7 +111,7 @@ def test_save_newick_with_labels(tmp_path, n_leaves):
 
     tr = Tree()
     tr.populate(n_leaves)
-    nw_str = tr.write(format=9)
+    nw_str = tr.write(parser=9)
 
     # Create an str-to-str mapping and create an integer Newick
     # key: node, value: label
