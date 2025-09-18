@@ -5,7 +5,7 @@ import secrets
 import numpy as np
 import pytest
 
-from ete3 import Tree
+from ete4 import Tree
 
 from phylo2vec.base.newick import to_newick
 from phylo2vec.utils.matrix import check_matrix, sample_matrix
@@ -99,7 +99,7 @@ def test_create_and_apply_label_mapping(n_leaves):
         # Random string Newick
         t = Tree()
         t.populate(n_leaves)
-        nw_str = t.write(format=9)
+        nw_str = t.write(parser=9)
 
         # Create an int-to-str label mapping and create an integer Newick
         nw_int, label_mapping = create_label_mapping(nw_str)
@@ -141,7 +141,7 @@ def test_remove_and_add(n_leaves):
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
 def test_get_common_ancestor(n_leaves):
-    """Test get_common_ancestor against ete3
+    """Test get_common_ancestor against ete
 
     Parameters
     ----------
@@ -157,11 +157,11 @@ def test_get_common_ancestor(n_leaves):
 
         nw = to_newick(v)
 
-        tr = Tree(nw, format=8)
+        tr = Tree(nw, parser=8)
 
-        ete3_common_ancestor = int(tr.get_common_ancestor(f"{node1}", f"{node2}").name)
+        ete_common_ancestor = int(tr.common_ancestor(f"{node1}", f"{node2}").name)
 
-        assert p2v_common_ancestor == ete3_common_ancestor
+        assert p2v_common_ancestor == ete_common_ancestor
 
 
 if __name__ == "__main__":

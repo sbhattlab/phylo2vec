@@ -1,9 +1,10 @@
 """Test conversion from v to newick and back to v"""
 
+import ete4
 import numpy as np
 import pytest
 
-from ete3 import Tree
+from ete4 import Tree
 
 from phylo2vec.base.ancestry import from_ancestry, to_ancestry
 from phylo2vec.base.edges import from_edges, to_edges
@@ -110,7 +111,7 @@ def test_newick_ladderize_vector(n_leaves):
     Simple way to check that isomorphic Newick strings
     without branch lengths have the same v
 
-    ete3's ladderize should create an isomorphism
+    ete's ladderize should create an isomorphism
     of the original Newick string
 
     Parameters
@@ -125,7 +126,7 @@ def test_newick_ladderize_vector(n_leaves):
 
         # Ladderize the tree and output a new Newick string
         tr.ladderize()
-        nw_ladderized = tr.write(format=9)
+        nw_ladderized = tr.write(parser=9)
 
         v2 = from_newick(nw_ladderized)
 
@@ -138,7 +139,7 @@ def test_newick_ladderize_matrix(n_leaves):
     Simple way to check that isomorphic Newick strings
     with branch lengths have the same matrix
 
-    ete3's ladderize should create an isomorphism
+    ete's ladderize should create an isomorphism
     of the original Newick string
 
     Parameters
@@ -153,7 +154,8 @@ def test_newick_ladderize_matrix(n_leaves):
 
         # Ladderize the tree and output a new Newick string
         tr.ladderize()
-        nw_ladderized = tr.write(format=1, dist_formatter="%0.8g")
+        parser = ete4.parser.newick.make_parser(1, dist="%0.8g")
+        nw_ladderized = tr.write(parser=parser)
 
         m2 = from_newick(nw_ladderized)
 

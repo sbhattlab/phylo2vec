@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from ete3 import Tree
+from ete4 import Tree
 from scipy import sparse
 
 from phylo2vec.base.newick import to_newick
@@ -23,15 +23,15 @@ from .config import MIN_N_LEAVES, N_REPEATS
 MAX_N_LEAVES_STATS = 50
 
 
-def _test_cophenetic(n_leaves, sample_fn, unrooted=False):
+def _test_cophenetic(n_leaves, sample_fn, topological, unrooted=False):
     """Helper function to test cophenetic distances using a sample function."""
 
-    def coph_ete3(tr, n_leaves):
+    def coph_ete(tr, n_leaves):
         dmat = np.zeros((n_leaves, n_leaves))
 
         for i in range(n_leaves):
             for j in range(i):
-                dist = tr.get_distance(f"{i}", f"{j}", topology_only=False)
+                dist = tr.get_distance(f"{i}", f"{j}", topological=topological)
                 dmat[i, j] = dist
                 dmat[j, i] = dist
 
@@ -44,11 +44,11 @@ def _test_cophenetic(n_leaves, sample_fn, unrooted=False):
         dmat_p2v = cophenetic_distances(vector_or_matrix, unrooted=unrooted)
 
         # tree with all branch lengths = 1
-        tr = Tree(to_newick(vector_or_matrix), format=1)
+        tr = Tree(to_newick(vector_or_matrix), parser=1)
 
         if unrooted:
             # Unroot by deleting the max node
-            # ete3 systematically unroot by removing the first non-leaf node
+            # ete systematically unroots by removing the first non-leaf node
             # Our approach is to remove the node with the highest index
             # (see rust implementation)
             names = [int(tr.children[0].name), int(tr.children[1].name)]
@@ -57,16 +57,16 @@ def _test_cophenetic(n_leaves, sample_fn, unrooted=False):
             else:
                 tr.children[1].delete()
 
-        # ete3 distance matrix
-        dmat_ete3 = coph_ete3(tr, n_leaves)
+        # ete distance matrix
+        dmat_ete = coph_ete(tr, n_leaves)
 
-        assert np.allclose(dmat_p2v, dmat_ete3)
+        assert np.allclose(dmat_p2v, dmat_ete)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_vector(n_leaves):
     """
-    Test that the cophenetic distance matrix matches the ete3 implementation
+    Test that the cophenetic distance matrix matches the ete implementation
     for rooted trees without branch lengths.
 
     Parameters
@@ -75,13 +75,13 @@ def test_cophenetic_vector(n_leaves):
         Number of leaves
     """
 
-    _test_cophenetic(n_leaves, sample_vector)
+    _test_cophenetic(n_leaves, sample_vector, topological=True)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_vector_unrooted(n_leaves):
     """
-    Test that the cophenetic distance matrix matches the ete3 implementation
+    Test that the cophenetic distance matrix matches the ete implementation
     for unrooted trees without branch lengths.
 
     Parameters
@@ -90,13 +90,13 @@ def test_cophenetic_vector_unrooted(n_leaves):
         Number of leaves
     """
 
-    _test_cophenetic(n_leaves, sample_vector, unrooted=True)
+    _test_cophenetic(n_leaves, sample_vector, topological=True, unrooted=True)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_matrix(n_leaves):
     """
-    Test that the cophenetic distance matrix matches the ete3 implementation
+    Test that the cophenetic distance matrix matches the ete implementation
     for rooted trees with branch lengths.
 
     Parameters
@@ -105,13 +105,13 @@ def test_cophenetic_matrix(n_leaves):
         Number of leaves
     """
 
-    _test_cophenetic(n_leaves, sample_matrix)
+    _test_cophenetic(n_leaves, sample_matrix, topological=False)
 
 
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
 def test_cophenetic_matrix_unrooted(n_leaves):
     """
-    Test that the cophenetic distance matrix matches the ete3 implementation
+    Test that the cophenetic distance matrix matches the ete implementation
     for unrooted trees with branch lengths.
 
     Parameters
@@ -120,7 +120,7 @@ def test_cophenetic_matrix_unrooted(n_leaves):
         Number of leaves
     """
 
-    _test_cophenetic(n_leaves, sample_matrix, unrooted=True)
+    _test_cophenetic(n_leaves, sample_matrix, topological=False, unrooted=True)
 
 
 @pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1])
