@@ -8,6 +8,7 @@ from typing import List, Tuple
 import numpy as np
 
 from ete4 import Tree
+from ete4 import Tree
 
 from phylo2vec import _phylo2vec_core as core
 from phylo2vec.base.newick import from_newick, to_newick
@@ -275,6 +276,7 @@ def reroot(v, node) -> np.ndarray:
     """
     ete_tree = Tree(to_newick(v), parser=8)
 
+    ete_tree.set_outgroup(f"{node}")
     ete_tree.set_outgroup(f"{node}")
 
     newick = ete_tree.write(parser=9)
