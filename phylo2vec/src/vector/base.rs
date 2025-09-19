@@ -1,13 +1,13 @@
-/// Base functions for Phylo2Vec vectors: sampling, validation, and checking properties.
+/// Base functions for `phylo2vec` vectors: sampling, validation, and checking properties.
 use rand::Rng;
 
 /// Sample a vector with `n_leaves` elements.
 ///
 /// If ordering is True, sample an ordered tree, by default ordering is False.
 ///
-/// ordering=True: v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
+/// ordering=True: `v_i` in {0, 1, ..., i} for i in (0, n_leaves-1)
 ///
-/// ordering=False: v_i in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
+/// ordering=False: `v_i` in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
 ///
 /// # Examples
 ///
@@ -18,24 +18,24 @@ use rand::Rng;
 /// ```
 pub fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
     let mut v: Vec<usize> = Vec::with_capacity(n_leaves);
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     if ordered {
         for i in 0..(n_leaves - 1) {
-            v.push(rng.gen_range(0..=i));
+            v.push(rng.random_range(0..=i));
         }
     } else {
         for i in 0..(n_leaves - 1) {
-            v.push(rng.gen_range(0..=2 * i));
+            v.push(rng.random_range(0..=2 * i));
         }
     }
 
     v
 }
 
-/// Input validation of a Phylo2Vec vector
+/// Input validation of a `phylo2vec` vector
 ///
-/// The input is checked to satisfy the Phylo2Vec constraints
+/// The input is checked to satisfy the `phylo2vec` constraints
 ///
 /// # Panics
 ///
@@ -49,27 +49,24 @@ pub fn sample_vector(n_leaves: usize, ordered: bool) -> Vec<usize> {
 /// ```
 pub fn check_v(v: &[usize]) {
     for (i, vi) in v.iter().enumerate() {
-        _check_max(i, *vi);
+        check_max(i, *vi);
     }
 }
 
-/// Validate the maximum value of a Phylo2Vec vector element
+/// Validate the maximum value of a `phylo2vec` vector element
 ///
 /// # Panics
-///
 /// Panics if the value is out of bounds (max = 2 * idx)
-fn _check_max(idx: usize, value: usize) {
+fn check_max(idx: usize, value: usize) {
     let absolute_max = 2 * idx;
     assert!(
         value <= absolute_max,
-        "Validation failed: v[{}] = {} is out of bounds (max = {})",
-        idx,
-        value,
-        absolute_max
+        "{}",
+        format!("Validation failed: v[{idx}] = {value} is out of bounds (max = {absolute_max})"),
     );
 }
 
-/// Check if a Phylo2Vec vector is unordered
+/// Check if a `phylo2vec` vector is unordered
 ///
 /// # Panics
 ///
@@ -94,7 +91,7 @@ fn _check_max(idx: usize, value: usize) {
 /// ```
 pub fn is_unordered(v: &[usize]) -> bool {
     for (i, vi) in v.iter().enumerate() {
-        _check_max(i, *vi);
+        check_max(i, *vi);
         if v[i] > i + 1 {
             return true;
         }
