@@ -163,15 +163,14 @@ a Creative Commons Attribution 4.0 International License (CC BY
 <body>
 <sec id="summary">
   <title>Summary</title>
-  <p>Phylogenetics is a fundamental component of many analysis
+  <p>Phylogenetics is a fundamental component of evolutionary analysis
   frameworks in biology
   (<xref alt="Yang, 2014" rid="ref-yang2014" ref-type="bibr">Yang,
-  2014</xref>) as well as linguistics
+  2014</xref>) and linguistics
   (<xref alt="Atkinson &amp; Gray, 2005" rid="ref-atkinson2005" ref-type="bibr">Atkinson
-  &amp; Gray, 2005</xref>) to study the evolutionary relationships of
-  different entities. Recently, the advent of large-scale genomics and
-  the SARS-CoV-2 pandemic has underscored the necessity for phylogenetic
-  software to handle large datasets of genomes or phylogenetic trees
+  &amp; Gray, 2005</xref>). Recently, the advent of large-scale genomics
+  and the SARS-CoV-2 pandemic has highlighted the necessity for
+  phylogenetic software to handle large datasets
   (<xref alt="Attwood et al., 2022" rid="ref-attwood2022" ref-type="bibr">Attwood
   et al., 2022</xref>;
   <xref alt="Kapli et al., 2020" rid="ref-kapli2020" ref-type="bibr">Kapli
@@ -199,53 +198,39 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>;
   <xref alt="Richman et al., 2025" rid="ref-richman2025" ref-type="bibr">Richman
-  et al., 2025</xref>). Compared to traditional tree representations
-  such as the Newick format
+  et al., 2025</xref>). Compared to the traditional Newick format which
+  represents trees using strings of nested parentheses
   (<xref alt="Felsenstein, 2004" rid="ref-felsenstein2004" ref-type="bibr">Felsenstein,
-  2004</xref>), which represents trees using strings of nested
-  parentheses, modern representations of phylogenetic trees utilize
-  integer vectors to define the tree topology traversal. This approach
-  offers several advantages, including easier manipulability, increased
-  memory efficiency, and applicability to downstream tasks such as
-  machine learning.</p>
+  2004</xref>), modern tree representations utilize integer vectors to
+  define the tree topology traversal. This approach offers several
+  advantages, including easier manipulation, increased memory
+  efficiency, and applicability to machine learning.</p>
   <p>Here, we present the latest release of
   <monospace>phylo2vec</monospace> (or Phylo2Vec), a high-performance
   software package for encoding, manipulating, and analysing binary
   phylogenetic trees. At its core, the package is based on the phylo2vec
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>) representation of binary trees, which defines a
-  bijection from any tree topology with <inline-formula><alternatives>
-  <tex-math><![CDATA[n]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>n</mml:mi></mml:math></alternatives></inline-formula>
-  leaves into an integer vector of size <inline-formula><alternatives>
-  <tex-math><![CDATA[n-1]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>.
-  Compared to the traditional Newick format, phylo2vec is designed to
-  enable fast sampling and comparison of binary trees. This release
-  features a core implementation in Rust, providing significant
-  performance improvements and memory efficiency
+  et al., 2024</xref>) representation of binary trees, and is designed
+  to enable fast sampling and tree comparison. This release features a
+  core implementation in Rust for improved performance and memory
+  efficiency
   (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
-  while remaining available in Python (superseding the release described
-  in the original paper
+  with wrappers in R and Python (superseding the original release
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>)) and R via dedicated wrappers, making it
-  accessible to a broad audience in the bioinformatics community.</p>
+  et al., 2024</xref>)), making it accessible to a broad audience in the
+  bioinformatics community.</p>
   <fig>
     <caption><p>Benchmark times for converting a phylo2vec vector to a
-    Newick string (left) and vice versa (right). For each size, we
-    evaluated the execution time for a minimum of 20 rounds using
-    <monospace>pytest-benchmark</monospace>. We compare the execution
-    time of the Python functions in the latest release, which rely on
-    Rust bindings via
-    <ext-link ext-link-type="uri" xlink:href="https://github.com/PyO3/pyo3">PyO3</ext-link>,
-    with the previous release
+    Newick string (left) and vice versa (right). Execution time was
+    measured over at least 20 runs per size, comparing Python functions
+    in the latest release (via Rust bindings with
+    <ext-link ext-link-type="uri" xlink:href="https://github.com/PyO3/pyo3">PyO3</ext-link>)
+    against the previous release
     (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-    et al., 2024</xref>), which make use of just-in-time (JIT)
-    compilation of Python functions using <monospace>Numba</monospace>
+    et al., 2024</xref>) based on <monospace>Numba</monospace>
     (<xref alt="Lam et al., 2015" rid="ref-lam2015" ref-type="bibr">Lam
-    et al., 2015</xref>). Execution times were benchmarked on an AMD
-    Ryzen Threadripper PRO 5995WX with a 64-core CPU @ 7 GHz and 256 GB
-    of RAM.
+    et al., 2015</xref>). Benchmarks ran on an on an AMD Ryzen
+    Threadripper PRO 5995WX (64 cores, 7 GHz, 256 GB RAM).
     <styled-content id="figU003Abenchmarks"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="fig1.pdf" />
   </fig>
@@ -253,19 +238,16 @@ a Creative Commons Attribution 4.0 International License (CC BY
 <sec id="statement-of-need">
   <title>Statement of need</title>
   <p>The purpose of the <monospace>phylo2vec</monospace> library is
-  threefold. First, the core of the library aims at providing a robust
-  phylogenetic tree manipulation library in Rust, complementing other
-  efforts such as <monospace>light_phylogeny</monospace>
+  threefold. First, it provides robust phylogenetic tree manipulation in
+  Rust, complementing other efforts such as
+  <monospace>light_phylogeny</monospace>
   (<xref alt="Duchemin et al., 2018" rid="ref-duchemin2018" ref-type="bibr">Duchemin
-  et al., 2018</xref>), which focuses on tree visualization and
-  manipulation of reconciled phylogenies
+  et al., 2018</xref>) for reconciled phylogenies
   (<xref alt="Nakhleh, 2013" rid="ref-nakhleh2013" ref-type="bibr">Nakhleh,
   2013</xref>), and <monospace>rust-bio</monospace>
   (<xref alt="Köster, 2016" rid="ref-koster2016" ref-type="bibr">Köster,
-  2016</xref>), a comprehensive bioinformatics library which does not
-  yet cover phylogenetics. Second, <monospace>phylo2vec</monospace> aims
-  at complementing existing phylogenetic libraries such as
-  <monospace>ape</monospace>
+  2016</xref>), which does not yet cover phylogenetics. Second, it
+  complements existing libraries such as <monospace>ape</monospace>
   (<xref alt="Paradis &amp; Schliep, 2019" rid="ref-paradis2019" ref-type="bibr">Paradis
   &amp; Schliep, 2019</xref>) in R, and <monospace>ete3</monospace>
   (<xref alt="Huerta-Cepas et al., 2016" rid="ref-huerta2016" ref-type="bibr">Huerta-Cepas
@@ -274,91 +256,84 @@ a Creative Commons Attribution 4.0 International License (CC BY
   et al., 2024</xref>) in Python, by providing fast tree sampling, fast
   tree comparison and efficient tree data compression
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>). Third, the inherent tree representation of
-  phylo2vec offers a pathway to several optimisation frameworks for
-  phylogenetic inference. A notable example is GradME
+  et al., 2024</xref>). Third, the phylo2vec representation offers a
+  pathway to using new optimisation frameworks for phylogenetic
+  inference. A notable example is GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
   et al., 2023</xref>), a gradient descent-based algorithm which uses a
-  relaxed representation of phylo2vec into a continuous space.</p>
+  continuous relaxation of the phylo2vec representation.</p>
 </sec>
 <sec id="features">
   <title>Features</title>
   <p>The presented release of <monospace>phylo2vec</monospace> addresses
-  several limitations of
+  optimisations limitations of
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>). From an optimisation perspective, it introduces
-  efficient <inline-formula><alternatives>
+  et al., 2024</xref>) with <inline-formula><alternatives>
   <tex-math><![CDATA[\mathcal{O}(n \log n)]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
-  implementations for both vector-to-Newick and Newick-to-vector
-  conversions, leveraging Adelson-Velsky and Landis (AVL) trees
+  implementations for vector-to-Newick and Newick-to-vector conversions,
+  leveraging Adelson-Velsky and Landis (AVL) trees
   (<xref alt="Adelson-Velsky &amp; Landis, In Russian. English translation in Soviet Mathematics Doklady, 3:1259--1263, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
   &amp; Landis, In Russian. English translation in Soviet Mathematics
   Doklady, 3:1259--1263, 1962</xref>) and Fenwick trees
   (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
   1994</xref>), respectively.</p>
-  <p>In terms of new features, it supports branch length annotations by
+  <p>New features include supporting branch length annotations by
   extending the vector representation of size
   <inline-formula><alternatives>
   <tex-math><![CDATA[n-1]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>
-  to a matrix of size <inline-formula><alternatives>
+  leaves to a matrix of size <inline-formula><alternatives>
   <tex-math><![CDATA[(n-1) \times 3]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>×</mml:mo><mml:mn>3</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>,
-  where <inline-formula><alternatives>
-  <tex-math><![CDATA[n]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>n</mml:mi></mml:math></alternatives></inline-formula>
-  denotes the number of leaves (or taxa) in a tree
-  (<xref alt="[fig:phylo2mat]" rid="figU003Aphylo2mat">[fig:phylo2mat]</xref>).
-  Further enhancements include several leaf-level operations (pruning,
-  placement, MRCA identification), fast cophenetic distance matrix
-  calculation, and various optimisation schemes based on phylo2vec tree
-  representations, notably hill-climbing and GradME
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>×</mml:mo><mml:mn>3</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>
+  (<xref alt="[fig:phylo2mat]" rid="figU003Aphylo2mat">[fig:phylo2mat]</xref>),
+  leaf-level operations (pruning, placement, MRCA identification), fast
+  cophenetic distance matrix calculation, and various optimisation
+  schemes based on phylo2vec tree representations, notably hill-climbing
+  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2024</xref>) and GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
-  et al., 2023</xref>). Bayesian phylogenetic inference via Markov Chain
-  Monte Carlo (MCMC) with phylo2vec matrices is also made possible by a
+  et al., 2023</xref>). Bayesian MCMC inference is enabled through a
   likelihood function that leverages tree representation similarities
-  between phylo2vec and <monospace>BEAGLE</monospace>, a highly
-  optimised library that underpins a number of phylogenetic software
+  with <monospace>BEAGLE</monospace>
   (<xref alt="Ayres et al., 2012" rid="ref-ayres2012" ref-type="bibr">Ayres
   et al., 2012</xref>;
   <xref alt="Suchard &amp; Rambaut, 2009" rid="ref-suchard2009" ref-type="bibr">Suchard
-  &amp; Rambaut, 2009</xref>). Finally, user-friendliness is enhanced by
-  step-by-step demos of the inner workings of phylo2vec’s
-  representations and their conversion to commonly used phylogenetic
-  tree formats (e.g., Newick string, list of edges).</p>
+  &amp; Rambaut, 2009</xref>). Finally, user-friendliness is enhanced
+  with step-by-step demos of the inner workings of phylo2vec’s
+  representations and their conversion to common phylogenetic tree
+  formats.</p>
   <fig>
     <caption><p>Recovering a tree from a phylo2vec vector: example for
     <inline-formula><alternatives>
     <tex-math><![CDATA[\boldsymbol{v} = [0, 2, 0, 4]]]></tex-math>
     <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝐯</mml:mi><mml:mo>=</mml:mo><mml:mrow><mml:mo stretchy="true" form="prefix">[</mml:mo><mml:mn>0</mml:mn><mml:mo>,</mml:mo><mml:mn>2</mml:mn><mml:mo>,</mml:mo><mml:mn>0</mml:mn><mml:mo>,</mml:mo><mml:mn>4</mml:mn><mml:mo stretchy="true" form="postfix">]</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>.
-    (a) Main algorithm for leaf placement described in
+    (a) Leaf placement algorithm from
     (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-    et al., 2024</xref>). (b) Augmenting the phylo2vec vector into a
-    matrix <inline-formula><alternatives>
+    et al., 2024</xref>). (b) Augmenting <inline-formula><alternatives>
+    <tex-math><![CDATA[\boldsymbol{v}]]></tex-math>
+    <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>𝐯</mml:mi></mml:math></alternatives></inline-formula>
+    into a matrix <inline-formula><alternatives>
     <tex-math><![CDATA[\boldsymbol{m}]]></tex-math>
     <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>𝐦</mml:mi></mml:math></alternatives></inline-formula>
     with branch lengths. We use an intermediary ancestry matrix whereby
-    each row describes a cherry (two children nodes and the parent
-    node), which we augment with two columns of branch lengths. The node
-    with the smallest descendant will have the branch length in the 2nd
-    column, and the other the branch length in the 3rd
+    each row encodes a cherry (two children + parent) with two extra
+    columns for branch lengths. The node with the smallest descendant
+    has the branch length in the second column, and the other the branch
+    length in the third
     column.<styled-content id="figU003Aphylo2mat"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="fig2.pdf" />
   </fig>
 </sec>
 <sec id="maintenance">
   <title>Maintenance</title>
-  <p>With Phylo2Vec, we aim to support long-term maintenance through
-  implementing recommended software practices explicitly into the
-  structure of the project and development workflow. More specifically,
-  we have structured the project such that the Rust API contains the
-  core algorithms, and all other language components are APIs that bind
-  to the Rust functions. This avoids tight coupling, as it allows for
-  the possibility of adding new languages to bind to the Rust API’s,
-  without needing to change anything in the Rust project itself.
-  Additionally, we have established a robust continuous integration (CI)
-  pipeline using GitHub Actions, which features:</p>
+  <p>A strong focus of this release is to support long-term maintenance
+  through implementing recommended software practices into its project
+  structure and development workflow. The project is structured with a
+  Rust API containing core algorithms with language bindings to avoid
+  tight coupling and enable easy language additions. Additionally, we
+  have established a robust continuous integration (CI) pipeline using
+  GitHub Actions, which features:</p>
   <list list-type="bullet">
     <list-item>
       <p>Unit test frameworks for Rust
@@ -390,13 +365,12 @@ a Creative Commons Attribution 4.0 International License (CC BY
   Research Council (MRC). This UK funded award is carried out in the
   frame of the Global Health EDCTP3 Joint Undertaking. S.B. acknowledges
   support from the Danish National Research Foundation via a chair grant
-  (DNRF160) which also supports N.S. and M.P.K. S.B. acknowledges
-  support from The Eric and Wendy Schmidt Fund For Strategic Innovation
-  via the Schmidt Polymath Award (G-22-63345) which also supports M.J.P.
-  and F.M.A. S.B. acknowledges support from the Novo Nordisk Foundation
-  via The Novo Nordisk Young Investigator Award (NNF20OC0059309). D.A.D.
-  is supported by a Data Science - Emerging researcher award from Novo
-  Nordisk Fonden (NNF23OC0084647).</p>
+  (DNRF160, also supporting N.S. and M.P.K.), The Eric and Wendy Schmidt
+  Fund For Strategic Innovation via the Schmidt Polymath Award
+  (G-22-63345, also supporting M.J.P. and F.M.A.), and the Novo Nordisk
+  Foundation via The Novo Nordisk Young Investigator Award
+  (NNF20OC0059309). D.A.D. is supported by a Data Science - Emerging
+  researcher award from Novo Nordisk Fonden (NNF23OC0084647).</p>
 </sec>
 </body>
 <back>
