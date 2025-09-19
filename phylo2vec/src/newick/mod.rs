@@ -46,7 +46,7 @@ fn node_substr(s: &str, start: usize) -> (&str, usize) {
 ///
 /// * `newick` - A string representing a phylogenetic tree in Newick format.
 ///   Leaves are noted as integers (0, 1, 2, ...) according to
-///   the Phylo2Vec convention.
+///   the `phylo2vec` convention.
 ///
 /// # Returns
 ///
@@ -64,7 +64,10 @@ fn node_substr(s: &str, start: usize) -> (&str, usize) {
 ///
 /// assert_eq!(cherries, vec![[0, 2, 5], [1, 3, 4], [5, 4, 6]]);
 /// ```
-///
+/// # Errors
+/// Returns a `NewickError` if the Newick string is ill-formed:
+/// * Ill-formed parentheses
+/// * Node could not be parsed as int
 pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
     if newick.is_empty() {
         return Ok(Vec::new());
@@ -89,7 +92,7 @@ pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
             if p.is_empty() {
                 // Case 1: No parent node
                 let mut c_ordered = [c1, c2];
-                c_ordered.sort();
+                c_ordered.sort_unstable();
 
                 // Add the triplet (c1, c2, max(c1, c2))
                 ancestry.push([c1, c2, c_ordered[1]]);
@@ -127,7 +130,7 @@ pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
 ///
 /// * `newick` - A string representing a phylogenetic tree in Newick format.
 ///   Leaves are noted as integers (0, 1, 2, ...) according to
-///   the Phylo2Vec convention.
+///   the `phylo2vec` convention.
 ///
 /// # Returns
 ///
@@ -147,7 +150,14 @@ pub fn parse(newick: &str) -> Result<Ancestry, NewickError> {
 /// assert_eq!(cherries, vec![[0, 2, 2], [1, 3, 3], [0, 1, 1]]);
 /// assert_eq!(bls, vec![[0.1, 0.2], [0.5, 0.7], [0.3, 0.4]]);
 /// ```
+/// # Panics
+/// Panics if branch length parsing failed (most likely missing)
 ///
+/// # Errors
+/// Returns a `NewickError` if the Newick string is ill-formed:
+/// * Ill-formed parentheses
+/// * Node could not be parsed as int
+/// * Branch length could not be parsed as float
 pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickError> {
     if newick.is_empty() {
         return Ok((Vec::new(), Vec::new())); // Return empty ancestry and branch length vectors
@@ -181,7 +191,7 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickE
                 Some(("", blp)) => {
                     // Case 1: No parent node
                     let mut c_ordered = [c1, c2];
-                    c_ordered.sort();
+                    c_ordered.sort_unstable();
 
                     // Add the triplet (c1, c2, max(c1, c2))
                     ancestry.push([c1, c2, c_ordered[1]]);
@@ -208,7 +218,7 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickE
                         if annotation.is_empty() {
                             // Case 3.1: No parent node --> store the max leaf
                             let mut c_ordered = [c1, c2];
-                            c_ordered.sort();
+                            c_ordered.sort_unstable();
 
                             ancestry.push([c1, c2, c_ordered[1]]);
                         } else {
@@ -221,10 +231,9 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickE
                         }
                         // We reached the root, so we can break
                         break;
-                    } else {
-                        // Case 4: Unknown (missing annotation?)
-                        panic!("Missing annotation in the Newick string");
                     }
+                    // Case 4: Unknown (missing annotation?)
+                    panic!("Missing annotation in the Newick string");
                 }
             }
         } else if c.is_ascii_digit() {
@@ -319,6 +328,34 @@ pub fn has_branch_lengths(newick: &str) -> bool {
     newick_patterns.branch_lengths.is_match(newick)
 }
 
+/// Check if the Newick string has integer labels
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::newick::has_integer_labels;
+/// let nw_str = "(((E:0.1,(A:0.1,C:0.1):0.1):0.1,F:0.1):0.1,(D:0.1,B:0.1):0.1);";
+/// let result_str = has_integer_labels(nw_str);
+/// assert!(!result_str);
+///
+/// let nw_mixed = "(((0:0.1,(A:0.1,C:0.1)6:0.1)8:0.1,2:0.1)9:0.1,(1:0.1,4:0.1)7:0.1)10;";
+/// let result_mixed = has_integer_labels(nw_mixed);
+/// assert!(!result_mixed);
+///
+/// let nw_int = "(((0:0.1,(3:0.1,5:0.1)6:0.1)8:0.1,2:0.1)9:0.1,(1:0.1,4:0.1)7:0.1)10;";
+/// let result_int = has_integer_labels(nw_int);
+/// assert!(result_int);
+/// ```
+pub fn has_integer_labels(newick: &str) -> bool {
+    let newick_patterns = NewickPatterns::new();
+    let n_left = newick_patterns.left_node.find_iter(newick).count();
+    let n_right = newick_patterns.right_node.find_iter(newick).count();
+    let n_left_generic = newick_patterns.left_node_generic.find_iter(newick).count();
+    let n_right_generic = newick_patterns.right_node_generic.find_iter(newick).count();
+
+    n_left == n_left_generic && n_right == n_right_generic
+}
+
 /// Find the number of leaves in the Newick string
 ///
 /// # Examples
@@ -330,21 +367,23 @@ pub fn has_branch_lengths(newick: &str) -> bool {
 /// let result = find_num_leaves(newick);
 /// assert_eq!(result, 6);
 /// ```
+/// # Panics
+/// Panics if the Newick string is ill-formed.
 pub fn find_num_leaves(newick: &str) -> usize {
     let newick_patterns = NewickPatterns::new();
-    let result: Vec<usize> = newick_patterns
+    let result = newick_patterns
         .pairs
         .captures_iter(newick)
         .map(|caps| {
             let (_, [_, node]) = caps.extract();
             node.parse::<usize>().unwrap()
         })
-        .collect();
+        .count();
 
-    result.len()
+    result
 }
 
-/// Create an integer-taxon label mapping (label_mapping)
+/// Create an integer-taxon label mapping (`label_mapping`)
 /// from a string-based newick (where leaves are strings)
 /// and produce a mapped integer-based newick (where leaves are integers).
 ///
@@ -437,7 +476,7 @@ pub fn create_label_mapping(newick: &str) -> (String, HashMap<usize, String>) {
     (newick_int, label_mapping)
 }
 
-/// Apply an integer-taxon label mapping (label_mapping)
+/// Apply an integer-taxon label mapping (`label_mapping`)
 /// to an integer-based newick (where leaves are integers)
 /// and produce a mapped Newick (where leaves are strings (taxa))
 ///
@@ -471,9 +510,11 @@ pub fn create_label_mapping(newick: &str) -> (String, HashMap<usize, String>) {
 ///     :1):1);"
 /// );
 /// ```
-pub fn apply_label_mapping(
+/// # Errors
+/// Throws a `NewickError` if Newick parsing failed.
+pub fn apply_label_mapping<S: ::std::hash::BuildHasher>(
     newick: &str,
-    label_mapping: &HashMap<usize, String>,
+    label_mapping: &HashMap<usize, String, S>,
 ) -> Result<String, NewickError> {
     if newick.is_empty() {
         return Ok(String::default());
@@ -492,24 +533,21 @@ pub fn apply_label_mapping(
             let (leaf, end) = node_substr(newick, i);
             i = end - 1;
 
-            match leaf.split_once(':') {
-                Some((n, bl)) => {
-                    // Add the node to the label mapping
-                    let leaf_int = n.parse::<usize>().map_err(NewickError::ParseIntError)?;
+            if let Some((n, bl)) = leaf.split_once(':') {
+                // Add the node to the label mapping
+                let leaf_int = n.parse::<usize>().map_err(NewickError::ParseIntError)?;
 
-                    // Push the mapped leaf to the string Newick
-                    newick_str.push_str(&label_mapping[&leaf_int]);
+                // Push the mapped leaf to the string Newick
+                newick_str.push_str(&label_mapping[&leaf_int]);
 
-                    // Push the branch length to the string Newick
-                    newick_str.push(':');
-                    newick_str.push_str(bl);
-                }
-                None => {
-                    let leaf_int = leaf.parse::<usize>().map_err(NewickError::ParseIntError)?;
+                // Push the branch length to the string Newick
+                newick_str.push(':');
+                newick_str.push_str(bl);
+            } else {
+                let leaf_int = leaf.parse::<usize>().map_err(NewickError::ParseIntError)?;
 
-                    // No branch length => add the mapped node as it is to the string Newick
-                    newick_str.push_str(&label_mapping[&leaf_int]);
-                }
+                // No branch length => add the mapped node as it is to the string Newick
+                newick_str.push_str(&label_mapping[&leaf_int]);
             }
         } else {
             newick_str.push(c);
@@ -542,7 +580,7 @@ mod tests {
     use crate::matrix::convert::to_newick as to_newick_from_matrix;
     use crate::vector::base::sample_vector;
     use crate::vector::convert::to_newick as to_newick_from_vector;
-    use rand::{distributions::Alphanumeric, Rng};
+    use rand::{distr::Alphanumeric, Rng};
     use rstest::*;
 
     #[rstest]
@@ -654,13 +692,14 @@ mod tests {
     fn generate_random_string_newick(n_leaves: usize) -> String {
         // Create random taxon labels
         // Alphanumeric: a-z, A-Z and 0-9.
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut mapping = HashMap::<usize, String>::new();
+        let strlen = 10;
 
         for i in 0..n_leaves {
             let taxon: String = (&mut rng)
                 .sample_iter(&Alphanumeric)
-                .take(10)
+                .take(strlen)
                 .map(char::from)
                 .collect();
             mapping.insert(i, taxon);
@@ -696,5 +735,20 @@ mod tests {
         // Ex: nw3 = "(((0,(1,2)),((3,((4,5),6)),(7,8))),9);"
         // Same topology, but different leaf placements
         assert_eq!(nw_str, nw_str2);
+    }
+
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_has_integer_labels(#[case] n_leaves: usize) {
+        // nw_str should not have integer labels
+        let nw_str = generate_random_string_newick(n_leaves);
+        assert!(!has_integer_labels(&nw_str));
+
+        // nw_int should have integer labels
+        let (nw_int, _) = create_label_mapping(&nw_str);
+
+        assert!(has_integer_labels(&nw_int));
     }
 }
