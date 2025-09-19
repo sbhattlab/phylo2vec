@@ -36,6 +36,7 @@ profile = { cmd = "cargo build --profile profiling && samply record target/profi
 py310 = ["python", "py310"]
 py311 = ["python", "py311"]
 py312 = ["python", "py312"]
+py313 = ["python", "py313"]
 
 # ======= py-phylo2vec ==========
 
@@ -81,6 +82,9 @@ python = "3.11.*"
 [feature.py312.dependencies]
 python = "3.12.*"
 
+[feature.py313.dependencies]
+python = "3.13.*"
+
 [feature.pydev.dependencies]
 pixi-kernel = ">=0.4.0,<0.5"
 jupyterlab = ">=4.1,<4.2"
@@ -99,6 +103,7 @@ pytest = ">=8.3.4,<9"
 pytest-benchmark = ">=5.1.0,<6"
 scipy = ">=1.15.0"
 tomli = ">=2.0.0,<3"
+libxcrypt = ">=4.4.36,<5"
 
 [feature.python.tasks.install-python]
 cmd = "maturin develop --release --manifest-path ./py-phylo2vec/Cargo.toml"

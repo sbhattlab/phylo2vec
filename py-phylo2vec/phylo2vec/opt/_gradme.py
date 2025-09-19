@@ -168,10 +168,10 @@ class GradME(BaseOptimizer):
 
             # Perform a round of optimization
             params_out = self._step(
-                params_in,
-                dm,
-                value_and_grad_fun,
-                optimizer,
+                dm=dm,
+                params=params_in,
+                value_and_grad_fun=value_and_grad_fun,
+                optimizer=optimizer,
             )
 
             # Transform the parameters into a weight matrix
