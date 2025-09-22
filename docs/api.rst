@@ -28,15 +28,18 @@ IO
     save_newick
 
 
-Metrics
+Statistics
 ----------------
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    metrics.cophenetic_distances
-    metrics.pairwise_distances
+    stats.cophenetic_distances
+    stats.pairwise_distances
+    stats.cov
+    stats.precision
+    stats.incidence
 
 Utils
 ----------------

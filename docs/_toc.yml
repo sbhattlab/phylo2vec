@@ -10,5 +10,7 @@ parts:
       - file: demo_opt.ipynb
   - caption: Help and References
     chapters:
+      - file: installation.md
       - file: development.md
+      - file: CONTRIBUTING.md
       - file: api.rst

@@ -1,14 +1,10 @@
-# Development Guide
-
-## How it works
+# Development guide
 
 The core logic of `phylo2vec` is implemented in Rust. The Rust code is accessed
 by other languages like Python and R using bindings. The main installable Python
-package will contain a hybrid of native Python code and Rust bindings. The Rust
-code is compiled by `maturin` and `pyo3` into a shared library that is used by
-the Python package.
+package will contain a hybrid of native Python code and Rust bindings.
 
-## Directories
+## Structure of the codebase
 
 `docs`: Jupyterbook documentation for phylo2vec. Includes this development
 guide, example notebooks, and the API reference.
@@ -27,7 +23,7 @@ containing the compiled bindings is called `_phylo2vec_core`.
 are implemented using the Rust bindings via `_phylo2vec_core`. However some have
 not been ported over yet and contain logic written in Python.
 
-`r-phylo2vec`: R bindings for the Rust code. Follows a similar structure to the
+`r-phylo2vec`: The R codebase for phylo2vec. Follows a similar structure to the
 Python package. The R package uses the `extendr` library to create bindings for
 the Rust code.
 
@@ -85,43 +81,28 @@ pixi run -e default profile
 
 Example profile output: ![Samply profile report](img/profile.png)
 
-## py-phylo2vec
+## Python: py-phylo2vec
 
 This directory contains the phylo2vec Python codebase, which includes Rust
-binding setup.
+binding setup. The Rust code is compiled by `maturin` and `pyo3` into a shared
+library that is used by the Python package.
 
 To install a development version of the python package, simply run the following
 within the root directory of the repository with
 [`pixi`](https://pixi.sh/latest/):
 
-```
+```bash
 pixi run -e py-phylo2vec install-python
 ```
 
-Once installed you can try it by opening up `ipython` within the pixi
-environment:
-
-```
-pixi run -e py-phylo2vec ipython
-```
-
-As of 10/18/2024 the phylo2vec Rust core code can be accessed from
+The phylo2vec Rust core code can be accessed from
 `_phylo2vec_core` module within Python:
 
-```
+```python
 from phylo2vec import _phylo2vec_core
 ```
 
-An example of calling `get_ancestry`:
-
-```
-_phylo2vec_core.get_ancestry([0, 2, 2, 5, 2])
-```
-
-## r-phylo2vec
-
-**NOTE: This is currently in active development and APIs will change. Use at
-your own risk.**
+## R: r-phylo2vec
 
 This directory contains the phylo2vec R codebase, which includes Rust binding
 setup.

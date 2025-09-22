@@ -34,7 +34,9 @@ Link to the paper:
 
 ## Installation
 
-### Pip
+### Python package
+
+#### Pip
 
 The easiest way to install the standard Python package is using pip:
 
@@ -52,7 +54,7 @@ installed separately. To do so, run:
 pip install phylo2vec[opt]
 ```
 
-### Manual installation
+#### Manual installation
 
 - We recommend setting up [pixi](https://pixi.sh/dev/) package management tool.
 - Clone the repository and install using `pixi`:
@@ -189,17 +191,9 @@ For comprehensive documentation, tutorials, and API reference, visit:
 
 ## How to Contribute
 
-We welcome contributions to Phylo2Vec! Here's how you can help:
+We welcome contributions to phylo2vec! Please refer to our [Contributing guidelines](https://github.com/sbhattlab/phylo2vec/blob/main/CONTRIBUTING.md) for more details how to report bugs, request features, or submit code improvements.
 
-1. **Fork the repository** and create your branch from `main`
-2. **Make your changes** and add tests if applicable
-3. **Run the tests** to ensure they pass
-4. **Submit a pull request** with a detailed description of your changes
-
-Please make sure to follow our coding standards and write appropriate tests for
-new features.
-
-Thanks to our contributors so far!
+Thanks to all our contributors so far!
 
 [![Contributors](https://contrib.rocks/image?repo=sbhattlab/phylo2vec)](https://github.com/sbhattlab/phylo2vec/graphs/contributors)
 
