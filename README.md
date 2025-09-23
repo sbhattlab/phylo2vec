@@ -51,7 +51,7 @@ demo). To avoid bloating the standard package, these dependencies must be
 installed separately. To do so, run:
 
 ```bash
-pip install phylo2vec[opt]
+pip install "phylo2vec[opt]"
 ```
 
 #### Manual installation
