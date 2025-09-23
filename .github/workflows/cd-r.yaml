@@ -53,14 +53,14 @@ jobs:
           mkdir -p dist
           Rscript -e "rextendr::document('${{ env.R_PACKAGE_DIR }}')"
           Rscript -e "devtools::build('${{ env.R_PACKAGE_DIR }}', binary = TRUE, path = 'dist')"
+      - name: Rename package for Windows
+        run: |
+          move dist\*.zip dist\phylo2vec_${{ steps.determine-version.outputs.version }}_windows.zip
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
           name: r-package-windows
           path: dist/*.zip
-      - name: Rename package for Windows
-        run: |
-          move dist\*.zip dist\phylo2vec_${{ steps.determine-version.outputs.version }}_windows.zip
 
   build-macos:
     runs-on: ${{ matrix.platform.runner }}
@@ -100,14 +100,14 @@ jobs:
           mkdir -p dist
           Rscript -e "rextendr::document('${{ env.R_PACKAGE_DIR }}')"
           Rscript -e "devtools::build('${{ env.R_PACKAGE_DIR }}', binary = TRUE, path = 'dist')"
+      - name: Rename package for MacOS
+        run: |
+          mv dist/*.tgz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_macos-${{ matrix.platform.target }}.tgz
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
           name: r-package-macos-${{ matrix.platform.target }}
           path: dist/*.tgz
-      - name: Rename package for MacOS
-        run: |
-          mv dist/*.tgz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_macos-${{ matrix.platform.target }}.tgz
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -145,14 +145,14 @@ jobs:
           mkdir -p dist
           Rscript -e "rextendr::document('${{ env.R_PACKAGE_DIR }}')"
           Rscript -e "devtools::build('${{ env.R_PACKAGE_DIR }}', binary = TRUE, path = 'dist')"
+      - name: Rename package for Linux
+        run: |
+          mv dist/*.tar.gz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_linux-x86_64.tar.gz
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
           name: r-package-linux
           path: dist/*.tar.gz
-      - name: Rename package for Linux
-        run: |
-          mv dist/*.tar.gz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_linux-x86_64.tar.gz
 
   release:
     name: Release R Package
