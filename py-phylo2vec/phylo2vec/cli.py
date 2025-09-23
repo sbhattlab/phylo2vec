@@ -13,11 +13,13 @@ phylo2vec to_newick $'0.0,1.0,2.0\n0.0,3.0,4.0' # Convert a matrix to Newick
 import sys
 
 from argparse import ArgumentParser
+from dataclasses import asdict
+from pprint import pprint
 
 from phylo2vec.base.newick import from_newick, to_newick
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
-from phylo2vec.io.reader import read
+from phylo2vec.io.reader import read, load_newick
 from phylo2vec.io.writer import write
 
 
@@ -53,7 +55,7 @@ COMMANDS = {
         "type": "write",
     },
     "from_newick": {
-        "help": "Convert a Newick string to a Phylo2Vec vector/matrix.",
+        "help": "Convert an integer-based Newick string to a Phylo2Vec vector/matrix.",
         "func": from_newick,
         "args": {
             "newick": {
@@ -64,7 +66,7 @@ COMMANDS = {
         "type": "write",
     },
     "to_newick": {
-        "help": "Convert a Phylo2Vec vector/matrix to a Newick string.",
+        "help": "Convert a Phylo2Vec vector/matrix to an integer-based Newick string.",
         "func": to_newick,
         "args": {
             "vector_or_matrix": {
@@ -73,6 +75,17 @@ COMMANDS = {
             },
         },
         "type": "read",
+    },
+    "load_newick": {
+        "help": "Load a general Newick string into a Phylo2Vec vector/matrix.",
+        "func": lambda newick: asdict(load_newick(newick)),
+        "args": {
+            "newick": {
+                "type": str,
+                "help": "Newick string representing the tree",
+            },
+        },
+        "type": None,
     },
 }
 
@@ -133,7 +146,7 @@ def main():
         if command["type"] == "write":
             out = write(out)
 
-        print(out)
+        pprint(out)
 
 
 if __name__ == "__main__":
