@@ -200,7 +200,7 @@ Thanks to all our contributors so far!
 ## License
 
 This project is distributed under the
-[GNU Lesser General Public License v3.0 (LGPL)](./LICENSE).
+[GNU Lesser General Public License v3.0 (LGPL)](https://github.com/sbhattlab/phylo2vec/blob/main/LICENSE).
 
 ## Citation
 

@@ -6,7 +6,9 @@ contributions from the community to help improve our project.
 ## Getting started
 
 To get started, please refer to our
-[Development guide](https://phylo2vec.readthedocs.io/en/latest/development.html)
+[Development guide](https://phylo2vec.readthedocs.io/en/latest/development.html),
+our [README](https://github.com/sbhattlab/phylo2vec?tab=readme-ov-file#phylo2vec),
+and our [Code of conduct](https://github.com/sbhattlab/phylo2vec/blob/main/CODE_OF_CONDUCT.md)
 to familiarize yourself with our project’s structure, testing framework, and
 benchmarking practices.
 
