@@ -1,6 +1,6 @@
-/// Base functions for Phylo2Vec matrices: sampling, validation, and checking properties.
+/// Base functions for `phylo2vec` matrices: sampling, validation, and checking properties.
 use ndarray::{s, Array2, ArrayView2, Axis};
-use rand::{distributions::Uniform, prelude::Distribution};
+use rand::{distr::Uniform, prelude::Distribution};
 
 use crate::vector::base::{check_v, sample_vector};
 
@@ -8,9 +8,9 @@ use crate::vector::base::{check_v, sample_vector};
 ///
 /// If ordering is True, sample an ordered tree, by default ordering is False
 ///
-/// ordering=True: v_i in {0, 1, ..., i} for i in (0, n_leaves-1)
+/// ordering=True: `v_i` in {0, 1, ..., i} for i in (0, n_leaves-1)
 ///
-/// ordering=False: v_i in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
+/// ordering=False: `v_i` in {0, 1, ..., 2*i} for i in (0, n_leaves-1)
 ///
 /// # Examples
 ///
@@ -27,8 +27,8 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f64> {
     // Generate the branch lengths using the uniform distribution in (0, 1)
     let mut bls = Vec::with_capacity(bl_size.0);
 
-    let mut rng = rand::thread_rng();
-    let uniform_dist = Uniform::new(0.0, 1.0); // Uniform distribution in the range (0, 1)
+    let mut rng = rand::rng();
+    let uniform_dist = Uniform::new(0.0, 1.0).unwrap(); // Uniform distribution in the range (0, 1)
 
     for _ in 0..bl_size.0 {
         let mut row = Vec::with_capacity(bl_size.1);
@@ -50,15 +50,15 @@ pub fn sample_matrix(n_leaves: usize, ordered: bool) -> Array2<f64> {
     m
 }
 
-/// Input validation of a Phylo2Vec matrix
+/// Input validation of a `phylo2vec` matrix
 ///
-/// The input is checked for the Phylo2Vec constraints on the vector part (first column)
+/// The input is checked for the `phylo2vec` constraints on the vector part (first column)
 /// and positive branch lengths in the remaining columns.
 ///
 /// # Panics
 ///
 /// Panics if:
-/// - Any element of the vector (first column of matrix) fails the Phylo2Vec constraints.
+/// - Any element of the vector (first column of matrix) fails the `phylo2vec` constraints.
 /// - Any branch length (columns 2 and 3) is not positive.
 ///
 /// # Examples
