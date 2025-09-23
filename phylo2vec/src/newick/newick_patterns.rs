@@ -22,7 +22,8 @@ pub struct NewickPatterns {
     pub right_node_generic: regex::Regex,
     pub pairs: regex::Regex,
     pub branch_lengths: regex::Regex,
-    pub parents: regex::Regex,
+    pub parent: regex::Regex,
+    pub parent_generic: regex::Regex,
 }
 
 impl NewickPatterns {
@@ -42,6 +43,7 @@ impl NewickPatterns {
         let pnode_pattern = r"\)(\d+)";
         let lnode_generic_pattern = r"\(\b(\w+)\b";
         let rnode_generic_pattern = r",\b(\w+)\b";
+        let pnode_generic_pattern = r"\)(\w+)";
         let bl_pattern = r":\d+(\.\d+)?";
         let pair_pattern = format!(r"({lnode_pattern})|({rnode_pattern})");
         Self {
@@ -58,7 +60,9 @@ impl NewickPatterns {
             // Pattern of a branch length annotation
             branch_lengths: regex::Regex::new(bl_pattern).unwrap(),
             // Pattern of a parent label
-            parents: regex::Regex::new(pnode_pattern).unwrap(),
+            parent: regex::Regex::new(pnode_pattern).unwrap(),
+            // Pattern of a generic parent label
+            parent_generic: regex::Regex::new(pnode_generic_pattern).unwrap(),
         }
     }
 }

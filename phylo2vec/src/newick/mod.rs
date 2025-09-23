@@ -261,13 +261,22 @@ pub fn parse_with_bls(newick: &str) -> Result<(Ancestry, Vec<[f64; 2]>), NewickE
 /// ```
 /// use phylo2vec::newick::remove_parent_labels;
 ///
+/// // Integer Newick
 /// let newick = "(((0,(3,5)6)8,2)9,(1,4)7)10;";
 /// let result = remove_parent_labels(newick);
 /// assert_eq!(result, "(((0,(3,5)),2),(1,4));");
+///
+/// // String Newick
+/// let newick_str = "(((A,(C,E)p0)p1,B)p2,(D,F)p3)p4;";
+/// let result_str = remove_parent_labels(newick_str);
+/// assert_eq!(result_str, "(((A,(C,E)),B),(D,F));");
 /// ```
 pub fn remove_parent_labels(newick: &str) -> String {
     let newick_patterns = NewickPatterns::new();
-    newick_patterns.parents.replace_all(newick, ")").to_string()
+    newick_patterns
+        .parent_generic
+        .replace_all(newick, ")")
+        .to_string()
 }
 
 /// Remove branch length annotations from the Newick string
@@ -306,7 +315,7 @@ pub fn remove_branch_lengths(newick: &str) -> String {
 /// ```
 pub fn has_parents(newick: &str) -> bool {
     let newick_patterns = NewickPatterns::new();
-    newick_patterns.parents.is_match(newick)
+    newick_patterns.parent.is_match(newick)
 }
 
 /// Check if the Newick string has branch lengths
@@ -328,25 +337,34 @@ pub fn has_branch_lengths(newick: &str) -> bool {
     newick_patterns.branch_lengths.is_match(newick)
 }
 
-/// Check if the Newick string has integer labels
+/// Check if a Newick string has only integer leaves
 ///
 /// # Examples
 ///
 /// ```
-/// use phylo2vec::newick::has_integer_labels;
+/// use phylo2vec::newick::has_integer_leaves;
+///
+/// // Only string leaves
 /// let nw_str = "(((E:0.1,(A:0.1,C:0.1):0.1):0.1,F:0.1):0.1,(D:0.1,B:0.1):0.1);";
-/// let result_str = has_integer_labels(nw_str);
+/// let result_str = has_integer_leaves(nw_str);
 /// assert!(!result_str);
 ///
+/// // Mixed string and integer leaves
 /// let nw_mixed = "(((0:0.1,(A:0.1,C:0.1)6:0.1)8:0.1,2:0.1)9:0.1,(1:0.1,4:0.1)7:0.1)10;";
-/// let result_mixed = has_integer_labels(nw_mixed);
+/// let result_mixed = has_integer_leaves(nw_mixed);
 /// assert!(!result_mixed);
 ///
+/// // Only integer leaves
 /// let nw_int = "(((0:0.1,(3:0.1,5:0.1)6:0.1)8:0.1,2:0.1)9:0.1,(1:0.1,4:0.1)7:0.1)10;";
-/// let result_int = has_integer_labels(nw_int);
+/// let result_int = has_integer_leaves(nw_int);
 /// assert!(result_int);
+///
+/// // Integer leaves and string parent nodes
+/// let nw_int_parents = "(((0:0.1,(3:0.1,5:0.1)p0:0.1)p1:0.1,2:0.1)p2:0.1,(1:0.1,4:0.1)p3:0.1)p4;";
+/// let result_int_parents = has_integer_leaves(nw_int_parents);
+/// assert!(result_int_parents);
 /// ```
-pub fn has_integer_labels(newick: &str) -> bool {
+pub fn has_integer_leaves(newick: &str) -> bool {
     let newick_patterns = NewickPatterns::new();
     let n_left = newick_patterns.left_node.find_iter(newick).count();
     let n_right = newick_patterns.right_node.find_iter(newick).count();
@@ -573,6 +591,73 @@ pub fn apply_label_mapping<S: ::std::hash::BuildHasher>(
     Ok(newick_str)
 }
 
+/// Process a Newick string by checking if it has integer labels.
+/// If it does, returns the string as-is with an empty mapping.
+/// If not, creates a label mapping and returns the integer Newick.
+///
+/// # Arguments
+///
+/// * `newick` - A string representing a phylogenetic tree in Newick format
+///
+/// # Returns
+///
+/// A tuple containing:
+/// * The processed Newick string (either original or converted to integer labels)
+/// * A HashMap mapping integers to original string labels (empty if input had integer labels)
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::newick::process;
+///
+/// // With string labels
+/// let newick_str = "((A,B),(C,D));";
+/// let (processed, mapping) = process(newick_str);
+/// assert_eq!(processed, "((0,1),(2,3));");
+/// assert_eq!(mapping.get(&0), Some(&"A".to_string()));
+///
+/// // With integer labels
+/// let newick_int = "((0,1),(2,3));";
+/// let (processed2, mapping2) = process(newick_int);
+/// assert_eq!(processed2, newick_int);
+/// assert!(mapping2.is_empty());
+///
+/// // With string labels and branch lengths
+/// let newick_str_bls = "((A:0.1,B:0.2):0.3,(D:0.4,C:0.5):0.6);";
+/// let (processed3, mapping3) = process(newick_str_bls);
+/// assert_eq!(processed3, "((0:0.1,1:0.2):0.3,(2:0.4,3:0.5):0.6);");
+/// assert_eq!(mapping3.get(&2), Some(&"D".to_string()));
+///
+/// // With integer labels and branch lengths
+/// let newick_int_bls = "((0:0.1,1:0.2):0.3,(2:0.4,3:0.5):0.6);";
+/// let (processed4, mapping4) = process(newick_int_bls);
+/// assert_eq!(processed4, newick_int_bls);
+/// assert!(mapping4.is_empty());
+///
+/// // With string labels and branch lengths and parents
+/// let newick_str_bls_parents = "((B:0.1,A:0.2)p0:0.3,(D:0.4,C:0.5)p1:0.6)p2;";
+/// let (processed5, mapping5) = process(newick_str_bls_parents);
+/// assert_eq!(processed5, "((0:0.1,1:0.2):0.3,(2:0.4,3:0.5):0.6);");
+/// assert_eq!(mapping5.get(&1), Some(&"A".to_string()));
+///
+/// // Mixed labels (should create mapping)
+/// let newick_mixed = "((0:0.1,(B:0.2,2:0.3)p0:0.4)p1:0.5,D:0.6)p2;";
+/// let (processed6, mapping6) = process(newick_mixed);
+/// assert_eq!(processed6, "((0:0.1,(1:0.2,2:0.3):0.4):0.5,3:0.6);");
+/// assert_eq!(mapping6.get(&1), Some(&"B".to_string()));
+/// assert_eq!(mapping6.get(&2), Some(&"2".to_string()));
+/// ```
+pub fn process(newick: &str) -> (String, HashMap<usize, String>) {
+    // Check if the Newick string has integer labels
+    if has_integer_leaves(newick) {
+        (remove_parent_labels(newick), HashMap::new())
+    } else {
+        // If not, create a label mapping
+        // Return the integer Newick and the label mapping
+        create_label_mapping(newick)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -629,9 +714,18 @@ mod tests {
     }
 
     #[rstest]
+    // Integer cases
     #[case("(((0,(3,5)6)8,2)9,(1,4)7)10;", "(((0,(3,5)),2),(1,4));")]
     #[case("(0,(1,(2,(3,(4,5)6)7)8)9)10;", "(0,(1,(2,(3,(4,5)))));")]
     #[case("((0,2)5,(1,3)4)6;", "((0,2),(1,3));")]
+    // String cases
+    #[case("(((A,(C,E)p0)p1,B)p2,(D,F)p3)p4;", "(((A,(C,E)),B),(D,F));")]
+    #[case("((A,B)p0,(D,C)p1)p2;", "((A,B),(D,C));")]
+    #[case("(A,(B,(C,(D,E)p0)p1)p2)p3;", "(A,(B,(C,(D,E))));")]
+    // Mixed cases
+    #[case("(((0,(C,5)p0)p1,2)p2,(1,4)p3)p4;", "(((0,(C,5)),2),(1,4));")]
+    #[case("((A,2)p0,(D,3)p1)p2;", "((A,2),(D,3));")]
+    #[case("(0,(B,(3,(D,5)p0)p1)p2)p3;", "(0,(B,(3,(D,5))));")]
     fn test_remove_parent_labels(#[case] newick: &str, #[case] expected: &str) {
         let result = remove_parent_labels(newick);
         assert_eq!(result, expected);
@@ -741,14 +835,14 @@ mod tests {
     #[case(10)]
     #[case(100)]
     #[case(1000)]
-    fn test_has_integer_labels(#[case] n_leaves: usize) {
+    fn test_has_integer_leaves(#[case] n_leaves: usize) {
         // nw_str should not have integer labels
         let nw_str = generate_random_string_newick(n_leaves);
-        assert!(!has_integer_labels(&nw_str));
+        assert!(!has_integer_leaves(&nw_str));
 
         // nw_int should have integer labels
         let (nw_int, _) = create_label_mapping(&nw_str);
 
-        assert!(has_integer_labels(&nw_int));
+        assert!(has_integer_leaves(&nw_int));
     }
 }

@@ -327,6 +327,21 @@ fn remove_parent_labels(newick: &str) -> String {
     newick::remove_parent_labels(newick)
 }
 
+/// Process a Newick string
+/// @export
+#[extendr]
+fn process_newick(newick: &str) -> List {
+    let (nw_int, label_mapping) = newick::process(newick);
+
+    let mut label_mapping_list: Vec<String> = Vec::new();
+
+    for i in 0..label_mapping.len() {
+        label_mapping_list.push(label_mapping[&i].clone());
+    }
+
+    list!(newick = nw_int, mapping = label_mapping_list)
+}
+
 /// Get the topological cophenetic distance matrix of a Phylo2Vec vector
 /// @export
 #[extendr]
@@ -488,6 +503,7 @@ extendr_module! {
     fn incidence_dense;
     fn pre_precision_from_matrix;
     fn pre_precision_from_vector;
+    fn process_newick;
     fn queue_shuffle;
     fn remove_branch_lengths;
     fn remove_parent_labels;
