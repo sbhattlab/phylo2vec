@@ -95,8 +95,8 @@ within the root directory of the repository with
 pixi run -e py-phylo2vec install-python
 ```
 
-The phylo2vec Rust core code can be accessed from
-`_phylo2vec_core` module within Python:
+The phylo2vec Rust core code can be accessed from `_phylo2vec_core` module
+within Python:
 
 ```python
 from phylo2vec import _phylo2vec_core
