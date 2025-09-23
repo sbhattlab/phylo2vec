@@ -50,7 +50,7 @@ jobs:
           Rscript -e "install.packages('rextendr', repos = c('https://extendr.r-universe.dev', 'https://cloud.r-project.org'))"
       - name: Build R package
         run: |
-          mkdir dist
+          mkdir -p dist
           Rscript -e "rextendr::document('${{ env.R_PACKAGE_DIR }}')"
           Rscript -e "devtools::build('${{ env.R_PACKAGE_DIR }}', binary = TRUE, path = 'dist')"
       - name: Upload package
@@ -60,7 +60,7 @@ jobs:
           path: dist/*.zip
       - name: Rename package for Windows
         run: |
-          mv dist/*.zip dist/phylo2vec_${{ steps.determine-version.outputs.version }}_windows.zip
+          move dist\*.zip dist\phylo2vec_${{ steps.determine-version.outputs.version }}_windows.zip
 
   build-macos:
     runs-on: ${{ matrix.platform.runner }}
