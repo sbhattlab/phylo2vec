@@ -191,7 +191,10 @@ For comprehensive documentation, tutorials, and API reference, visit:
 
 ## How to Contribute
 
-We welcome contributions to phylo2vec! Please refer to our [Contributing guidelines](https://github.com/sbhattlab/phylo2vec/blob/main/CONTRIBUTING.md) for more details how to report bugs, request features, or submit code improvements.
+We welcome contributions to phylo2vec! Please refer to our
+[Contributing guidelines](https://github.com/sbhattlab/phylo2vec/blob/main/CONTRIBUTING.md)
+for more details how to report bugs, request features, or submit code
+improvements.
 
 Thanks to all our contributors so far!
 
