@@ -275,6 +275,13 @@ class TestToNewick:
         assert exc_info.value.code == 2
 
 
+class TestLoadNewick:
+    def test_valid_newick_with_bls(self):
+        """Tets load_newick with valid newick string with BLs."""
+
+        newick_str = "((A:0.1,B:0.2):0.3,(D:0.4,C:0.5):0.6);"
+
+
 if __name__ == "__main__":
     # Run tests when file is executed directly
     pytest.main([__file__, "-v"])

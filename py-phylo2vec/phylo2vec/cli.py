@@ -14,7 +14,6 @@ import sys
 
 from argparse import ArgumentParser
 from dataclasses import asdict
-from pprint import pprint
 
 from phylo2vec.base.newick import from_newick, to_newick
 from phylo2vec.utils.matrix import sample_matrix
@@ -37,7 +36,7 @@ COMMANDS = {
                 "help": "Sample an ordered vector",
             },
         },
-        "type": "write",
+        "post": write,
     },
     "samplem": {
         "help": "Sample a Phylo2Vec matrix.",
@@ -52,7 +51,7 @@ COMMANDS = {
                 "help": "Sample an ordered matrix",
             },
         },
-        "type": "write",
+        "post": write,
     },
     "from_newick": {
         "help": "Convert an integer-based Newick string to a Phylo2Vec vector/matrix.",
@@ -63,7 +62,7 @@ COMMANDS = {
                 "help": "Newick string representing the tree",
             },
         },
-        "type": "write",
+        "post": write,
     },
     "to_newick": {
         "help": "Convert a Phylo2Vec vector/matrix to an integer-based Newick string.",
@@ -74,18 +73,18 @@ COMMANDS = {
                 "help": "Phylo2Vec vector/matrix to convert",
             },
         },
-        "type": "read",
+        "pre": read,
     },
     "load_newick": {
         "help": "Load a general Newick string into a Phylo2Vec vector/matrix.",
-        "func": lambda newick: asdict(load_newick(newick)),
+        "func": load_newick,
         "args": {
-            "newick": {
+            "filepath_or_buffer": {
                 "type": str,
                 "help": "Newick string representing the tree",
             },
         },
-        "type": None,
+        "post": asdict,
     },
 }
 
@@ -133,20 +132,22 @@ def main():
         sys.exit(1)
     else:
         command = COMMANDS[command_name]
-        func = command["func"]
+        fn = command["func"]
         the_args = vars(args)
 
         # Process input
-        if command["type"] == "read":
-            the_args["vector_or_matrix"] = read(the_args["vector_or_matrix"])
+        pre_fn = command.get("pre", None)
+        if pre_fn is not None:
+            the_args["vector_or_matrix"] = pre_fn(the_args["vector_or_matrix"])
 
-        out = func(**the_args)
+        out = fn(**the_args)
 
         # Process output
-        if command["type"] == "write":
-            out = write(out)
+        post_fn = command.get("post", None)
+        if post_fn is not None:
+            out = post_fn(out)
 
-        pprint(out)
+        print(out)
 
 
 if __name__ == "__main__":
