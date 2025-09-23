@@ -70,8 +70,8 @@ def _test_and_save_load_newick(tmp_path, n_leaves, sample_fn):
 
     newick_path = tmp_path / "test.newick"
     save_newick(vector_or_matrix, newick_path)
-    m2 = load_newick(newick_path)
-    assert np.array_equal(vector_or_matrix, m2)
+    loader = load_newick(newick_path)
+    assert np.array_equal(vector_or_matrix, loader.p2v)
 
     # Unallowed file extension should trigger an AssertionError
     random_path = tmp_path / "test.random"

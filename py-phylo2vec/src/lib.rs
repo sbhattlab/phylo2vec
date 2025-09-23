@@ -222,6 +222,11 @@ fn has_parents(newick: &str) -> bool {
 }
 
 #[pyfunction]
+fn process_newick(newick: &str) -> PyResult<(String, HashMap<usize, String>)> {
+    Ok(newick::process(newick))
+}
+
+#[pyfunction]
 fn remove_branch_lengths(newick: &str) -> PyResult<String> {
     Ok(newick::remove_branch_lengths(newick))
 }
@@ -299,6 +304,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(incidence_dense, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision_with_bls, m)?)?;
+    m.add_function(wrap_pyfunction!(process_newick, m)?)?;
     m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;
     m.add_function(wrap_pyfunction!(remove_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;

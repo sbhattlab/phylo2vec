@@ -11,8 +11,14 @@ load_newick(filepath_or_buffer)
 a Newick-formatted tree}
 }
 \value{
-A vector (ndim == 1) or matrix (ndim == 2)
-which satisfies Phylo2Vec constraints
+A list containing:
+\itemize{
+\item newick: Newick string with integer labels
+\item mapping: A named vector mapping original labels to integers
+\item p2v: A phylo2ec representation, either a
+vector (ndim == 1) or matrix (ndim == 2)
+which satisfies phylo2vec constraints
+}
 }
 \description{
 Read a newick file into a Phylo2Vec vector or matrix.

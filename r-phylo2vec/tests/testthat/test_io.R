@@ -30,3 +30,31 @@ test_that(desc = "save_and_load_matrix", {
     }
   }
 })
+
+test_that(desc = "save_and_load_newick_vector", {
+  tmp_path <- tempdir()
+  for (n_leaves in c(2, MIN_N_LEAVES, MAX_N_LEAVES)) {
+    for (j in seq_len(N_REPEATS)) {
+      v <- sample_vector(n_leaves, FALSE)
+
+      newick_path <- file.path(tmp_path, "test.nwk")
+      save_newick(v, newick_path)
+      res <- load_newick(newick_path)
+      expect_equal(res$p2v, v)
+    }
+  }
+})
+
+test_that(desc = "save_and_load_newick_matrix", {
+  tmp_path <- tempdir()
+  for (n_leaves in c(2, MIN_N_LEAVES, MAX_N_LEAVES)) {
+    for (j in seq_len(N_REPEATS)) {
+      m <- sample_matrix(n_leaves, FALSE)
+
+      newick_path <- file.path(tmp_path, "test.nwk")
+      save_newick(m, newick_path)
+      res <- load_newick(newick_path)
+      expect_equal(res$p2v, m)
+    }
+  }
+})

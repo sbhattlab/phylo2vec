@@ -97,6 +97,10 @@ pre_precision_from_matrix <- function(matrix) .Call(wrap__pre_precision_from_mat
 #' @export
 pre_precision_from_vector <- function(vector) .Call(wrap__pre_precision_from_vector, vector)
 
+#' Process a Newick string
+#' @export
+process_newick <- function(newick) .Call(wrap__process_newick, newick)
+
 #' Produce an ordered version (i.e., birth-death process version)
 #' of a Phylo2Vec vector using the Queue Shuffle algorithm.
 #'

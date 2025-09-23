@@ -2,10 +2,13 @@
 
 import os
 
+from dataclasses import dataclass
 from io import StringIO, TextIOBase
 from typing import Union
 
 import numpy as np
+
+import phylo2vec._phylo2vec_core as core
 
 from phylo2vec.base.newick import from_newick
 from phylo2vec.utils.matrix import check_matrix
@@ -57,7 +60,14 @@ def load(
     return arr
 
 
-def load_newick(filepath_or_buffer: str) -> np.ndarray:
+@dataclass
+class NewickLoader:
+    newick: str
+    mapping: dict[int, str]
+    p2v: np.ndarray
+
+
+def load_newick(filepath_or_buffer: str) -> NewickLoader:
     """Read a Newick string/file into a Phylo2Vec vector or matrix.
 
     Parameters
@@ -79,4 +89,10 @@ def load_newick(filepath_or_buffer: str) -> np.ndarray:
     else:
         newick = filepath_or_buffer
 
-    return from_newick(newick)
+    newick_int, label_mapping = core.process_newick(newick)
+
+    return NewickLoader(
+        newick=newick_int,
+        mapping=label_mapping,
+        p2v=from_newick(newick_int),
+    )
