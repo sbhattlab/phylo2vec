@@ -50,7 +50,7 @@ jobs:
           Rscript -e "install.packages('rextendr', repos = c('https://extendr.r-universe.dev', 'https://cloud.r-project.org'))"
       - name: Build R package
         run: |
-          mkdir dist
+          mkdir -p dist
           Rscript -e "rextendr::document('${{ env.R_PACKAGE_DIR }}')"
           Rscript -e "devtools::build('${{ env.R_PACKAGE_DIR }}', binary = TRUE, path = 'dist')"
       - name: Upload package
@@ -58,6 +58,9 @@ jobs:
         with:
           name: r-package-windows
           path: dist/*.zip
+      - name: Rename package for Windows
+        run: |
+          move dist\*.zip dist\phylo2vec_${{ steps.determine-version.outputs.version }}_windows.zip
 
   build-macos:
     runs-on: ${{ matrix.platform.runner }}
@@ -102,6 +105,9 @@ jobs:
         with:
           name: r-package-macos-${{ matrix.platform.target }}
           path: dist/*.tgz
+      - name: Rename package for MacOS
+        run: |
+          mv dist/*.tgz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_macos-${{ matrix.platform.target }}.tgz
 
   build-linux:
     runs-on: ubuntu-22.04
@@ -144,6 +150,9 @@ jobs:
         with:
           name: r-package-linux
           path: dist/*.tar.gz
+      - name: Rename package for Linux
+        run: |
+          mv dist/*.tar.gz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_linux-x86_64.tar.gz
 
   release:
     name: Release R Package
