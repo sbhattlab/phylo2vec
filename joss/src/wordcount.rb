@@ -32,7 +32,7 @@ class SimplePaperFile
   def count_words
     return nil if @paper_path.nil?
 
-    word_count = Open3.capture3("cat #{@paper_path} | wc -w")[0].to_i
+    word_count = File.read(@paper_path).split.size
     puts "Wordcount for `#{File.basename(@paper_path)}` is #{word_count}"
     word_count
   end
