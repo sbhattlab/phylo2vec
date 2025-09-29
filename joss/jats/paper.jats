@@ -192,7 +192,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   et al., 2024</xref>), an emerging body of research has been dedicated
   to efficient representations of data for genomes
   (<xref alt="Deorowicz et al., 2023" rid="ref-deorowicz2023" ref-type="bibr">Deorowicz
-  et al., 2023</xref>) and phylogenetic trees such as phylo2vec
+  et al., 2023</xref>) and phylogenetic trees
   (<xref alt="Chauve et al., 2025" rid="ref-chauve2025" ref-type="bibr">Chauve
   et al., 2025</xref>;
   <xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
@@ -229,8 +229,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
     (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
     et al., 2024</xref>) based on <monospace>Numba</monospace>
     (<xref alt="Lam et al., 2015" rid="ref-lam2015" ref-type="bibr">Lam
-    et al., 2015</xref>). Benchmarks ran on an on an AMD Ryzen
-    Threadripper PRO 5995WX (64 cores, 7 GHz, 256 GB RAM).
+    et al., 2015</xref>). All benchmarks were performed on a workstation
+    equipped with an AMD Ryzen Threadripper PRO 5995WX (64 cores, 2.7
+    GHz) and 256 GB of RAM.
     <styled-content id="figU003Abenchmarks"></styled-content></p></caption>
     <graphic mimetype="application" mime-subtype="pdf" xlink:href="fig1.pdf" />
   </fig>
@@ -273,19 +274,12 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
   implementations for vector-to-Newick and Newick-to-vector conversions,
   leveraging Adelson-Velsky and Landis (AVL) trees
-  (<xref alt="Adelson-Velsky &amp; Landis, In Russian. English translation in Soviet Mathematics Doklady, 3:1259--1263, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
-  &amp; Landis, In Russian. English translation in Soviet Mathematics
-  Doklady, 3:1259--1263, 1962</xref>) and Fenwick trees
+  (<xref alt="Adelson-Velsky &amp; Landis, 1962" rid="ref-adelson1962" ref-type="bibr">Adelson-Velsky
+  &amp; Landis, 1962</xref>) and Fenwick trees
   (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
   1994</xref>), respectively.</p>
-  <p>New features include supporting branch length annotations by
-  extending the vector representation of size
-  <inline-formula><alternatives>
-  <tex-math><![CDATA[n-1]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>
-  leaves to a matrix of size <inline-formula><alternatives>
-  <tex-math><![CDATA[(n-1) \times 3]]></tex-math>
-  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>−</mml:mo><mml:mn>1</mml:mn><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>×</mml:mo><mml:mn>3</mml:mn></mml:mrow></mml:math></alternatives></inline-formula>
+  <p>New features include an extension of the vector representation to
+  support branch length annotations
   (<xref alt="[fig:phylo2mat]" rid="figU003Aphylo2mat">[fig:phylo2mat]</xref>),
   leaf-level operations (pruning, placement, MRCA identification), fast
   cophenetic distance matrix calculation, and various optimisation
@@ -293,16 +287,15 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>) and GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
-  et al., 2023</xref>). Bayesian MCMC inference is enabled through a
-  likelihood function that leverages tree representation similarities
-  with <monospace>BEAGLE</monospace>
+  et al., 2023</xref>). We also propose a likelihood function for
+  Bayesian MCMC inference that leverages tree representation
+  similarities with <monospace>BEAGLE</monospace>
   (<xref alt="Ayres et al., 2012" rid="ref-ayres2012" ref-type="bibr">Ayres
   et al., 2012</xref>;
   <xref alt="Suchard &amp; Rambaut, 2009" rid="ref-suchard2009" ref-type="bibr">Suchard
   &amp; Rambaut, 2009</xref>). Finally, user-friendliness is enhanced
-  with step-by-step demos of the inner workings of phylo2vec’s
-  representations and their conversion to common phylogenetic tree
-  formats.</p>
+  with step-by-step demos of phylo2vec’s representations and core
+  functions.</p>
   <fig>
     <caption><p>Recovering a tree from a phylo2vec vector: example for
     <inline-formula><alternatives>
@@ -387,7 +380,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Bhatt</surname><given-names>Samir</given-names></name>
       </person-group>
       <article-title>Phylo2Vec: A vector representation for binary trees</article-title>
-      <source>Systematic Biology</source>
+      <source>Syst. Biol.</source>
       <publisher-name>Oxford University Press US</publisher-name>
       <year iso-8601-date="2024">2024</year>
       <pub-id pub-id-type="doi">10.1093/sysbio/syae030</pub-id>
@@ -443,7 +436,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>others</surname></name>
       </person-group>
       <article-title>BEAGLE: An application programming interface and high-performance computing library for statistical phylogenetics</article-title>
-      <source>Systematic biology</source>
+      <source>Syst. Biol.</source>
       <publisher-name>Oxford University Press</publisher-name>
       <year iso-8601-date="2012">2012</year>
       <volume>61</volume>
@@ -461,6 +454,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       </person-group>
       <article-title>An algorithm for the organization of information</article-title>
       <source>Proc. USSR Acad. Sci.</source>
+      <year iso-8601-date="1962">1962</year>
       <volume>146</volume>
       <fpage>263</fpage>
       <lpage>266</lpage>
@@ -477,7 +471,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Bhatt</surname><given-names>Samir</given-names></name>
       </person-group>
       <article-title>Leaping through tree space: Continuous phylogenetic inference for rooted and unrooted trees</article-title>
-      <source>Genome Biology and Evolution</source>
+      <source>Genome Biol. Evol.</source>
       <publisher-name>Oxford University Press US</publisher-name>
       <year iso-8601-date="2023">2023</year>
       <volume>15</volume>
@@ -499,18 +493,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Boussau</surname><given-names>Bastien</given-names></name>
         <name><surname>Chevenet</surname><given-names>François</given-names></name>
         <name><surname>Comte</surname><given-names>Nicolas</given-names></name>
-        <name><surname>Davín</surname><given-names>Adrián A</given-names></name>
-        <name><surname>Dessimoz</surname><given-names>Christophe</given-names></name>
-        <name><surname>Dylus</surname><given-names>David</given-names></name>
-        <name><surname>Hasic</surname><given-names>Damir</given-names></name>
-        <name><surname>Mallo</surname><given-names>Diego</given-names></name>
-        <name><surname>Planel</surname><given-names>Rémi</given-names></name>
-        <name><surname>Posada</surname><given-names>David</given-names></name>
-        <name><surname>Scornavacca</surname><given-names>Celine</given-names></name>
-        <name><surname>Szöllősi</surname><given-names>Gergely</given-names></name>
-        <name><surname>Zhang</surname><given-names>Louxin</given-names></name>
-        <name><surname>Tannier</surname><given-names>Éric</given-names></name>
-        <name><surname>Daubin</surname><given-names>Vincent</given-names></name>
+        <name><surname>Davı́n</surname><given-names>Adrián A</given-names></name>
+        <name><surname>others</surname></name>
       </person-group>
       <article-title>RecPhyloXML: A format for reconciled gene trees</article-title>
       <source>Bioinformatics</source>
@@ -529,7 +513,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Nakhleh</surname><given-names>Luay</given-names></name>
       </person-group>
       <article-title>Computational approaches to species phylogeny inference and gene tree reconciliation</article-title>
-      <source>Trends in ecology &amp; evolution</source>
+      <source>Trends Ecol. Evol.</source>
       <publisher-name>Elsevier</publisher-name>
       <year iso-8601-date="2013">2013</year>
       <volume>28</volume>
@@ -563,7 +547,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Bork</surname><given-names>Peer</given-names></name>
       </person-group>
       <article-title>ETE 3: Reconstruction, analysis, and visualization of phylogenomic data</article-title>
-      <source>Molecular biology and evolution</source>
+      <source>Mol. Biol. Evol.</source>
       <publisher-name>Society for Molecular Biology; Evolution</publisher-name>
       <year iso-8601-date="2016">2016</year>
       <volume>33</volume>
@@ -581,7 +565,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Sukumaran</surname><given-names>Jeet</given-names></name>
       </person-group>
       <article-title>DendroPy 5: a mature Python library for phylogenetic computing</article-title>
-      <source>Journal of Open Source Software</source>
+      <source>J. Open Source Softw.</source>
       <publisher-name>The Open Journal</publisher-name>
       <year iso-8601-date="2024">2024</year>
       <volume>9</volume>
@@ -600,7 +584,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Telford</surname><given-names>Maximilian J</given-names></name>
       </person-group>
       <article-title>Phylogenetic tree building in the genomic age</article-title>
-      <source>Nature Reviews Genetics</source>
+      <source>Nat. Rev. Genet.</source>
       <publisher-name>Nature Publishing Group UK London</publisher-name>
       <year iso-8601-date="2020">2020</year>
       <volume>21</volume>
@@ -634,7 +618,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Goldman</surname><given-names>Nick</given-names></name>
       </person-group>
       <article-title>Maximum likelihood pandemic-scale phylogenetics</article-title>
-      <source>Nature Genetics</source>
+      <source>Nat. Genet.</source>
       <publisher-name>Nature Publishing Group US New York</publisher-name>
       <year iso-8601-date="2023">2023</year>
       <volume>55</volume>
@@ -654,7 +638,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Pybus</surname><given-names>Oliver G</given-names></name>
       </person-group>
       <article-title>Phylogenetic and phylodynamic approaches to understanding and combating the early SARS-CoV-2 pandemic</article-title>
-      <source>Nature Reviews Genetics</source>
+      <source>Nat. Rev. Genet.</source>
       <publisher-name>Nature Publishing Group UK London</publisher-name>
       <year iso-8601-date="2022">2022</year>
       <volume>23</volume>
@@ -674,8 +658,6 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <publisher-name>Cold Spring Harbor Laboratory</publisher-name>
       <year iso-8601-date="2021">2021</year>
       <pub-id pub-id-type="doi">10.1101/2021.10.27.465994</pub-id>
-      <fpage>2021</fpage>
-      <lpage>10</lpage>
     </element-citation>
   </ref>
   <ref id="ref-turakhia2021">
@@ -691,7 +673,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Corbett-Detig</surname><given-names>Russell</given-names></name>
       </person-group>
       <article-title>Ultrafast sample placement on existing tRees (UShER) enables real-time phylogenetics for the SARS-CoV-2 pandemic</article-title>
-      <source>Nature genetics</source>
+      <source>Nat. Genet.</source>
       <publisher-name>Nature Publishing Group US New York</publisher-name>
       <year iso-8601-date="2021">2021</year>
       <volume>53</volume>
@@ -716,7 +698,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Corbett-Detig</surname><given-names>Russell</given-names></name>
       </person-group>
       <article-title>A framework for automated scalable designation of viral pathogen lineages from genomic data</article-title>
-      <source>Nature Microbiology</source>
+      <source>Nat. Microbiol.</source>
       <publisher-name>Nature Publishing Group UK London</publisher-name>
       <year iso-8601-date="2024">2024</year>
       <volume>9</volume>
@@ -752,6 +734,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>IV</surname><given-names>Frederick A. Matsen</given-names></name>
       </person-group>
       <article-title>Vector encoding of phylogenetic trees by ordered leaf attachment</article-title>
+      <source>arXiv</source>
       <year iso-8601-date="2025">2025</year>
       <uri>https://arxiv.org/abs/2503.10169</uri>
       <pub-id pub-id-type="doi">10.48550/arXiv.2503.10169</pub-id>
@@ -765,7 +748,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Zhang</surname><given-names>Louxin</given-names></name>
       </person-group>
       <article-title>A vector representation for phylogenetic trees</article-title>
-      <source>Philosophical Transactions B</source>
+      <source>Philos. Trans. R. Soc. B</source>
       <publisher-name>The Royal Society</publisher-name>
       <year iso-8601-date="2025">2025</year>
       <volume>380</volume>
@@ -782,7 +765,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Gray</surname><given-names>Russell D</given-names></name>
       </person-group>
       <article-title>Curious parallels and curious connections—phylogenetic thinking in biology and historical linguistics</article-title>
-      <source>Systematic biology</source>
+      <source>Syst. Biol.</source>
       <publisher-name>Society of Systematic Zoology</publisher-name>
       <year iso-8601-date="2005">2005</year>
       <volume>54</volume>
@@ -831,7 +814,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>others</surname></name>
       </person-group>
       <article-title>High-resolution epidemiological landscape from~ 290,000 SARS-CoV-2 genomes from Denmark</article-title>
-      <source>Nature communications</source>
+      <source>Nat. Commun.</source>
       <publisher-name>Nature Publishing Group UK London</publisher-name>
       <year iso-8601-date="2024">2024</year>
       <volume>15</volume>
@@ -890,7 +873,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Seibert</surname><given-names>Stanley</given-names></name>
       </person-group>
       <article-title>Numba: A LLVM-based Python JIT compiler</article-title>
-      <source>Proceedings of the second workshop on the LLVM compiler infrastructure in HPC</source>
+      <source>Proc. 2nd workshop on the LLVM compiler infrastructure in HPC</source>
       <publisher-name>Association for Computing Machinery</publisher-name>
       <year iso-8601-date="2015">2015</year>
       <pub-id pub-id-type="doi">10.1145/2833157.2833162</pub-id>
@@ -904,7 +887,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
         <name><surname>Fenwick</surname><given-names>Peter M</given-names></name>
       </person-group>
       <article-title>A new data structure for cumulative frequency tables</article-title>
-      <source>Software: Practice and experience</source>
+      <source>Softw. Pract. Exp.</source>
       <publisher-name>Wiley Online Library</publisher-name>
       <year iso-8601-date="1994">1994</year>
       <volume>24</volume>
