@@ -192,10 +192,12 @@ For comprehensive documentation, tutorials, and API reference, visit:
 ## How to Contribute (issues, feature requests...)
 
 Found a bug or want a new feature? We welcome contributions to phylo2vec! 🤗
-Feel free to report any bugs or feature requests on our
-If you want to contribute directly to the project, fork the repository, create a new branch, and open a pull request (PR) on our [Pull requests page](https://github.com/sbhattlab/phylo2vec/pulls).
+Feel free to report any bugs or feature requests on our If you want to
 contribute directly to the project, fork the repository, create a new branch,
 and open a pull request (PR) on our
+[Pull requests page](https://github.com/sbhattlab/phylo2vec/pulls). contribute
+directly to the project, fork the repository, create a new branch, and open a
+pull request (PR) on our
 [Pull requests page](https://github.com/Neclow/phylo2vec/pulls).
 
 Please refer to our
