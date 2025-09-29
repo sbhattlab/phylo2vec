@@ -189,9 +189,16 @@ phylo2vec to_newick $'0.0,1.0,2.0\n0.0,3.0,4.0' # Convert a matrix to Newick
 For comprehensive documentation, tutorials, and API reference, visit:
 [https://phylo2vec.readthedocs.io](https://phylo2vec.readthedocs.io)
 
-## How to Contribute
+## How to Contribute (issues, feature requests...)
 
-We welcome contributions to phylo2vec! Please refer to our
+Found a bug or want a new feature? We welcome contributions to phylo2vec! 🤗
+Feel free to report any bugs or feature requests on our
+[Issues page](https://github.com/sbhattlab/phylo2vec/issues). If you want to
+contribute directly to the project, fork the repository, create a new branch,
+and open a pull request (PR) on our
+[Pull requests page](https://github.com/sbhattlab/phylo2vec/pulls).
+
+Please refer to our
 [Contributing guidelines](https://github.com/sbhattlab/phylo2vec/blob/main/CONTRIBUTING.md)
 for more details how to report bugs, request features, or submit code
 improvements.
