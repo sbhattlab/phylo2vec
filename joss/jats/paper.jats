@@ -78,14 +78,6 @@ manipulation</article-title>
 <xref ref-type="aff" rid="aff-2"/>
 </contrib>
 <contrib contrib-type="author">
-<contrib-id contrib-id-type="orcid">https://orcid.org/0009-0003-6220-7218</contrib-id>
-<name>
-<surname>Gordon</surname>
-<given-names>Madeline</given-names>
-</name>
-<xref ref-type="aff" rid="aff-2"/>
-</contrib>
-<contrib contrib-type="author">
 <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-5479-1974</contrib-id>
 <name>
 <surname>Duchêne</surname>
@@ -341,7 +333,9 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (G-22-63345, also supporting M.J.P. and F.M.A.), and the Novo Nordisk
   Foundation via The Novo Nordisk Young Investigator Award
   (NNF20OC0059309). D.A.D. is supported by a Data Science - Emerging
-  researcher award from Novo Nordisk Fonden (NNF23OC0084647).</p>
+  researcher award from Novo Nordisk Fonden (NNF23OC0084647). The
+  authors also thank Madeline Gordon for her help in implementing
+  functions related to the matrix format.</p>
 </sec>
 </body>
 <back>
