@@ -186,8 +186,9 @@ phylo2vec to_newick $'0.0,1.0,2.0\n0.0,3.0,4.0' # Convert a matrix to Newick
 
 #### Datasets
 
-Description of the datasets as well as download links are available in
-in the [datasets](https://github.com/sbhattlab/phylo2vec/tree/main/py-phylo2vec/phylo2vec/datasets/descr) directory.
+Description of the datasets as well as download links are available in in the
+[datasets](https://github.com/sbhattlab/phylo2vec/tree/main/py-phylo2vec/phylo2vec/datasets/descr)
+directory.
 
 ## Documentation
 

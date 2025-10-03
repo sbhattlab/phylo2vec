@@ -1,7 +1,7 @@
 # Zika dataset
 
-| Taxonomic Rank | Number of Taxa | Number of Bases | Type | Description | Link |
-| -------------- | -------------- | --------------- | ---- |------------ | ---- |
+| Taxonomic Rank | Number of Taxa | Number of Bases | Type | Description                                                                                                                  | Link                                                                                                                           |
+| -------------- | -------------- | --------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Zika virus     | 86             | 10,807          | RNA  | Zika whole genomes isolated between 2013 and 2016. Retrieved from [treetime](https://github.com/neherlab/treetime_examples). | [FASTA Link](https://github.com/neherlab/treetime_examples/blob/79eae7f8025a8ef3165c856c7359d92e738eb893/data/zika/zika.fasta) |
 
 References:
