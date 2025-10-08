@@ -1,6 +1,6 @@
 [project]
 name = "phylo2vec"
-version = "1.4.0"
+version = "1.5.0"
 description = "Phylo2Vec"
 authors = ["Neil Scheidwasser"]
 channels = ["conda-forge"]

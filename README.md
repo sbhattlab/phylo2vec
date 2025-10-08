@@ -204,7 +204,7 @@ Readily downloadable datasets can be listed using:
 ```python
 from phylo2vec.datasets import list_datasets
 
-list_dataset()
+list_datasets()
 ```
 
 ## Documentation
