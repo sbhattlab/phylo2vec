@@ -210,3 +210,9 @@ tmp/
 
 # Outputs files from opt/
 trees/
+
+# Datasets
+py-phylo2vec/phylo2vec/datasets/data/
+
+# Profiling
+profile.json.gz

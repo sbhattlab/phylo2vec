@@ -1,8 +1,23 @@
 # Yeast dataset
 
-| Taxonomic Rank                | Number of Taxa | Number of Bases | Type | Description                                                                                                                            | Link                                                                           |
-| ----------------------------- | -------------- | --------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Fungi; mainly _Saccharomyces_ | 8              | 127,018         | DNA  | Alignment of 106 orthologous genes of 8 different species of yeast. Retrieved from [phangorn](https://github.com/KlausVigo/phangorn/). | [RData link](https://github.com/KlausVigo/phangorn/blob/main/data/yeast.RData) |
+| Taxonomic Rank                | Number of Taxa | Number of Bases | Type | Description                                                                                                                            | Link                                                                                     |
+| ----------------------------- | -------------- | --------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Fungi; mainly _Saccharomyces_ | 8              | 127026          | DNA  | Alignment of 106 orthologous genes of 8 different species of yeast. Retrieved from [phangorn](https://github.com/KlausVigo/phangorn/). | [RData link](https://github.com/KlausVigo/phangorn/raw/refs/heads/main/data/yeast.RData) |
+
+## Download
+
+To load the data in R, use the `phangorn` package:
+
+```r
+library(phangorn)
+data(yeast)
+```
+
+To save the data to a FASTA file, run:
+
+```r
+write.DNA(as.DNAbin(yeast, file="yeast.fa", format="fasta"))
+```
 
 References:
 

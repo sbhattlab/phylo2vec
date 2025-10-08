@@ -4,7 +4,7 @@
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://phylo2vec.readthedocs.io)
 [![DOI](https://zenodo.org/badge/710195598.svg)](https://zenodo.org/badge/latestdoi/710195598)
 
-<span><img src="https://img.shields.io/badge/SSEC-Project-purple?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAOCAQAAABedl5ZAAAACXBIWXMAAAHKAAABygHMtnUxAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAMNJREFUGBltwcEqwwEcAOAfc1F2sNsOTqSlNUopSv5jW1YzHHYY/6YtLa1Jy4mbl3Bz8QIeyKM4fMaUxr4vZnEpjWnmLMSYCysxTcddhF25+EvJia5hhCudULAePyRalvUteXIfBgYxJufRuaKuprKsbDjVUrUj40FNQ11PTzEmrCmrevPhRcVQai8m1PRVvOPZgX2JttWYsGhD3atbHWcyUqX4oqDtJkJiJHUYv+R1JbaNHJmP/+Q1HLu2GbNoSm3Ft0+Y1YMdPSTSwQAAAABJRU5ErkJggg==&style=plastic" /><span>
+<span><img src="https://img.shields.io/badge/SSEC-Project-purple?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAOCAQAAABedl5ZAAAACXBIWXMAAAHKAAABygHMtnUxAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAMNJREFUGBltwcEqwwEcAOAfc1F2sNsOTqSlNUopSv5jW1YzHHYY/6YtLa1Jy4mbl3Bz8QIeyKM4fMaUxr4vZnEpjWnmLMSYCysxTcddhF25+EvJia5hhCudULAePyRalvUteXIfBgYxJufRuaKuprKsbDjVUrUj40FNQ11PTzEmrCmrevPhRcVQai8m1PRVvOPZgX2JttWYsGhD3atbHWcyUqX4oqDtJkJiJHUYv+R1JbaNHJmP/+Q1HLu2GbNoSm3Ft0+Y1YMdPSTSwQAAAABJRU5ErkJggg==&style=plastic"/><span>
 ![LGPL-3.0 License](https://badgen.net/badge/license/LGPL-3.0)
 
 <!-- [![Documentation Status](https://readthedocs.org/projects/phylo2vec/badge/?version=latest)](https://phylo2vec.readthedocs.io/en/latest/?badge=latest) -->
@@ -189,6 +189,23 @@ phylo2vec to_newick $'0.0,1.0,2.0\n0.0,3.0,4.0' # Convert a matrix to Newick
 Description of the datasets as well as download links are available in in the
 [datasets](https://github.com/sbhattlab/phylo2vec/tree/main/py-phylo2vec/phylo2vec/datasets/descr)
 directory.
+
+Datasets for which a FASTA file is available can be downloaded and loaded into
+Biopython:
+
+```python
+from phylo2vec.datasets import load_alignment
+
+load_alignment("zika")
+```
+
+Readily downloadable datasets can be listed using:
+
+```python
+from phylo2vec.datasets import list_datasets
+
+list_dataset()
+```
 
 ## Documentation
 
