@@ -95,7 +95,7 @@ mod tests {
     #[case(array![[1.0, 2.0], [3.0, 4.0]], array![[1.00001, 2.00002], [3.00003, 4.00004]], true)]
     // Within atol
     #[case(array![[1e-9, 2e-9], [3e-9, 4e-9]], array![[0.0, 0.0], [0.0, 0.0]], true)]
-    // Excedes rtol
+    // Exceeds rtol
     #[case(array![[1.0, 2.0], [3.0, 4.0]], array![[1.0001, 2.0], [3.0, 4.0]], false)]
     // Large values
     #[case(array![[1e10, 2e10]], array![[1e10 + 1e5, 2e10 + 2e5]], true)]
