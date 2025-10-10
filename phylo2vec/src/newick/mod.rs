@@ -583,6 +583,23 @@ mod tests {
     use rand::{distr::Alphanumeric, Rng};
     use rstest::*;
 
+    // Test that default() creates the same patterns as new()
+    #[rstest]
+    #[case("(1,2)3")]
+    #[case("((1,2)3,(4,5)6)7")]
+    // Case with BLs
+    #[case("((1:0.1,2:0.2)3:0.3,(4:0.4,5:0.5)6:0.6)7:0.7")]
+    fn test_newick_patterns_default(#[case] newick: &str) {
+        let patterns_new = NewickPatterns::new();
+        let patterns_default = NewickPatterns::default();
+
+        // Test that default() creates the same patterns as new()
+        assert_eq!(
+            patterns_new.pairs.is_match(newick),
+            patterns_default.pairs.is_match(newick)
+        );
+    }
+
     #[rstest]
     #[case(10)]
     #[case(100)]
@@ -688,6 +705,19 @@ mod tests {
         assert_eq!(bls, expected_bls);
     }
 
+    #[rstest]
+    // No BLs
+    #[case("((1,2)4,3)5;")]
+    #[case("((1,2)5,(3,4)6)7;")]
+    // Partially missing BLs
+    #[case("((1:0.5,2)4,3:0.8)5;")]
+    #[case("((1:0.5,2)4:0.9,3:0.8)5;")]
+    #[case("((1:,2:0.2)4:0.9,3:0.8)5;")]
+    #[should_panic]
+    fn test_parse_with_bls_panics(#[case] newick: &str) {
+        parse_with_bls(newick).expect("Expected Newick parsing to fail");
+    }
+
     // Generate a random Newick string with random taxon labels
     fn generate_random_string_newick(n_leaves: usize) -> String {
         // Create random taxon labels
@@ -714,11 +744,68 @@ mod tests {
     }
 
     #[rstest]
+    #[case(0)]
     #[case(10)]
     #[case(100)]
     #[case(1000)]
     fn test_label_mapping(#[case] n_leaves: usize) {
-        let nw_str = generate_random_string_newick(n_leaves);
+        let nw_str = match n_leaves {
+            0 => String::default(),
+            _ => generate_random_string_newick(n_leaves),
+        };
+
+        // Get the "sorted" version of the integer Newick
+        // Ex: nw1 = "(((0,(1,5)),((2,((3,9),7)),(6,8))),4);"
+        // Ex: nw3 = "(((0,(1,2)),((3,((4,5),6)),(7,8))),9);"
+        let (nw_int, mapping) = create_label_mapping(&nw_str);
+
+        let nw_str2 = apply_label_mapping(&nw_int, &mapping).expect("Oops");
+
+        // Check if nw2 (first Newick with taxon labels) == nw4 (second Newick with taxon labels)
+        // Note: asserting the equality of a random integer Newick from phylo2vec with
+        // a new integer Newick from create + apply_label_mapping does not work
+        // because the order of the leaves is not guaranteed to be the same.
+        // Ex: nw1 = "(((0,(1,5)),((2,((3,9),7)),(6,8))),4);"
+        // Ex: nw3 = "(((0,(1,2)),((3,((4,5),6)),(7,8))),9);"
+        // Same topology, but different leaf placements
+        assert_eq!(nw_str, nw_str2);
+    }
+
+    // Generate a random Newick string with random taxon labels
+    fn generate_random_string_newick_with_bls(n_leaves: usize) -> String {
+        // Create random taxon labels
+        // Alphanumeric: a-z, A-Z and 0-9.
+        let mut rng = rand::rng();
+        let mut mapping = HashMap::<usize, String>::new();
+        let strlen = 10;
+
+        for i in 0..n_leaves {
+            let taxon: String = (&mut rng)
+                .sample_iter(&Alphanumeric)
+                .take(strlen)
+                .map(char::from)
+                .collect();
+            mapping.insert(i, taxon);
+        }
+
+        // Generate a random newick
+        let m = sample_matrix(n_leaves, false);
+        let nw1 = remove_parent_labels(&to_newick_from_matrix(&m.view()));
+
+        // Map new taxon labels to each leaf
+        apply_label_mapping(&nw1, &mapping).expect("Failed to apply label mapping")
+    }
+
+    #[rstest]
+    #[case(0)]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_label_mapping_with_bls(#[case] n_leaves: usize) {
+        let nw_str = match n_leaves {
+            0 => String::default(),
+            _ => generate_random_string_newick_with_bls(n_leaves),
+        };
 
         // Get the "sorted" version of the integer Newick
         // Ex: nw1 = "(((0,(1,5)),((2,((3,9),7)),(6,8))),4);"

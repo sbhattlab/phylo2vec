@@ -132,6 +132,8 @@ mod tests {
     // Verifies correct matrix generation from a Newick string.
     #[rstest]
     #[case("(0:0.1,1:0.2)2;", array![[0.0, 0.1, 0.2]] )]
+    // Cover bl_rows_to_swap case
+    #[case("(1:0.2,0:0.1)2;", array![[0.0, 0.1, 0.2]] )]
     #[case("(((0:0.9,2:0.4)4:0.8,3:3.0)5:0.4,1:0.5)6;", array![
         [0.0, 0.9, 0.4],
         [0.0, 0.8, 3.0],

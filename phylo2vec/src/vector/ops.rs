@@ -98,15 +98,15 @@ pub fn remove_leaf(v: &mut [usize], leaf: usize) -> (Vec<usize>, usize) {
     (new_vec, sister)
 }
 
-pub fn argeq(ancestry: &Ancestry, leaf: usize) -> (usize, usize) {
+pub fn argeq(ancestry: &Ancestry, node: usize) -> (usize, usize) {
     for (r, a_r) in ancestry.iter().enumerate() {
         for (c, a_rc) in a_r.iter().enumerate() {
-            if *a_rc == leaf {
+            if *a_rc == node {
                 return (r, c);
             }
         }
     }
-    panic!("Leaf not found in ancestry");
+    panic!("Node not found in ancestry");
 }
 
 // Get the ancestry path of a tree node
@@ -402,6 +402,14 @@ mod tests {
     ) {
         let coords = argeq(&ancestry, leaf);
         assert_eq!(coords, expected_coords);
+    }
+
+    #[rstest]
+    #[case(vec![[0, 1, 2]], 3)]
+    #[case(vec![[0, 1, 4], [4, 2, 5], [5, 3, 6]], 7)]
+    #[should_panic]
+    fn test_argeq_panic(#[case] ancestry: Ancestry, #[case] leaf: usize) {
+        argeq(&ancestry, leaf);
     }
 
     #[rstest]
