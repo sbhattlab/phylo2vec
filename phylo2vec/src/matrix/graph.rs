@@ -87,6 +87,25 @@ mod tests {
         true
     }
 
+    // Test all_close
+    #[rstest]
+    // Identical
+    #[case(array![[1.0, 2.0], [3.0, 4.0]], array![[1.0, 2.0], [3.0, 4.0]], true)]
+    // Within rtol
+    #[case(array![[1.0, 2.0], [3.0, 4.0]], array![[1.00001, 2.00002], [3.00003, 4.00004]], true)]
+    // Within atol
+    #[case(array![[1e-9, 2e-9], [3e-9, 4e-9]], array![[0.0, 0.0], [0.0, 0.0]], true)]
+    // Exceeds rtol
+    #[case(array![[1.0, 2.0], [3.0, 4.0]], array![[1.0001, 2.0], [3.0, 4.0]], false)]
+    // Large values
+    #[case(array![[1e10, 2e10]], array![[1e10 + 1e5, 2e10 + 2e5]], true)]
+    // Single diff
+    #[case(array![[1.0, 2.0], [3.0, 4.0]], array![[1.0, 2.0], [3.0, 5.0]], false)]
+    fn test_allclose(#[case] a: Array2<f64>, #[case] b: Array2<f64>, #[case] expected: bool) {
+        let result = allclose(a.view(), b.view());
+        assert_eq!(result, expected);
+    }
+
     // Test cophenetic distances with branch lengths in the `cophenetic_distances_with_bls` function
     // Verifies correct cophenetic distance calculation from a matrix with branch lengths.
     #[rstest]
@@ -208,6 +227,40 @@ mod tests {
             "VCV mismatch: Computed VCV = {:?}, Expected VCV = {:?}",
             try_vcv,
             expected_vcv
+        );
+    }
+
+    #[rstest]
+    #[case(array![[0.0, 1.0, 1.0]], array![[1.0, 0.0], [0.0, 1.0]])]
+    #[case(array![[0.0, 1.0, 10.0]], array![[1.0, 0.0], [0.0, 0.1]])]
+    #[case(array![
+        [0.0, 1.0, 1.0], [0.0, 1.0, 1.0]
+    ], array![
+        [1.0, 0.0, 0.0, -1.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, -1.0],
+        [-1.0, 0.0, -1.0, 3.0]
+    ])]
+    #[case(array![
+        [0.0, 0.4, 0.5],
+        [2.0, 0.1, 0.2],
+        [2.0, 1.0, 0.8],
+    ], array![[10.0, 0.0, 0.0, 0.0, 0.0, -10.0],
+        [0.0, 5.0, 0.0, 0.0, 0.0, -5.0],
+        [0.0, 0.0, 2.5, 0.0, -2.5, 0.0],
+        [0.0, 0.0, 0.0, 2.0, -2.0, 0.0],
+        [0.0, 0.0, -2.5, -2.0, 5.75, 0.0],
+        [-10.0, -5.0, 0.0, 0.0, 0.0, 16.0]])]
+    fn test_pre_precision(
+        #[case] matrix: Array2<f64>,
+        #[case] expected_pre_precision: Array2<f64>,
+    ) {
+        let try_pre_precision = pre_precision(&matrix.view());
+        assert!(
+            allclose(try_pre_precision.view(), expected_pre_precision.view()),
+            "Pre-precision mismatch: Computed Pre-precision = {:?}, Expected Pre-precision = {:?}",
+            try_pre_precision,
+            expected_pre_precision
         );
     }
 }
