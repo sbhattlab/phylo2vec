@@ -30,7 +30,7 @@ For more details, see the [JOSS Paper Format guidelines](https://joss.readthedoc
 
 To double-check the word count, you may run:
 
-```ruby
+```bash
 ruby joss/src/wordcount.rb
 ```
 
