@@ -13,6 +13,7 @@ authors:
     affiliation: 1 # (Multiple affiliations must be quoted)
     equal-contrib: true
   - name: Ayush Nag
+    orcid: 0009-0008-1790-597X
     affiliation: 2
     equal-contrib: true
   - name: Matthew J Penn
