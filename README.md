@@ -251,6 +251,20 @@ If you use Phylo2Vec in your research, please cite:
 }
 ```
 
+If you use the software, please cite:
+
+```bibtex
+@misc{10.48550/arXiv.2506.19490,
+      title={phylo2vec: a library for vector-based phylogenetic tree manipulation},
+      author={Neil Scheidwasser and Ayush Nag and Matthew J Penn and Anthony MV Jakob and Frederik Mølkjær Andersen and Mark P Khurana and Landung Setiawan and David A Duchêne and Samir Bhatt},
+      year={2025},
+      eprint={2506.19490},
+      archivePrefix={arXiv},
+      primaryClass={q-bio.PE},
+      url={https://arxiv.org/abs/2506.19490},
+}
+```
+
 ## Related Work
 
 - Preprint repository (core functions are deprecated):
