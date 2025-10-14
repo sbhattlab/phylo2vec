@@ -50,7 +50,7 @@ manipulation</article-title>
 <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-0996-1356</contrib-id>
 <name>
 <surname>Jakob</surname>
-<given-names>Anthony M. V.</given-names>
+<given-names>Anthony</given-names>
 </name>
 <xref ref-type="aff" rid="aff-4"/>
 </contrib>
@@ -58,7 +58,7 @@ manipulation</article-title>
 <contrib-id contrib-id-type="orcid">https://orcid.org/0009-0004-4071-3707</contrib-id>
 <name>
 <surname>Andersen</surname>
-<given-names>Frederik M.</given-names>
+<given-names>Frederik Mølkjær</given-names>
 </name>
 <xref ref-type="aff" rid="aff-1"/>
 </contrib>
@@ -66,7 +66,7 @@ manipulation</article-title>
 <contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-1123-7674</contrib-id>
 <name>
 <surname>Khurana</surname>
-<given-names>Mark P.</given-names>
+<given-names>Mark Poulsen</given-names>
 </name>
 <xref ref-type="aff" rid="aff-1"/>
 </contrib>
@@ -123,9 +123,9 @@ College London, London, United Kingdom</institution>
 <author-notes>
 <corresp id="cor-1">* E-mail: <email></email></corresp>
 </author-notes>
-<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2025-05-14">
-<day>14</day>
-<month>5</month>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2025-06-13">
+<day>13</day>
+<month>6</month>
 <year>2025</year>
 </pub-date>
 <volume>¿VOL?</volume>
@@ -188,8 +188,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   et al., 2023</xref>) and phylogenetic trees
   (<xref alt="Chauve et al., 2025" rid="ref-chauve2025" ref-type="bibr">Chauve
   et al., 2025</xref>;
-  <xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>;
+  <xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2025</xref>;
   <xref alt="Richman et al., 2025" rid="ref-richman2025" ref-type="bibr">Richman
   et al., 2025</xref>). Compared to the traditional Newick format which
   represents trees using strings of nested parentheses
@@ -202,16 +202,17 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <monospace>phylo2vec</monospace> (or Phylo2Vec), a high-performance
   software package for encoding, manipulating, and analysing binary
   phylogenetic trees. At its core, the package is based on the phylo2vec
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>) representation of binary trees, and is designed
+  (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2025</xref>) representation of binary trees, and is designed
   to enable fast sampling and tree comparison. This release features a
   core implementation in Rust for improved performance and memory
   efficiency
   (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
   with wrappers in R and Python (superseding the original release
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>)), making it accessible to a broad audience in the
-  bioinformatics community.</p>
+  presented in Penn et al.
+  (<xref alt="2025" rid="ref-penn2024" ref-type="bibr">2025</xref>)),
+  making it accessible to a broad audience in the bioinformatics
+  community.</p>
   <fig>
     <caption><p>Benchmark times for converting a phylo2vec vector to a
     Newick string (left) and vice versa (right). Execution time was
@@ -219,8 +220,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
     in the latest release (via Rust bindings with
     <ext-link ext-link-type="uri" xlink:href="https://github.com/PyO3/pyo3">PyO3</ext-link>)
     against the previous release
-    (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-    et al., 2024</xref>) based on <monospace>Numba</monospace>
+    (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
+    et al., 2025</xref>) based on <monospace>Numba</monospace>
     (<xref alt="Lam et al., 2015" rid="ref-lam2015" ref-type="bibr">Lam
     et al., 2015</xref>). All benchmarks were performed on a workstation
     equipped with an AMD Ryzen Threadripper PRO 5995WX (64 cores, 2.7
@@ -249,8 +250,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (<xref alt="Moreno et al., 2024" rid="ref-Moreno2024" ref-type="bibr">Moreno
   et al., 2024</xref>) in Python, by providing fast tree sampling, fast
   tree comparison and efficient tree data compression
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>). Third, the phylo2vec representation offers a
+  (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2025</xref>). Third, the phylo2vec representation offers a
   pathway to using new optimisation frameworks for phylogenetic
   inference. A notable example is GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
@@ -261,8 +262,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <title>Features</title>
   <p>The presented release of <monospace>phylo2vec</monospace> addresses
   optimisations limitations of
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>) with <inline-formula><alternatives>
+  (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2025</xref>) with <inline-formula><alternatives>
   <tex-math><![CDATA[\mathcal{O}(n \log n)]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>𝒪</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>n</mml:mi><mml:mo>log</mml:mo><mml:mi>n</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow></mml:mrow></mml:math></alternatives></inline-formula>
   implementations for vector-to-Newick and Newick-to-vector conversions,
@@ -271,13 +272,13 @@ a Creative Commons Attribution 4.0 International License (CC BY
   &amp; Landis, 1962</xref>) and Fenwick trees
   (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
   1994</xref>), respectively.</p>
-  <p>New features include an extension of the vector representation to
-  support branch length annotations, leaf-level operations (pruning,
-  placement, MRCA identification), fast cophenetic distance matrix
-  calculation, and various optimisation schemes based on phylo2vec tree
-  representations, notably hill-climbing
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>) and GradME
+  <p>New features in the latest release include an extension of the
+  vector representation to support branch length annotations, leaf-level
+  operations (pruning, placement, and MRCA identification), fast
+  cophenetic distance matrix calculation, and various optimisation
+  schemes based on phylo2vec tree representations, notably hill-climbing
+  (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
+  et al., 2025</xref>) and GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
   et al., 2023</xref>). We also propose a likelihood function for
   Bayesian MCMC inference that leverages tree representation
@@ -301,7 +302,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <list list-type="bullet">
     <list-item>
       <p>Unit test frameworks for Rust
-      (<ext-link ext-link-type="uri" xlink:href="https://crates.io">cargo</ext-link>),
+      (<ext-link ext-link-type="uri" xlink:href="https://doc.rust-lang.org/stable/cargo">cargo</ext-link>),
       Python
       (<ext-link ext-link-type="uri" xlink:href="https://github.com/pytest-dev/pytest">pytest</ext-link>),
       and R (testthat
@@ -320,7 +321,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <ext-link ext-link-type="uri" xlink:href="https://jupyterbook.org">Jupyter
   Book</ext-link> and
   <ext-link ext-link-type="uri" xlink:href="https://about.readthedocs.com/">Read
-  The Docs</ext-link>.</p>
+  the Docs</ext-link>.</p>
 </sec>
 <sec id="acknowledgements">
   <title>Acknowledgements</title>
@@ -355,10 +356,12 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <article-title>Phylo2Vec: A vector representation for binary trees</article-title>
       <source>Syst. Biol.</source>
       <publisher-name>Oxford University Press US</publisher-name>
-      <year iso-8601-date="2024">2024</year>
+      <year iso-8601-date="2025">2025</year>
+      <volume>74</volume>
+      <issue>2</issue>
       <pub-id pub-id-type="doi">10.1093/sysbio/syae030</pub-id>
-      <fpage>syae030</fpage>
-      <lpage></lpage>
+      <fpage>250</fpage>
+      <lpage>266</lpage>
     </element-citation>
   </ref>
   <ref id="ref-paradis2019">
@@ -768,7 +771,6 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <publisher-name>Sinauer Associates</publisher-name>
       <publisher-loc>Sunderland, MA</publisher-loc>
       <year iso-8601-date="2004">2004</year>
-      <volume>2</volume>
     </element-citation>
   </ref>
   <ref id="ref-khurana2024">
