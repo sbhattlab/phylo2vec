@@ -19,13 +19,13 @@ authors:
   - name: Matthew J. Penn
     orcid: 0000-0001-8682-5393
     affiliation: 1
-  - name: Anthony M.V. Jakob
+  - name: Anthony Jakob
     orcid: 0000-0002-0996-1356
     affiliation: 4
-  - name: Frederik M. Andersen
+  - name: Frederik Mølkjær Andersen
     orcid: 0009-0004-4071-3707
     affiliation: 1
-  - name: Mark P. Khurana
+  - name: Mark Poulsen Khurana
     orcid: 0000-0002-1123-7674
     affiliation: 1
   - name: Landung Setiawan
