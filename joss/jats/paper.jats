@@ -123,9 +123,9 @@ College London, London, United Kingdom</institution>
 <author-notes>
 <corresp id="cor-1">* E-mail: <email></email></corresp>
 </author-notes>
-<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2025-05-14">
-<day>14</day>
-<month>5</month>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2025-06-13">
+<day>13</day>
+<month>6</month>
 <year>2025</year>
 </pub-date>
 <volume>¿VOL?</volume>
@@ -271,11 +271,11 @@ a Creative Commons Attribution 4.0 International License (CC BY
   &amp; Landis, 1962</xref>) and Fenwick trees
   (<xref alt="Fenwick, 1994" rid="ref-fenwick1994" ref-type="bibr">Fenwick,
   1994</xref>), respectively.</p>
-  <p>New features include an extension of the vector representation to
-  support branch length annotations, leaf-level operations (pruning,
-  placement, MRCA identification), fast cophenetic distance matrix
-  calculation, and various optimisation schemes based on phylo2vec tree
-  representations, notably hill-climbing
+  <p>New features in the latest release include an extension of the
+  vector representation to support branch length annotations, leaf-level
+  operations (pruning, placement, and MRCA identification), fast
+  cophenetic distance matrix calculation, and various optimisation
+  schemes based on phylo2vec tree representations, notably hill-climbing
   (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2024</xref>) and GradME
   (<xref alt="Penn et al., 2023" rid="ref-penn2023" ref-type="bibr">Penn
@@ -301,7 +301,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <list list-type="bullet">
     <list-item>
       <p>Unit test frameworks for Rust
-      (<ext-link ext-link-type="uri" xlink:href="https://crates.io">cargo</ext-link>),
+      (<ext-link ext-link-type="uri" xlink:href="https://doc.rust-lang.org/stable/cargo">cargo</ext-link>),
       Python
       (<ext-link ext-link-type="uri" xlink:href="https://github.com/pytest-dev/pytest">pytest</ext-link>),
       and R (testthat
@@ -320,7 +320,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <ext-link ext-link-type="uri" xlink:href="https://jupyterbook.org">Jupyter
   Book</ext-link> and
   <ext-link ext-link-type="uri" xlink:href="https://about.readthedocs.com/">Read
-  The Docs</ext-link>.</p>
+  the Docs</ext-link>.</p>
 </sec>
 <sec id="acknowledgements">
   <title>Acknowledgements</title>
@@ -768,7 +768,6 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <publisher-name>Sinauer Associates</publisher-name>
       <publisher-loc>Sunderland, MA</publisher-loc>
       <year iso-8601-date="2004">2004</year>
-      <volume>2</volume>
     </element-citation>
   </ref>
   <ref id="ref-khurana2024">

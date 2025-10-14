@@ -47,7 +47,7 @@ affiliations:
    index: 3
  - name: Independent researcher
    index: 4
-date: 14 May 2025
+date: 13 June 2025
 geometry: margin=2cm
 bibliography: paper.bib
 ---
@@ -68,16 +68,16 @@ The purpose of the \texttt{phylo2vec} library is threefold. First, it provides r
 
 The presented release of \texttt{phylo2vec} addresses optimisations limitations of [@penn2024] with $\mathcal{O}(n \log n)$ implementations for vector-to-Newick and Newick-to-vector conversions, leveraging Adelson-Velsky and Landis (AVL) trees [@adelson1962] and Fenwick trees [@fenwick1994], respectively.
 
-New features include an extension of the vector representation to support branch length annotations, leaf-level operations (pruning, placement, MRCA identification), fast cophenetic distance matrix calculation, and various optimisation schemes based on phylo2vec tree representations, notably hill-climbing [@penn2024] and GradME [@penn2023]. We also propose a likelihood function for Bayesian MCMC inference that leverages tree representation similarities with \texttt{BEAGLE} [@suchard2009; @ayres2012]. Finally, user-friendliness is enhanced with step-by-step demos of phylo2vec’s representations and core functions.
+New features in the latest release include an extension of the vector representation to support branch length annotations, leaf-level operations (pruning, placement, and MRCA identification), fast cophenetic distance matrix calculation, and various optimisation schemes based on phylo2vec tree representations, notably hill-climbing [@penn2024] and GradME [@penn2023]. We also propose a likelihood function for Bayesian MCMC inference that leverages tree representation similarities with \texttt{BEAGLE} [@suchard2009; @ayres2012]. Finally, user-friendliness is enhanced with step-by-step demos of phylo2vec’s representations and core functions.
 
 # Maintenance
 
 A strong focus of this release is to support long-term maintenance through implementing recommended software practices into its project structure and development workflow. The project is structured with a Rust API containing core algorithms with language bindings to avoid tight coupling and enable easy language additions. Additionally, we have established a robust continuous integration (CI) pipeline using GitHub Actions, which features:
 
-* Unit test frameworks for Rust ([cargo](https://crates.io)), Python ([pytest](https://github.com/pytest-dev/pytest)), and R (testthat [@wickham2011])
+* Unit test frameworks for Rust ([cargo](https://doc.rust-lang.org/stable/cargo)), Python ([pytest](https://github.com/pytest-dev/pytest)), and R (testthat [@wickham2011])
 * Benchmarking on the Rust code ([criterion](https://github.com/bheisler/criterion.rs)) and its Python bindings ([pytest-benchmark](https://github.com/ionelmc/pytest-benchmark))
 
-Lastly, to complement Jupyter Notebook demos, comprehensive documentation is provided using [Jupyter Book](https://jupyterbook.org) and [Read The Docs](https://about.readthedocs.com/).
+Lastly, to complement Jupyter Notebook demos, comprehensive documentation is provided using [Jupyter Book](https://jupyterbook.org) and [Read the Docs](https://about.readthedocs.com/).
 
 # Acknowledgements
 
