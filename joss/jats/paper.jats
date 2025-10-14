@@ -209,9 +209,10 @@ a Creative Commons Attribution 4.0 International License (CC BY
   efficiency
   (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
   with wrappers in R and Python (superseding the original release
-  (<xref alt="Penn et al., 2024" rid="ref-penn2024" ref-type="bibr">Penn
-  et al., 2024</xref>)), making it accessible to a broad audience in the
-  bioinformatics community.</p>
+  presented in Penn et al.
+  (<xref alt="2024" rid="ref-penn2024" ref-type="bibr">2024</xref>)),
+  making it accessible to a broad audience in the bioinformatics
+  community.</p>
   <fig>
     <caption><p>Benchmark times for converting a phylo2vec vector to a
     Newick string (left) and vice versa (right). Execution time was
