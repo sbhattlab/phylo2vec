@@ -178,7 +178,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <xref alt="Sanderson, 2021" rid="ref-sanderson2021" ref-type="bibr">Sanderson,
   2021</xref>;
   <xref alt="Turakhia et al., 2021" rid="ref-turakhia2021" ref-type="bibr">Turakhia
-  et al., 2021</xref>), visualization
+  et al., 2021</xref>), visualisation
   (<xref alt="Sanderson, 2022" rid="ref-sanderson2022" ref-type="bibr">Sanderson,
   2022</xref>), and lineage identification
   (<xref alt="McBroome et al., 2024" rid="ref-mcbroome2024" ref-type="bibr">McBroome
@@ -207,8 +207,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   to enable fast sampling and tree comparison. This release features a
   core implementation in Rust for improved performance and memory
   efficiency
-  (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>),
-  with wrappers in R and Python (superseding the original release
+  (<xref alt="[fig:benchmarks]" rid="figU003Abenchmarks">[fig:benchmarks]</xref>)
+  with wrappers in R and Python (superseding the original Python release
   (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2025</xref>)), making it accessible to a broad audience in the
   bioinformatics community.</p>
@@ -238,7 +238,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (<xref alt="Duchemin et al., 2018" rid="ref-duchemin2018" ref-type="bibr">Duchemin
   et al., 2018</xref>) for reconciled phylogenies
   (<xref alt="Nakhleh, 2013" rid="ref-nakhleh2013" ref-type="bibr">Nakhleh,
-  2013</xref>), and <monospace>rust-bio</monospace>
+  2013</xref>) and <monospace>rust-bio</monospace>
   (<xref alt="Köster, 2016" rid="ref-koster2016" ref-type="bibr">Köster,
   2016</xref>), which does not yet cover phylogenetics. Second, it
   complements existing libraries such as <monospace>ape</monospace>
@@ -247,8 +247,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   (<xref alt="Huerta-Cepas et al., 2016" rid="ref-huerta2016" ref-type="bibr">Huerta-Cepas
   et al., 2016</xref>) and <monospace>DendroPy</monospace>
   (<xref alt="Moreno et al., 2024" rid="ref-Moreno2024" ref-type="bibr">Moreno
-  et al., 2024</xref>) in Python, by providing fast tree sampling, fast
-  tree comparison and efficient tree data compression
+  et al., 2024</xref>) in Python, by providing fast tree sampling and
+  comparison, and efficient tree data compression
   (<xref alt="Penn et al., 2025" rid="ref-penn2024" ref-type="bibr">Penn
   et al., 2025</xref>). Third, the phylo2vec representation offers a
   pathway to using new optimisation frameworks for phylogenetic
@@ -326,15 +326,15 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <title>Acknowledgements</title>
   <p>S.B. acknowledges funding from the MRC Centre for Global Infectious
   Disease Analysis (reference MR/X020258/1), funded by the UK Medical
-  Research Council (MRC). This UK funded award is carried out in the
-  frame of the Global Health EDCTP3 Joint Undertaking. S.B. acknowledges
-  support from the Danish National Research Foundation via a chair grant
-  (DNRF160, also supporting N.S. and M.P.K.), The Eric and Wendy Schmidt
-  Fund For Strategic Innovation via the Schmidt Polymath Award
-  (G-22-63345, also supporting M.J.P. and F.M.A.), and the Novo Nordisk
-  Foundation via The Novo Nordisk Young Investigator Award
+  Research Council (MRC). This UK-funded award is carried out within the
+  framework of the Global Health EDCTP3 Joint Undertaking. S.B.
+  acknowledges support from the Danish National Research Foundation via
+  a chair grant (DNRF160, also supporting N.S. and M.P.K.), The Eric and
+  Wendy Schmidt Fund For Strategic Innovation via the Schmidt Polymath
+  Award (G-22-63345, also supporting M.J.P. and F.M.A.), and the Novo
+  Nordisk Foundation via The Novo Nordisk Young Investigator Award
   (NNF20OC0059309). D.A.D. is supported by a Data Science - Emerging
-  researcher award from Novo Nordisk Fonden (NNF23OC0084647). The
+  Researcher award from Novo Nordisk Fonden (NNF23OC0084647). The
   authors also thank Madeline Gordon for her help in implementing
   functions related to the matrix format.</p>
 </sec>
