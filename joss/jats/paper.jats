@@ -373,6 +373,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>Bioinformatics</source>
       <year iso-8601-date="2019">2019</year>
       <volume>35</volume>
+      <issue>3</issue>
       <pub-id pub-id-type="doi">10.1093/bioinformatics/bty633</pub-id>
       <fpage>526</fpage>
       <lpage>528</lpage>
@@ -431,6 +432,7 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <source>Proc. USSR Acad. Sci.</source>
       <year iso-8601-date="1962">1962</year>
       <volume>146</volume>
+      <issue>2</issue>
       <fpage>263</fpage>
       <lpage>266</lpage>
     </element-citation>
@@ -580,6 +582,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
       <year iso-8601-date="2022">2022</year>
       <volume>11</volume>
       <pub-id pub-id-type="doi">10.7554/eLife.82392</pub-id>
+      <fpage>e82392</fpage>
+      <lpage></lpage>
     </element-citation>
   </ref>
   <ref id="ref-demaio2023">
