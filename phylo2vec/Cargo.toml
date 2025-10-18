@@ -12,6 +12,7 @@ bit-set = "0.8.0"
 ndarray = "0.16.1"
 rand = "*"
 regex = "1.11.1"
+ryu = "1.0"
 thiserror = "2.0.12"
 
 [dev-dependencies]

@@ -1,5 +1,6 @@
 /// Functions to convert Phylo2Vec matrices to other tree representations
 use ndarray::{Array2, ArrayView2, Axis};
+use ryu::Buffer;
 
 use crate::matrix::base::{check_m, parse_matrix};
 use crate::newick::{has_parents, parse_with_bls};
@@ -37,18 +38,18 @@ fn build_newick_with_bls(pairs: &Pairs, branch_lengths: &[[f64; 2]]) -> String {
 
     let mut cache = prepare_cache(pairs);
 
+    let mut buffer = Buffer::new();
+
     for (i, (&(c1, c2), &[bl1, bl2])) in pairs.iter().zip(branch_lengths.iter()).enumerate() {
         let s2 = std::mem::take(&mut cache[c2]);
         let sp = (num_leaves + i).to_string();
-        let sb1 = bl1.to_string();
-        let sb2 = bl2.to_string();
 
         cache[c1].push(':');
-        cache[c1].push_str(&sb1);
+        cache[c1].push_str(buffer.format(bl1));
         cache[c1].push(',');
         cache[c1].push_str(&s2);
         cache[c1].push(':');
-        cache[c1].push_str(&sb2);
+        cache[c1].push_str(buffer.format(bl2));
         cache[c1].push(')');
         cache[c1].push_str(&sp);
     }
@@ -198,7 +199,7 @@ mod tests {
         [0.0, 1.0, 3.0],
         [0.0, 0.1, 0.2],
         [1.0, 0.5, 0.7],
-    ], "((0:0.1,2:0.2)5:0.5,(1:1,3:3)4:0.7)6;")]
+    ], "((0:0.1,2:0.2)5:0.5,(1:1.0,3:3.0)4:0.7)6;")]
     fn test_to_newick(#[case] m: Array2<f64>, #[case] expected: &str) {
         let newick = to_newick(&m.view());
         assert_eq!(newick, expected);
