@@ -553,6 +553,7 @@ dependencies = [
  "rand",
  "regex",
  "rstest",
+ "ryu",
  "thiserror",
 ]
 

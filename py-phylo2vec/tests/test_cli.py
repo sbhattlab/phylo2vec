@@ -264,7 +264,7 @@ class TestToNewick:
             with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
                 main()
                 # Check that stdout == 0,2
-                assert mock_stdout.getvalue().strip() == "((0:1,2:2)3:3,1:4)4;"
+                assert mock_stdout.getvalue().strip() == "((0:1.0,2:2.0)3:3.0,1:4.0)4;"
 
     def test_missing_argument(self):
         """Test to_newick without required argument."""
