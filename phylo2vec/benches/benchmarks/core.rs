@@ -1,18 +1,14 @@
-use criterion::{criterion_group, BenchmarkId, Criterion};
-use phylo2vec::matrix::base::sample_matrix;
-use phylo2vec::matrix::convert::{
-    from_newick as from_newick_from_matrix, to_newick as to_newick_from_matrix,
-};
-use phylo2vec::vector::base::sample_vector;
-use phylo2vec::vector::convert::{
-    from_newick as from_newick_from_vector, to_newick as to_newick_from_vector,
-};
 use std::ops::RangeInclusive;
 use std::time::Duration;
 
-/// A range of multipliers used to generate benchmark sample sizes.
-/// Each value in this range is multiplied by 10,000 to produce sample sizes
-/// ranging from 10,000 to 100,000.
+use criterion::{criterion_group, BenchmarkId, Criterion};
+use phylo2vec::matrix::base::sample_matrix;
+use phylo2vec::matrix::convert as mconvert;
+use phylo2vec::vector::base::sample_vector;
+use phylo2vec::vector::convert as vconvert;
+
+// Test sample sizes: 10000 * (1, 2, ..., 10)
+const SCALE: usize = 10000;
 const SAMPLE_SIZES: RangeInclusive<usize> = 1..=10;
 
 /// Benchmark to_newick with both ordered and unordered inputs
@@ -24,8 +20,7 @@ fn bench_to_newick(c: &mut Criterion) {
     );
 
     for i in SAMPLE_SIZES {
-        // Scale the sample size by 10000 to adjust the range for benchmarking purposes
-        let sample_size = 10000 * i;
+        let sample_size = SCALE * i;
 
         // Benchmark ordered case
         group.bench_with_input(
@@ -35,7 +30,7 @@ fn bench_to_newick(c: &mut Criterion) {
                 let v = sample_vector(size, true);
 
                 // Benchmark only the to_newick operation
-                b.iter(|| to_newick_from_vector(&v));
+                b.iter(|| vconvert::to_newick(&v));
             },
         );
 
@@ -47,7 +42,7 @@ fn bench_to_newick(c: &mut Criterion) {
                 let v = sample_vector(size, false);
 
                 // Benchmark only the to_newick operation
-                b.iter(|| to_newick_from_vector(&v));
+                b.iter(|| vconvert::to_newick(&v));
             },
         );
 
@@ -59,7 +54,7 @@ fn bench_to_newick(c: &mut Criterion) {
                 let m = sample_matrix(size, false);
 
                 // Benchmark only the to_newick operation
-                b.iter(|| to_newick_from_matrix(&m.view()));
+                b.iter(|| mconvert::to_newick(&m.view()));
             },
         );
     }
@@ -74,33 +69,30 @@ fn bench_from_newick(c: &mut Criterion) {
         criterion::PlotConfiguration::default().summary_scale(criterion::AxisScale::Logarithmic),
     );
     for i in SAMPLE_SIZES {
-        let sample_size = 10000 * i;
+        let sample_size = SCALE * i;
         group.bench_with_input(
             BenchmarkId::new("vector", sample_size),
             &sample_size,
             |b, &size| {
                 // Generate the Newick string once outside the benchmark loop
-                let v = sample_vector(size, true);
-                let newick = to_newick_from_vector(&v);
+                let v = sample_vector(size, false);
+                let newick = vconvert::to_newick(&v);
 
                 // Benchmark only the to_vector operation
-                b.iter(|| from_newick_from_vector(&newick));
+                b.iter(|| vconvert::from_newick(&newick));
             },
         );
-    }
 
-    for i in SAMPLE_SIZES {
-        let sample_size = 10000 * i;
         group.bench_with_input(
             BenchmarkId::new("matrix", sample_size),
             &sample_size,
             |b, &size| {
                 // Generate the matrix once outside the benchmark loop
                 let m = sample_matrix(size, false);
-                let newick = to_newick_from_matrix(&m.view());
+                let newick = mconvert::to_newick(&m.view());
 
                 // Benchmark only the to_vector operation
-                b.iter(|| from_newick_from_matrix(&newick));
+                b.iter(|| mconvert::from_newick(&newick));
             },
         );
     }

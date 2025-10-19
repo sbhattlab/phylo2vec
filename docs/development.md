@@ -71,15 +71,32 @@ Example Rust criterion benchmark output:
 
 You can also profile the Rust code using samply and locate bottlenecks. The main
 function being profiled by `pixi run profile` is located at
-`phylo2vec/src/profile_main.rs`. The function runs `to_newick` and `to_vector`
-with customizable n_leaves input sizes. You can run the following command to run
-the profile and view it in the interactive Mozilla Firefox profiler:
+`phylo2vec/src/profile_main.rs`. The function runs `to_newick` and `from_newick`
+with customizable `n_leaves` for the input size. You can run the following
+command to run the default profile and view it in the interactive Mozilla
+Firefox profiler:
 
 ```console
 pixi run -e default profile
 ```
 
+By default, this will profile the vector functions for n_leaves = 100000. See
+<https://github.com/sbhattlab/phylo2vec/blob/main/phylo2vec/src/profile_main.rs>
+for more information.
+
 Example profile output: ![Samply profile report](img/profile.png)
+
+To change the default options, run:
+
+```console
+pixi run -e [env] profile [matrix|vector] [n_leaves]
+```
+
+Example for env = `py-phylo2vec`, matrix functions and `n_leaves` = 10000:
+
+```console
+pixi run -e py-phylo2vec profile matrix 10000
+```
 
 ## Python: py-phylo2vec
 
