@@ -668,6 +668,11 @@ mod tests {
         "((0,2)5,(1,3)4)6;"
     )]
     #[case("(((2:0.02,1:0.01),0:0.041),3:1.42);", "(((2,1),0),3);")]
+    #[case("(((2:2e-2,1:1e-2),0:4.1e-2),3:1.42e0);", "(((2,1),0),3);")]
+    #[case(
+        "((0:1.94831E-06,2:9.25e-1)5:1.8209481e-3,(1:1,3:3)4:4)6;",
+        "((0,2)5,(1,3)4)6;"
+    )]
     fn test_remove_branch_lengths(#[case] newick: &str, #[case] expected: &str) {
         let result = remove_branch_lengths(newick);
         assert_eq!(result, expected);

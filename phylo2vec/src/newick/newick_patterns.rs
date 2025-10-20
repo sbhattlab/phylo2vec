@@ -42,7 +42,7 @@ impl NewickPatterns {
         let pnode_pattern = r"\)(\d+)";
         let lnode_generic_pattern = r"\(\b(\w+)\b";
         let rnode_generic_pattern = r",\b(\w+)\b";
-        let bl_pattern = r":\d+(\.\d+)?";
+        let bl_pattern = r":\d+(\.\d+)?([eE][+-]?\d+)?";
         let pair_pattern = format!(r"({lnode_pattern})|({rnode_pattern})");
         Self {
             // Pattern of an integer label on the left of a pair
