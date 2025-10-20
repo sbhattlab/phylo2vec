@@ -237,7 +237,3 @@ def test_incidence(v, d):
             assert np.array_equal(func((data, (rows, cols))).toarray(), d)
         else:
             assert np.array_equal(func(inc).toarray(), d)
-
-
-if __name__ == "__main__":
-    pytest.main()

@@ -78,7 +78,8 @@ COMMANDS = {
 
 
 def parse_args():
-    """Phylo2vec argument parser.
+    """
+    Phylo2vec argument parser.
 
     Sets up the command line interface for the Phylo2Vec CLI.
 
@@ -102,6 +103,10 @@ def parse_args():
                 **arg_details,
             )
 
+    if len(sys.argv) == 1:
+        global_parser.print_help()
+        sys.exit(0)
+
     return global_parser.parse_args()
 
 
@@ -110,30 +115,22 @@ def main():
 
     args = parse_args()
 
-    command_name = sys.argv[1] if len(sys.argv) > 1 else None
+    command_name = sys.argv[1]
+    command = COMMANDS[command_name]
+    func = command["func"]
+    the_args = vars(args)
 
-    if command_name is None:
-        print("No command provided. Use --help for more information.")
-        sys.exit(1)
-    elif command_name not in COMMANDS:
-        print(f"Unknown command: {command_name}. Use --help for more information.")
-        sys.exit(1)
-    else:
-        command = COMMANDS[command_name]
-        func = command["func"]
-        the_args = vars(args)
+    # Process input
+    if command["type"] == "read":
+        the_args["vector_or_matrix"] = read(the_args["vector_or_matrix"])
 
-        # Process input
-        if command["type"] == "read":
-            the_args["vector_or_matrix"] = read(the_args["vector_or_matrix"])
+    out = func(**the_args)
 
-        out = func(**the_args)
+    # Process output
+    if command["type"] == "write":
+        out = write(out)
 
-        # Process output
-        if command["type"] == "write":
-            out = write(out)
-
-        print(out)
+    print(out)
 
 
 if __name__ == "__main__":

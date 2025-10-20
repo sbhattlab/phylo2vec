@@ -33,6 +33,22 @@ def test_v2newick2v(n_leaves):
         assert np.all(v == v2)
 
 
+class TestToNewickEdgeCases:
+    def test_to_newick_empty(self):
+        # dim 0
+        v0 = np.array(0)
+        # Check that we raise a ValueError
+        with pytest.raises(ValueError):
+            to_newick(v0)
+
+    def test_to_newick_ndim3(self):
+        # array with 3 dimensions
+        t = np.zeros((MIN_N_LEAVES, 3, 1))
+        # Check that we raise a ValueError
+        with pytest.raises(ValueError):
+            to_newick(t)
+
+
 @pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
 def test_m2newick2m(n_leaves):
     """
@@ -208,7 +224,3 @@ def test_v2pairs2v(n_leaves):
         pairs = to_pairs(v)
         v2 = from_pairs(pairs)
         assert np.array_equal(v, v2)
-
-
-if __name__ == "__main__":
-    pytest.main()

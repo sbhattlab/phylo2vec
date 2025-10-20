@@ -5,7 +5,7 @@ import pytest
 
 from ete4 import Tree
 
-from phylo2vec.base.newick import from_newick
+from phylo2vec.base.newick import from_newick, to_newick
 from phylo2vec.io.reader import load, load_newick
 from phylo2vec.io.writer import save, save_newick
 from phylo2vec.utils.matrix import sample_matrix
@@ -127,3 +127,33 @@ def test_save_newick_with_labels(tmp_path, n_leaves):
         nw_str2 = f.read().strip()
 
     assert nw_str == nw_str2
+
+
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])
+def test_load_newick_vector_from_str(n_leaves):
+    v = sample_vector(n_leaves)
+    nw_str = to_newick(v)
+    v2 = load_newick(nw_str)
+    assert np.array_equal(v, v2)
+
+
+@pytest.mark.parametrize("n_leaves", [MIN_N_LEAVES, MAX_N_LEAVES])
+def test_load_newick_matrix_from_str(n_leaves):
+    m = sample_matrix(n_leaves)
+    nw_str = to_newick(m)
+    m2 = load_newick(nw_str)
+    assert np.array_equal(m, m2)
+
+
+class TestSaveEdgeCases:
+    def test_save_empty(self):
+        v = np.array(0)
+        with pytest.raises(ValueError):
+            save(v, "test.csv")
+
+    def test_save_ndim3(self):
+        # array with 3 dimensions
+        t = np.zeros((MIN_N_LEAVES, 3, 1))
+        # Check that we raise a ValueError
+        with pytest.raises(ValueError):
+            save(t, "test.csv")
