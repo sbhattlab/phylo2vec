@@ -10,10 +10,10 @@ import pytest
 from phylo2vec.cli import parse_args, main
 
 
-class TestHelp:
-    """Test help functionality."""
+class TestMain:
+    """Test CLI main."""
 
-    def test_main_help(self):
+    def test_help(self):
         """Test main help message displays correctly."""
         with pytest.raises(SystemExit) as exc_info:
             with patch("sys.argv", ["phylo2vec", "--help"]):
@@ -21,37 +21,35 @@ class TestHelp:
         # Help should exit with code 0
         assert exc_info.value.code == 0
 
-    def test_subcommand_help_samplev(self):
+    def test_no_command(self):
+        """Test that main with no command should redirect to help."""
+        # Capture output from both commands
+        with patch("sys.stdout", new_callable=StringIO) as stdout:
+            with pytest.raises(SystemExit) as exc_info:
+                with patch("sys.argv", ["phylo2vec"]):
+                    parse_args()
+
+        with patch("sys.stdout", new_callable=StringIO) as stdout_help:
+            with pytest.raises(SystemExit) as exc_info_help:
+                with patch("sys.argv", ["phylo2vec", "--help"]):
+                    parse_args()
+
+        # Both should exit with code 0
+        assert exc_info.value.code == 0
+        assert exc_info_help.value.code == 0
+
+        assert stdout.getvalue() == stdout_help.getvalue()
+
+
+class TestSampleV:
+    """Test the samplev command."""
+
+    def test_help(self):
         """Test samplev subcommand help."""
         with pytest.raises(SystemExit) as exc_info:
             with patch("sys.argv", ["phylo2vec", "samplev", "--help"]):
                 parse_args()
         assert exc_info.value.code == 0
-
-    def test_subcommand_help_samplem(self):
-        """Test samplem subcommand help."""
-        with pytest.raises(SystemExit) as exc_info:
-            with patch("sys.argv", ["phylo2vec", "samplem", "--help"]):
-                parse_args()
-        assert exc_info.value.code == 0
-
-    def test_subcommand_help_from_newick(self):
-        """Test from_newick subcommand help."""
-        with pytest.raises(SystemExit) as exc_info:
-            with patch("sys.argv", ["phylo2vec", "from_newick", "--help"]):
-                parse_args()
-        assert exc_info.value.code == 0
-
-    def test_subcommand_help_to_newick(self):
-        """Test to_newick subcommand help."""
-        with pytest.raises(SystemExit) as exc_info:
-            with patch("sys.argv", ["phylo2vec", "to_newick", "--help"]):
-                parse_args()
-        assert exc_info.value.code == 0
-
-
-class TestSampleV:
-    """Test the samplev command."""
 
     def test_valid_number(self):
         """Test samplev with valid number of leaves."""
@@ -82,7 +80,7 @@ class TestSampleV:
             with patch("sys.stderr", new_callable=StringIO):  # Suppress error output
                 with patch("sys.argv", ["phylo2vec", "samplev", "not_a_number"]):
                     parse_args()
-        # Should exit with error code (error 2 for argument errors)
+        # Should exit with error code
         assert exc_info.value.code == 2
 
     def test_float(self):
@@ -90,7 +88,7 @@ class TestSampleV:
         with pytest.raises(SystemExit) as exc_info:
             with patch("sys.argv", ["phylo2vec", "samplev", "3.5"]):
                 parse_args()
-        # Should exit with error code (error 2 for argument errors)
+        # Should exit with error code
         assert exc_info.value.code == 2
 
     def test_negative_number(self):
@@ -105,7 +103,7 @@ class TestSampleV:
             with pytest.raises(ValueError):
                 main()
 
-    def test_big_number(self):
+    def test_big_number(self, n_leaves=1000000):
         """Test samplev with a large number."""
         with patch("sys.argv", ["phylo2vec", "samplev", f"{1000000}"]):
             main()
@@ -114,20 +112,27 @@ class TestSampleV:
 class TestSampleM:
     """Test the samplem command."""
 
-    def test_valid_number(self):
+    def test_help(self):
+        """Test samplem subcommand help."""
+        with pytest.raises(SystemExit) as exc_info:
+            with patch("sys.argv", ["phylo2vec", "samplem", "--help"]):
+                parse_args()
+        assert exc_info.value.code == 0
+
+    def test_valid_number(self, n_leaves=5):
         """Test samplem with valid number of leaves."""
-        with patch("sys.argv", ["phylo2vec", "samplem", "5"]):
+        with patch("sys.argv", ["phylo2vec", "samplem", f"{n_leaves}"]):
             args = parse_args()
             assert hasattr(args, "n_leaves")
-            assert args.n_leaves == 5
+            assert args.n_leaves == n_leaves
             assert hasattr(args, "ordered")
             assert not args.ordered
 
-    def test_with_ordered_flag(self):
+    def test_with_ordered_flag(self, n_leaves=3):
         """Test samplem with --ordered flag."""
-        with patch("sys.argv", ["phylo2vec", "samplem", "3", "--ordered"]):
+        with patch("sys.argv", ["phylo2vec", "samplem", f"{n_leaves}", "--ordered"]):
             args = parse_args()
-            assert args.n_leaves == 3
+            assert args.n_leaves == n_leaves
             assert args.ordered
 
     def test_missing_argument(self):
@@ -143,7 +148,7 @@ class TestSampleM:
             with patch("sys.stderr", new_callable=StringIO):  # Suppress error output
                 with patch("sys.argv", ["phylo2vec", "samplem", "not_a_number"]):
                     parse_args()
-        # Should exit with error code (error 2 for argument errors)
+        # Should exit with error code
         assert exc_info.value.code == 2
 
     def test_float(self):
@@ -151,7 +156,7 @@ class TestSampleM:
         with pytest.raises(SystemExit) as exc_info:
             with patch("sys.argv", ["phylo2vec", "samplem", "3.5"]):
                 parse_args()
-        # Should exit with error code (error 2 for argument errors)
+        # Should exit with error code
         assert exc_info.value.code == 2
 
     def test_negative_number(self):
@@ -166,14 +171,21 @@ class TestSampleM:
             with pytest.raises(ValueError):
                 main()
 
-    def test_big_number(self):
+    def test_big_number(self, n_leaves=100_000):
         """Test samplem with a large number."""
-        with patch("sys.argv", ["phylo2vec", "samplem", f"{1000000}"]):
+        with patch("sys.argv", ["phylo2vec", "samplem", f"{n_leaves}"]):
             main()
 
 
 class TestFromNewick:
     """Test the from_newick command."""
+
+    def test_help(self):
+        """Test from_newick subcommand help."""
+        with pytest.raises(SystemExit) as exc_info:
+            with patch("sys.argv", ["phylo2vec", "from_newick", "--help"]):
+                parse_args()
+        assert exc_info.value.code == 0
 
     def test_valid_newick(self):
         """Test from_newick with valid newick string."""
@@ -236,6 +248,13 @@ class TestFromNewick:
 class TestToNewick:
     """Test the to_newick command."""
 
+    def test_help(self):
+        """Test to_newick subcommand help."""
+        with pytest.raises(SystemExit) as exc_info:
+            with patch("sys.argv", ["phylo2vec", "to_newick", "--help"]):
+                parse_args()
+        assert exc_info.value.code == 0
+
     def test_valid_vector(self):
         """Test to_newick with valid vector input."""
         vector_input = "0,0,4,3"
@@ -273,8 +292,3 @@ class TestToNewick:
                 with patch("sys.argv", ["phylo2vec", "to_newick"]):
                     parse_args()
         assert exc_info.value.code == 2
-
-
-if __name__ == "__main__":
-    # Run tests when file is executed directly
-    pytest.main([__file__, "-v"])

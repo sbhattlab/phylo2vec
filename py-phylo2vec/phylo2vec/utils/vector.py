@@ -251,49 +251,80 @@ def get_common_ancestor(v, node1, node2):
     mrca : int
         Most recent common ancestor node between node1 and node2
     """
-    if not (node1 >= 0 and node2 >= 0):
-        raise ValueError("Nodes must be greater than or equal to 0")
+    if not (0 <= node1 <= 2 * len(v) and 0 <= node2 <= 2 * len(v)):
+        raise ValueError("Nodes must be in the range [0, 2 * n_leaves]")
     return core.get_common_ancestor(v, node1, node2)
 
 
-def reroot(v, node) -> np.ndarray:
-    """Reroot a tree (via its Phylo2Vec vector v) at a given node
+def reroot(vector_or_matrix, node) -> np.ndarray:
+    """Reroot a tree in phylo2vec format at a given node
 
     Parameters
     ----------
-    v : numpy.ndarray
-        Phylo2Vec representation of a tree
+    vector_or_matrix : numpy.ndarray
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
     node : int
         A node to reroot the tree at
 
         Must be a valid node in the tree, i.e., in the range [0, 2 * n_leaves - 1]
 
+        Cannot be the current root node, i.e., 2 * n_leaves
+
     Returns
     -------
     numpy.ndarray
         rerooted vector
     """
-    ete_tree = Tree(to_newick(v), parser=8)
+    if node < 0 or node > 2 * len(vector_or_matrix):
+        raise ValueError(
+            f"Node {node} is out of bounds for tree with "
+            f"{len(vector_or_matrix)} leaves. "
+            f"Valid range is [0, {2 * len(vector_or_matrix)}]"
+        )
+    if node == 2 * len(vector_or_matrix):
+        raise ValueError("Cannot reroot at the current root node")
 
+    # Reroot via ete
+    if vector_or_matrix.ndim == 1:
+        # Using in_parser = 8 includes topology + all labels
+        in_parser = 8
+        # Using out_parser = 8 omits the root node label
+        # So we use out_parser = 9 (excludes all parent labels)
+        out_parser = 9
+    elif vector_or_matrix.ndim == 2:
+        # Using in_parser = 1 includes topology + branch lengths + all labels
+        in_parser = 1
+        # Using out_parser = 1 omits the root node label
+        # So we use out_parser = 5 (excludes all parent labels)
+        out_parser = 5
+    else:
+        raise ValueError(
+            "Input must be a Phylo2Vec vector (ndim == 1) " "or matrix (ndim == 2)"
+        )
+
+    # Convert to Newick format
+    newick = to_newick(vector_or_matrix)
+
+    # Reroot via ete
+    ete_tree = Tree(newick, parser=in_parser)
     ete_tree.set_outgroup(f"{node}")
-    ete_tree.set_outgroup(f"{node}")
 
-    newick = ete_tree.write(parser=9)
+    # Write rerooted Newick
+    newick_rerooted = ete_tree.write(parser=out_parser)
 
-    v_new = from_newick(newick)
+    # Convert back to phylo2vec format
+    vector_or_matrix_rerooted = from_newick(newick_rerooted)
 
-    check_vector(v_new)
-
-    return from_newick(newick)
+    return vector_or_matrix_rerooted
 
 
-def reroot_at_random(v) -> np.ndarray:
-    """Reroot a tree (via its Phylo2Vec vector v) at a random node
+def reroot_at_random(vector_or_matrix) -> np.ndarray:
+    """Reroot a tree in phylo2vec format at a random node
 
     Parameters
     ----------
-    v : numpy.ndarray
-        Phylo2Vec representation of a tree
+    vector_or_matrix : numpy.ndarray
+        Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
     -------
@@ -301,4 +332,4 @@ def reroot_at_random(v) -> np.ndarray:
         rerooted vector
     """
 
-    return reroot(v, random.randint(0, 2 * len(v) - 1))
+    return reroot(vector_or_matrix, random.randint(0, 2 * len(vector_or_matrix) - 1))
