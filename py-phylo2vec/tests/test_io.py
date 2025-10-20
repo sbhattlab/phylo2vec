@@ -145,15 +145,15 @@ def test_load_newick_matrix_from_str(n_leaves):
     assert np.array_equal(m, m2)
 
 
-def test_save_empty():
-    v = np.array(0)
-    with pytest.raises(ValueError):
-        save(v, "test.csv")
+class TestSaveEdgeCases:
+    def test_save_empty(self):
+        v = np.array(0)
+        with pytest.raises(ValueError):
+            save(v, "test.csv")
 
-
-def test_save_ndim3():
-    # array with 3 dimensions
-    t = np.zeros((MIN_N_LEAVES, 3, 1))
-    # Check that we raise a ValueError
-    with pytest.raises(ValueError):
-        save(t, "test.csv")
+    def test_save_ndim3(self):
+        # array with 3 dimensions
+        t = np.zeros((MIN_N_LEAVES, 3, 1))
+        # Check that we raise a ValueError
+        with pytest.raises(ValueError):
+            save(t, "test.csv")
