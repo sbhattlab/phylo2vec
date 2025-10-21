@@ -637,6 +637,24 @@ mod tests {
         assert_eq!(v, v2);
     }
 
+    #[rstest]
+    #[case(10)]
+    #[case(100)]
+    #[case(1000)]
+    fn test_newick(#[case] n_leaves: usize) {
+        // Sample a vector
+        let v = sample_vector(n_leaves, false);
+
+        // Convert to Newick
+        let newick = to_newick(&v);
+
+        // Convert back to vector
+        let v2 = from_newick(&newick);
+
+        // Check if the original and converted vectors are equal
+        assert_eq!(v, v2);
+    }
+
     /// Test the conversion of a Newick string to a vector
     ///
     /// Tests are using 5 or less leaf tree with different structures
