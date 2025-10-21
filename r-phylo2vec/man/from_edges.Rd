@@ -2,10 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{from_edges}
 \alias{from_edges}
-\title{Convert an edge list to a Phylo2Vec vector}
+\title{Convert an edge list to a phylo2vec vector}
 \usage{
 from_edges(edges)
 }
+\arguments{
+\item{edges}{Edge list representation (shape: \link{2*(n_leaves - 1), 2})}
+}
+\value{
+phylo2vec vector representation
+}
 \description{
-Convert an edge list to a Phylo2Vec vector
+Convert an edge list to a phylo2vec vector
 }

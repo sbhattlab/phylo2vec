@@ -2,10 +2,18 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{sample_matrix}
 \alias{sample_matrix}
-\title{Sample a random tree with branch lengths via Phylo2Vec}
+\title{Sample a random tree with branch lengths via phylo2vec}
 \usage{
 sample_matrix(n_leaves, ordered)
 }
+\arguments{
+\item{n_leaves}{Number of leaves (must be at least 2)}
+
+\item{ordered}{Whether to sample an ordered tree}
+}
+\value{
+A phylo2vec matrix representing the sampled tree with branch lengths (shape: \link{n_leaves - 1, 3})
+}
 \description{
-Sample a random tree with branch lengths via Phylo2Vec
+Sample a random tree with branch lengths via phylo2vec
 }

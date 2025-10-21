@@ -13,10 +13,12 @@ use phylo2vec::vector::convert as vconvert;
 use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
+// Convert Vec<i32> to Vec<usize>
 fn as_usize(v: Vec<i32>) -> Vec<usize> {
     v.iter().map(|&x| x as usize).collect()
 }
 
+// Convert Vec<usize> to Vec<i32>
 fn as_i32(v: Vec<usize>) -> Vec<i32> {
     v.iter().map(|&x| x as i32).collect()
 }
@@ -42,7 +44,14 @@ fn convert_from_rmatrix(matrix: &Robj) -> Result<Array2<f64>, &'static str> {
     Ok(array)
 }
 
-/// Sample a random tree topology via Phylo2Vec
+/// Sample a random tree topology via phylo2vec
+///
+/// In ordered trees, leaf i grows from a sister leaf (i.e., attaches to a leaf branch j <= i)
+/// In unordered trees, leaf i grows from any node (i.e., attaches to any branch j <= 2*i)
+///
+/// @param n_leaves Number of leaves (must be at least 2)
+/// @param ordered Whether to sample an ordered tree
+/// @return A phylo2vec vector representing the sampled tree topology (length: n_leaves - 1)
 /// @export
 #[extendr]
 fn sample_vector(n_leaves: isize, ordered: bool) -> Result<Vec<i32>, Error> {
@@ -53,7 +62,11 @@ fn sample_vector(n_leaves: isize, ordered: bool) -> Result<Vec<i32>, Error> {
     }
 }
 
-/// Sample a random tree with branch lengths via Phylo2Vec
+/// Sample a random tree with branch lengths via phylo2vec
+///
+/// @param n_leaves Number of leaves (must be at least 2)
+/// @param ordered Whether to sample an ordered tree
+/// @return A phylo2vec matrix representing the sampled tree with branch lengths (shape: [n_leaves - 1, 3])
 /// @export
 #[extendr]
 fn sample_matrix(n_leaves: isize, ordered: bool) -> Result<RMatrix<f64>, Error> {
@@ -68,32 +81,28 @@ fn sample_matrix(n_leaves: isize, ordered: bool) -> Result<RMatrix<f64>, Error> 
     }
 }
 
-/// Recover a rooted tree (in Newick format) from a Phylo2Vec vector
-/// @export
+// Recover a rooted tree (in Newick format) from a phylo2vec vector
 #[extendr]
 fn to_newick_from_vector(vector: Vec<i32>) -> String {
     let v_usize = as_usize(vector);
     vconvert::to_newick(&v_usize)
 }
 
-/// Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
-/// @export
+// Recover a rooted tree (in Newick format) from a phylo2vec matrix
 #[extendr]
 fn to_newick_from_matrix(matrix: RMatrix<f64>) -> String {
     let matrix = convert_from_rmatrix(&matrix).unwrap();
     mconvert::to_newick(&matrix.view())
 }
 
-/// Convert a newick string to a Phylo2Vec vector
-/// @export
+// Convert a newick string to a phylo2vec vector
 #[extendr]
 fn to_vector(newick: &str) -> Vec<i32> {
     let v = vconvert::from_newick(newick);
     as_i32(v)
 }
 
-/// Convert a newick string to a Phylo2Vec vector
-/// @export
+// Convert a newick string to a phylo2vec matrix
 #[extendr]
 fn to_matrix(newick: &str) -> RMatrix<f64> {
     let matrix = mconvert::from_newick(newick);
@@ -101,7 +110,11 @@ fn to_matrix(newick: &str) -> RMatrix<f64> {
     RMatrix::new_matrix(shape[0], shape[1], |r, c| matrix[[r, c]])
 }
 
-/// Validate a Phylo2Vec vector
+/// Validate a phylo2vec vector
+///
+/// Raises an error if the vector is invalid.
+///
+/// @param vector phylo2vec vector representation of a tree topology
 /// @export
 #[extendr]
 fn check_v(vector: Vec<i32>) {
@@ -109,7 +122,11 @@ fn check_v(vector: Vec<i32>) {
     vbase::check_v(&v_usize);
 }
 
-/// Validate a Phylo2Vec vector
+/// Validate a phylo2vec matrix
+///
+/// Raises an error if the matrix is invalid.
+///
+/// @param vector phylo2vec matrix representation of a tree (with branch lengths)
 /// @export
 #[extendr]
 fn check_m(vector: RMatrix<f64>) {
@@ -118,7 +135,10 @@ fn check_m(vector: RMatrix<f64>) {
     mbase::check_m(&matrix.view());
 }
 
-/// Get the ancestry matrix of a Phylo2Vec vector
+/// Get the ancestry matrix of a phylo2vec vector
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @return Ancestry representation (shape: [n_leaves - 1, 3])
 /// @export
 #[extendr]
 fn to_ancestry(vector: Vec<i32>) -> RMatrix<i32> {
@@ -129,7 +149,10 @@ fn to_ancestry(vector: Vec<i32>) -> RMatrix<i32> {
     RMatrix::new_matrix(k, 3, |r, c| ancestry[r][c] as i32)
 }
 
-/// Convert an ancestry matrix to a Phylo2Vec vector
+/// Convert an ancestry matrix to a phylo2vec vector
+///
+/// @param matrix Ancestry representation (shape: [n_leaves - 1, 3])
+/// @return phylo2vec vector representation
 /// @export
 #[extendr]
 fn from_ancestry(matrix: RMatrix<i32>) -> Vec<i32> {
@@ -155,7 +178,10 @@ fn from_ancestry(matrix: RMatrix<i32>) -> Vec<i32> {
     as_i32(v)
 }
 
-/// Get pairs from a Phylo2Vec vector
+/// Get pairs from a phylo2vec vector
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @return Pairs representation (shape: [n_leaves - 1, 2])
 /// @export
 #[extendr]
 fn to_pairs(vector: Vec<i32>) -> RMatrix<i32> {
@@ -169,7 +195,10 @@ fn to_pairs(vector: Vec<i32>) -> RMatrix<i32> {
     })
 }
 
-/// Convert a pairs matrix to a Phylo2Vec vector
+/// Convert a pairs matrix to a phylo2vec vector
+///
+/// @param pairs Pairs representation (shape: [n_leaves - 1, 2])
+/// @return phylo2vec vector representation
 /// @export
 #[extendr]
 fn from_pairs(pairs: RMatrix<i32>) -> Vec<i32> {
@@ -182,7 +211,10 @@ fn from_pairs(pairs: RMatrix<i32>) -> Vec<i32> {
     as_i32(v)
 }
 
-/// Get the edge list of a Phylo2Vec vector
+/// Get the edge list of a phylo2vec vector
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @return Edge list representation (shape: [2*(n_leaves - 1), 2])
 /// @export
 #[extendr]
 fn to_edges(vector: Vec<i32>) -> RMatrix<i32> {
@@ -196,7 +228,10 @@ fn to_edges(vector: Vec<i32>) -> RMatrix<i32> {
     })
 }
 
-/// Convert an edge list to a Phylo2Vec vector
+/// Convert an edge list to a phylo2vec vector
+///
+/// @param edges Edge list representation (shape: [2*(n_leaves - 1), 2])
+/// @return phylo2vec vector representation
 /// @export
 #[extendr]
 fn from_edges(edges: RMatrix<i32>) -> Vec<i32> {
@@ -209,7 +244,12 @@ fn from_edges(edges: RMatrix<i32>) -> Vec<i32> {
     as_i32(v)
 }
 
-/// Add a leaf to a Phylo2Vec vector
+/// Add a leaf to a phylo2vec vector
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @param leaf The leaf to add (0-indexed)
+/// @param branch The branch to attach the new leaf to (0-indexed)
+/// @return New vector with the added leaf
 /// @export
 #[extendr]
 fn add_leaf(vector: Vec<i32>, leaf: i32, branch: i32) -> Vec<i32> {
@@ -218,7 +258,13 @@ fn add_leaf(vector: Vec<i32>, leaf: i32, branch: i32) -> Vec<i32> {
     as_i32(new_v)
 }
 
-/// Remove a leaf from a Phylo2Vec vector
+/// Remove a leaf from a phylo2vec vector
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @param leaf The leaf to remove (0-indexed)
+/// @return A list with two elements:
+/// - `v`: New vector with the removed leaf
+/// - `branch`: The branch the removed leaf was attached to (0-indexed)
 /// @export
 #[extendr]
 fn remove_leaf(vector: Vec<i32>, leaf: i32) -> Robj {
@@ -227,11 +273,15 @@ fn remove_leaf(vector: Vec<i32>, leaf: i32) -> Robj {
     list!(v = as_i32(new_v), branch = branch as i32).into()
 }
 
-// Get the first recent common ancestor between two nodes in a Phylo2Vec tree
-// node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
-// Similar to ape's `getMRCA` function in R (for leaf nodes)
-// and ETE's `get_common_ancestor` in Python (for all nodes), but for Phylo2Vec vectors.
-
+/// Get the first recent common ancestor between two nodes in a phylo2vec tree
+/// node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+/// Similar to ape's `getMRCA` function in R (for leaf nodes)
+/// and ETE's `get_common_ancestor` in Python (for all nodes), but for phylo2vec vectors.
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @param node1 The first node (0-indexed)
+/// @param node2 The second node (0-indexed)
+/// @return The common ancestor node (0-indexed)
 /// @export
 #[extendr]
 fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
@@ -241,17 +291,17 @@ fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
 }
 
 /// Produce an ordered version (i.e., birth-death process version)
-/// of a Phylo2Vec vector using the Queue Shuffle algorithm.
+/// of a phylo2vec vector using the Queue Shuffle algorithm.
 ///
 /// Queue Shuffle ensures that the output tree is ordered,
 /// while also ensuring a smooth path through the space of orderings
 ///
 /// for more details, see https://doi.org/10.1093/gbe/evad213
 ///
-/// @param vector A Phylo2Vec vector (i.e., a vector of integers)
-/// @param shuffle_cherries If true, the algorithm will shuffle cherries (i.e., pairs of leaves)
+/// @param vector phylo2vec vector representation of a tree topology
+/// @param shuffle_cherries If true, the algorithm will randomly shuffle the order of cherries (i.e., pairs of leaves)
 /// @return A list with two elements:
-/// - `v`: The ordered Phylo2Vec vector
+/// - `v`: The ordered phylo2vec vector
 /// - `mapping`: A mapping of the original labels to the new labels
 /// @export
 #[extendr]
@@ -264,6 +314,7 @@ fn queue_shuffle(vector: Vec<i32>, shuffle_cherries: bool) -> List {
 /// Check if a newick string has branch lengths
 ///
 /// @param newick Newick representation of a tree
+/// @return TRUE if the newick has branch lengths, FALSE otherwise
 /// @export
 #[extendr]
 fn has_branch_lengths(newick: &str) -> bool {
@@ -354,8 +405,7 @@ fn remove_parent_labels(newick: &str) -> String {
     newick::remove_parent_labels(newick)
 }
 
-/// Get the topological cophenetic distance matrix of a Phylo2Vec vector
-/// @export
+// Get the topological cophenetic distance matrix of a phylo2vec vector
 #[extendr]
 fn cophenetic_from_vector(vector: Vec<i32>, unrooted: bool) -> RMatrix<i32> {
     let v_usize: Vec<usize> = as_usize(vector);
@@ -368,8 +418,7 @@ fn cophenetic_from_vector(vector: Vec<i32>, unrooted: bool) -> RMatrix<i32> {
     coph_r
 }
 
-/// Get the cophenetic distance matrix of a Phylo2Vec matrix
-/// @export
+// Get the cophenetic distance matrix of a phylo2vec matrix
 #[extendr]
 fn cophenetic_from_matrix(matrix: ArrayView2<f64>, unrooted: bool) -> RMatrix<f64> {
     let coph_rs = mgraph::cophenetic_distances(&matrix.view(), unrooted);
@@ -381,8 +430,10 @@ fn cophenetic_from_matrix(matrix: ArrayView2<f64>, unrooted: bool) -> RMatrix<f6
     coph_r
 }
 
-/// Get the precision matrix of a Phylo2Vec vector
-/// @export
+// Get a precursor of the precision matrix of a phylo2vec vector
+// The precision matrix is the inverse of the variance-covariance matrix.
+// The precision matrix can be obtained using Schur's complement on this precursor.
+// Output shape: [2 * (n_leaves - 1), 2 * (n_leaves- 1)]
 #[extendr]
 fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     let v_usize: Vec<usize> = as_usize(vector);
@@ -395,8 +446,10 @@ fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     preprecision_r
 }
 
-/// Get the precision matrix of a Phylo2Vec matrix
-/// @export
+// Get the precision matrix of a phylo2vec matrix
+// The precision matrix is the inverse of the variance-covariance matrix.
+// The precision matrix can be obtained using Schur's complement on this precursor.
+// Output shape: [2 * (n_leaves - 1), 2 * (n_leaves- 1)]
 #[extendr]
 fn pre_precision_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
@@ -409,8 +462,7 @@ fn pre_precision_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     pre_precision_r
 }
 
-/// Get the variance-covariance matrix of a Phylo2Vec vector
-/// @export
+// Get the variance-covariance matrix of a phylo2vec vector
 #[extendr]
 fn vcov_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     let v_usize: Vec<usize> = as_usize(vector);
@@ -423,8 +475,7 @@ fn vcov_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     vcv_r
 }
 
-/// Get the variance-covariance matrix of a Phylo2Vec matrix
-/// @export
+// Get the variance-covariance matrix of a phylo2vec matrix
 #[extendr]
 fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
@@ -437,8 +488,7 @@ fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     vcv_matrix
 }
 
-/// Get the incidence matrix of a Phylo2Vec vector in dense format
-/// @export
+// Get the oriented incidence matrix of a phylo2vec vector in dense format
 #[extendr]
 fn incidence_dense(input_vector: Vec<i32>) -> RMatrix<i32> {
     let v_usize = as_usize(input_vector);
@@ -453,8 +503,7 @@ fn incidence_dense(input_vector: Vec<i32>) -> RMatrix<i32> {
     dense_r
 }
 
-/// Get the incidence matrix of a Phylo2Vec vector in COO format
-/// @export
+// Get the incidence matrix of a phylo2vec vector in COO format
 #[extendr]
 fn incidence_coo(input_vector: Vec<i32>) -> List {
     let v_usize = as_usize(input_vector);
@@ -466,8 +515,7 @@ fn incidence_coo(input_vector: Vec<i32>) -> List {
     )
 }
 
-/// Get the incidence matrix of a Phylo2Vec vector in CSR format
-/// @export
+// Get the incidence matrix of a phylo2vec vector in CSC format
 #[extendr]
 fn incidence_csc(input_vector: Vec<i32>) -> List {
     let v_usize = as_usize(input_vector);
@@ -479,8 +527,7 @@ fn incidence_csc(input_vector: Vec<i32>) -> List {
     )
 }
 
-/// Get the incidence matrix of a Phylo2Vec vector in CSR format
-/// @export
+// Get the incidence matrix of a phylo2vec vector in CSR format
 #[extendr]
 fn incidence_csr(input_vector: Vec<i32>) -> List {
     let v_usize = as_usize(input_vector);

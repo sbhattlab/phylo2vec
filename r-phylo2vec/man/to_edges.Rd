@@ -2,10 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{to_edges}
 \alias{to_edges}
-\title{Get the edge list of a Phylo2Vec vector}
+\title{Get the edge list of a phylo2vec vector}
 \usage{
 to_edges(vector)
 }
+\arguments{
+\item{vector}{phylo2vec vector representation of a tree topology}
+}
+\value{
+Edge list representation (shape: \link{2*(n_leaves - 1), 2})
+}
 \description{
-Get the edge list of a Phylo2Vec vector
+Get the edge list of a phylo2vec vector
 }

@@ -1,7 +1,9 @@
-#' Compute the cophenetic distance matrix of a Phylo2Vec
-#' vector (topological) or matrix (from branch lengths).
+#' Compute the cophenetic distance matrix of a phylo2vec
+#' vector (tree topology) or matrix (topology + branch lengths).
 #'
-#' @param vector_or_matrix Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+#' Output shape: (n_leaves, n_leaves)
+#'
+#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
 #' @param unrooted Logical indicating whether applying the cophenetic distance
 #'  to an unrooted tree or not (see ete3). Default is FALSE.
 #' @return Cophenetic distance matrix
@@ -16,10 +18,12 @@ cophenetic_distances <- function(vector_or_matrix, unrooted = FALSE) {
   }
 }
 
-#' Compute the variance-covariance matrix of a Phylo2Vec
-#' vector (topological) or matrix (from branch lengths).
+#' Compute the variance-covariance matrix of a phylo2vec
+#' vector (tree topology) or matrix (topology + branch lengths).
 #'
-#' @param vector_or_matrix Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+#' Output shape: (n_leaves, n_leaves)
+#'
+#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
 #' @return Variance-covariance matrix
 #' @export
 vcovp <- function(vector_or_matrix) {
@@ -32,12 +36,14 @@ vcovp <- function(vector_or_matrix) {
   }
 }
 
-#' Compute the precision matrix of a Phylo2Vec
-#' vector (topological) or matrix (from branch lengths).
+#' Compute the precision matrix of a phylo2vec
+#' vector (tree topology) or matrix (topology + branch lengths).
 #'
 #' The precision matrix is the inverse of the variance-covariance matrix.
 #'
-#' @param vector_or_matrix Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
+#' Output shape: (n_leaves, n_leaves)
+#'
+#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
 #' @return Precision matrix
 #' @export
 precision <- function(vector_or_matrix) {
@@ -66,9 +72,16 @@ precision <- function(vector_or_matrix) {
   a - b %*% solve(c, d)
 }
 
-#' Compute the incidence matrix of a Phylo2Vec vector.
+#' Compute the incidence matrix of a phylo2vec vector (tree topology).
 #'
-#' @param vector_or_matrix Phylo2Vec vector (ndim == 1)
+#' The incidence matrix B_ij is:
+#' - 1 if edge_j leaves node_i
+#' - -1 if edge_j enters node_i
+#' - 0 otherwise
+#'
+#' Output shape: (2 * k + 1, 2 * k) where k = n_leaves - 1
+#'
+#' @param vector_or_matrix phylo2vec vector (ndim == 1)
 #' @param format The format of the incidence matrix.
 #'   Options are "coo"/"T" (coordinate), "csr"/"R" (compressed sparse row),
 #'   "csc"/"C" (compressed sparse column), "dense"/"D" (dense matrix).
@@ -112,6 +125,6 @@ incidence <- function(vector, format = "C") {
       stop("Unknown format. Use 'coo', 'csr', 'csc', or 'dense'.")
     }
   } else {
-    stop("Input must be a Phylo2Vec vector.")
+    stop("Input must be a phylo2vec vector.")
   }
 }

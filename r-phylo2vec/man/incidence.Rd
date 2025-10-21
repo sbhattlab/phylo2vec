@@ -2,7 +2,7 @@
 % Please edit documentation in R/stats.R
 \name{incidence}
 \alias{incidence}
-\title{Compute the incidence matrix of a Phylo2Vec vector.}
+\title{Compute the incidence matrix of a phylo2vec vector (tree topology).}
 \usage{
 incidence(vector, format = "C")
 }
@@ -12,11 +12,19 @@ Options are "coo"/"T" (coordinate), "csr"/"R" (compressed sparse row),
 "csc"/"C" (compressed sparse column), "dense"/"D" (dense matrix).
 Default is "C" for compressed sparse row.}
 
-\item{vector_or_matrix}{Phylo2Vec vector (ndim == 1)}
+\item{vector_or_matrix}{phylo2vec vector (ndim == 1)}
 }
 \value{
 Incidence matrix in the specified format.
 }
 \description{
-Compute the incidence matrix of a Phylo2Vec vector.
+The incidence matrix B_ij is:
+\itemize{
+\item 1 if edge_j leaves node_i
+\item -1 if edge_j enters node_i
+\item 0 otherwise
+}
+}
+\details{
+Output shape: (2 * k + 1, 2 * k) where k = n_leaves - 1
 }

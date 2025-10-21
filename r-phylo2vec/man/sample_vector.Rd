@@ -2,10 +2,19 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{sample_vector}
 \alias{sample_vector}
-\title{Sample a random tree topology via Phylo2Vec}
+\title{Sample a random tree topology via phylo2vec}
 \usage{
 sample_vector(n_leaves, ordered)
 }
+\arguments{
+\item{n_leaves}{Number of leaves (must be at least 2)}
+
+\item{ordered}{Whether to sample an ordered tree}
+}
+\value{
+A phylo2vec vector representing the sampled tree topology (length: n_leaves - 1)
+}
 \description{
-Sample a random tree topology via Phylo2Vec
+In ordered trees, leaf i grows from a sister leaf (i.e., attaches to a leaf branch j <= i)
+In unordered trees, leaf i grows from any node (i.e., attaches to any branch j <= 2*i)
 }

@@ -10,7 +10,12 @@
 #' @useDynLib phylo2vec, .registration = TRUE
 NULL
 
-#' Add a leaf to a Phylo2Vec vector
+#' Add a leaf to a phylo2vec vector
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @param leaf The leaf to add (0-indexed)
+#' @param branch The branch to attach the new leaf to (0-indexed)
+#' @return New vector with the added leaf
 #' @export
 add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, branch)
 
@@ -31,20 +36,24 @@ add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, b
 #' @export
 apply_label_mapping <- function(newick, label_mapping_list) .Call(wrap__apply_label_mapping, newick, label_mapping_list)
 
-#' Validate a Phylo2Vec vector
+#' Validate a phylo2vec matrix
+#'
+#' Raises an error if the matrix is invalid.
+#'
+#' @param vector phylo2vec matrix representation of a tree (with branch lengths)
 #' @export
 check_m <- function(vector) invisible(.Call(wrap__check_m, vector))
 
-#' Validate a Phylo2Vec vector
+#' Validate a phylo2vec vector
+#'
+#' Raises an error if the vector is invalid.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
 #' @export
 check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
 
-#' Get the cophenetic distance matrix of a Phylo2Vec matrix
-#' @export
 cophenetic_from_matrix <- function(matrix, unrooted) .Call(wrap__cophenetic_from_matrix, matrix, unrooted)
 
-#' Get the topological cophenetic distance matrix of a Phylo2Vec vector
-#' @export
 cophenetic_from_vector <- function(vector, unrooted) .Call(wrap__cophenetic_from_vector, vector, unrooted)
 
 #' Create an integer-taxon label mapping (label_mapping)
@@ -70,63 +79,70 @@ create_label_mapping <- function(newick) .Call(wrap__create_label_mapping, newic
 #' @export
 find_num_leaves <- function(newick) .Call(wrap__find_num_leaves, newick)
 
-#' Convert an ancestry matrix to a Phylo2Vec vector
+#' Convert an ancestry matrix to a phylo2vec vector
+#'
+#' @param matrix Ancestry representation (shape: [n_leaves - 1, 3])
+#' @return phylo2vec vector representation
 #' @export
 from_ancestry <- function(matrix) .Call(wrap__from_ancestry, matrix)
 
-#' Convert an edge list to a Phylo2Vec vector
+#' Convert an edge list to a phylo2vec vector
+#'
+#' @param edges Edge list representation (shape: [2*(n_leaves - 1), 2])
+#' @return phylo2vec vector representation
 #' @export
 from_edges <- function(edges) .Call(wrap__from_edges, edges)
 
-#' Convert a pairs matrix to a Phylo2Vec vector
+#' Convert a pairs matrix to a phylo2vec vector
+#'
+#' @param pairs Pairs representation (shape: [n_leaves - 1, 2])
+#' @return phylo2vec vector representation
 #' @export
 from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 
+#' Get the first recent common ancestor between two nodes in a phylo2vec tree
+#' node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+#' Similar to ape's `getMRCA` function in R (for leaf nodes)
+#' and ETE's `get_common_ancestor` in Python (for all nodes), but for phylo2vec vectors.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @param node1 The first node (0-indexed)
+#' @param node2 The second node (0-indexed)
+#' @return The common ancestor node (0-indexed)
 #' @export
 get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
 
 #' Check if a newick string has branch lengths
 #'
 #' @param newick Newick representation of a tree
+#' @return TRUE if the newick has branch lengths, FALSE otherwise
 #' @export
 has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
 
-#' Get the incidence matrix of a Phylo2Vec vector in COO format
-#' @export
 incidence_coo <- function(input_vector) .Call(wrap__incidence_coo, input_vector)
 
-#' Get the incidence matrix of a Phylo2Vec vector in CSR format
-#' @export
 incidence_csc <- function(input_vector) .Call(wrap__incidence_csc, input_vector)
 
-#' Get the incidence matrix of a Phylo2Vec vector in CSR format
-#' @export
 incidence_csr <- function(input_vector) .Call(wrap__incidence_csr, input_vector)
 
-#' Get the incidence matrix of a Phylo2Vec vector in dense format
-#' @export
 incidence_dense <- function(input_vector) .Call(wrap__incidence_dense, input_vector)
 
-#' Get the precision matrix of a Phylo2Vec matrix
-#' @export
 pre_precision_from_matrix <- function(matrix) .Call(wrap__pre_precision_from_matrix, matrix)
 
-#' Get the precision matrix of a Phylo2Vec vector
-#' @export
 pre_precision_from_vector <- function(vector) .Call(wrap__pre_precision_from_vector, vector)
 
 #' Produce an ordered version (i.e., birth-death process version)
-#' of a Phylo2Vec vector using the Queue Shuffle algorithm.
+#' of a phylo2vec vector using the Queue Shuffle algorithm.
 #'
 #' Queue Shuffle ensures that the output tree is ordered,
 #' while also ensuring a smooth path through the space of orderings
 #'
 #' for more details, see https://doi.org/10.1093/gbe/evad213
 #'
-#' @param vector A Phylo2Vec vector (i.e., a vector of integers)
-#' @param shuffle_cherries If true, the algorithm will shuffle cherries (i.e., pairs of leaves)
+#' @param vector phylo2vec vector representation of a tree topology
+#' @param shuffle_cherries If true, the algorithm will randomly shuffle the order of cherries (i.e., pairs of leaves)
 #' @return A list with two elements:
-#' - `v`: The ordered Phylo2Vec vector
+#' - `v`: The ordered phylo2vec vector
 #' - `mapping`: A mapping of the original labels to the new labels
 #' @export
 queue_shuffle <- function(vector, shuffle_cherries) .Call(wrap__queue_shuffle, vector, shuffle_cherries)
@@ -145,52 +161,66 @@ remove_branch_lengths <- function(newick) .Call(wrap__remove_branch_lengths, new
 #' @export
 remove_parent_labels <- function(newick) .Call(wrap__remove_parent_labels, newick)
 
-#' Remove a leaf from a Phylo2Vec vector
+#' Remove a leaf from a phylo2vec vector
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @param leaf The leaf to remove (0-indexed)
+#' @return A list with two elements:
+#' - `v`: New vector with the removed leaf
+#' - `branch`: The branch the removed leaf was attached to (0-indexed)
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 
-#' Sample a random tree with branch lengths via Phylo2Vec
+#' Sample a random tree with branch lengths via phylo2vec
+#'
+#' @param n_leaves Number of leaves (must be at least 2)
+#' @param ordered Whether to sample an ordered tree
+#' @return A phylo2vec matrix representing the sampled tree with branch lengths (shape: [n_leaves - 1, 3])
 #' @export
 sample_matrix <- function(n_leaves, ordered) .Call(wrap__sample_matrix, n_leaves, ordered)
 
-#' Sample a random tree topology via Phylo2Vec
+#' Sample a random tree topology via phylo2vec
+#'
+#' In ordered trees, leaf i grows from a sister leaf (i.e., attaches to a leaf branch j <= i)
+#' In unordered trees, leaf i grows from any node (i.e., attaches to any branch j <= 2*i)
+#'
+#' @param n_leaves Number of leaves (must be at least 2)
+#' @param ordered Whether to sample an ordered tree
+#' @return A phylo2vec vector representing the sampled tree topology (length: n_leaves - 1)
 #' @export
 sample_vector <- function(n_leaves, ordered) .Call(wrap__sample_vector, n_leaves, ordered)
 
-#' Get the ancestry matrix of a Phylo2Vec vector
+#' Get the ancestry matrix of a phylo2vec vector
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @return Ancestry representation (shape: [n_leaves - 1, 3])
 #' @export
 to_ancestry <- function(vector) .Call(wrap__to_ancestry, vector)
 
-#' Get the edge list of a Phylo2Vec vector
+#' Get the edge list of a phylo2vec vector
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @return Edge list representation (shape: [2*(n_leaves - 1), 2])
 #' @export
 to_edges <- function(vector) .Call(wrap__to_edges, vector)
 
-#' Recover a rooted tree (in Newick format) from a Phylo2Vec matrix
-#' @export
 to_newick_from_matrix <- function(matrix) .Call(wrap__to_newick_from_matrix, matrix)
 
-#' Recover a rooted tree (in Newick format) from a Phylo2Vec vector
-#' @export
 to_newick_from_vector <- function(vector) .Call(wrap__to_newick_from_vector, vector)
 
-#' Get pairs from a Phylo2Vec vector
+#' Get pairs from a phylo2vec vector
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @return Pairs representation (shape: [n_leaves - 1, 2])
 #' @export
 to_pairs <- function(vector) .Call(wrap__to_pairs, vector)
 
-#' Convert a newick string to a Phylo2Vec vector
-#' @export
 to_matrix <- function(newick) .Call(wrap__to_matrix, newick)
 
-#' Convert a newick string to a Phylo2Vec vector
-#' @export
 to_vector <- function(newick) .Call(wrap__to_vector, newick)
 
-#' Get the variance-covariance matrix of a Phylo2Vec matrix
-#' @export
 vcov_from_matrix <- function(matrix) .Call(wrap__vcov_from_matrix, matrix)
 
-#' Get the variance-covariance matrix of a Phylo2Vec vector
-#' @export
 vcov_from_vector <- function(vector) .Call(wrap__vcov_from_vector, vector)
 
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/base_newick.R
 \name{from_newick}
 \alias{from_newick}
-\title{Convert a Newick string to a Phylo2Vec vector or matrix}
+\title{Convert a Newick string to a phylo2vec vector or matrix}
 \usage{
 from_newick(newick)
 }
@@ -10,9 +10,9 @@ from_newick(newick)
 \item{newick}{Newick string representation of the tree}
 }
 \value{
-A Phylo2Vec matrix (if branch lengths are present),
-otherwise a Phylo2Vec vector (no branch lengths)
+A phylo2vec matrix (tree with branch lengths)
+or a phylo2vec vector (tree topology only)
 }
 \description{
-Convert a Newick string to a Phylo2Vec vector or matrix
+Convert a Newick string to a phylo2vec vector or matrix
 }

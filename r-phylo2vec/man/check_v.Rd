@@ -2,10 +2,13 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{check_v}
 \alias{check_v}
-\title{Validate a Phylo2Vec vector}
+\title{Validate a phylo2vec vector}
 \usage{
 check_v(vector)
 }
+\arguments{
+\item{vector}{phylo2vec vector representation of a tree topology}
+}
 \description{
-Validate a Phylo2Vec vector
+Raises an error if the vector is invalid.
 }

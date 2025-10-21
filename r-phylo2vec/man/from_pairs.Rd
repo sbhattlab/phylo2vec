@@ -2,10 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{from_pairs}
 \alias{from_pairs}
-\title{Convert a pairs matrix to a Phylo2Vec vector}
+\title{Convert a pairs matrix to a phylo2vec vector}
 \usage{
 from_pairs(pairs)
 }
+\arguments{
+\item{pairs}{Pairs representation (shape: \link{n_leaves - 1, 2})}
+}
+\value{
+phylo2vec vector representation
+}
 \description{
-Convert a pairs matrix to a Phylo2Vec vector
+Convert a pairs matrix to a phylo2vec vector
 }

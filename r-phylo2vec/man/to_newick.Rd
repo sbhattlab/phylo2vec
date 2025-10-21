@@ -2,17 +2,17 @@
 % Please edit documentation in R/base_newick.R
 \name{to_newick}
 \alias{to_newick}
-\title{Convert a Phylo2Vec vector or matrix to Newick format}
+\title{Convert a phylo2vec vector or matrix to Newick format}
 \usage{
 to_newick(vector_or_matrix)
 }
 \arguments{
-\item{vector_or_matrix}{Phylo2Vec matrix if branch lengths
-are present, otherwise a vector}
+\item{vector_or_matrix}{phylo2vec matrix (tree with branch
+lengths) or a vector (tree topology only)}
 }
 \value{
 Newick string representation of the tree
 }
 \description{
-Convert a Phylo2Vec vector or matrix to Newick format
+Convert a phylo2vec vector or matrix to Newick format
 }

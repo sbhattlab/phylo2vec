@@ -2,18 +2,17 @@
 % Please edit documentation in R/stats.R
 \name{vcovp}
 \alias{vcovp}
-\title{Compute the variance-covariance matrix of a Phylo2Vec
-vector (topological) or matrix (from branch lengths).}
+\title{Compute the variance-covariance matrix of a phylo2vec
+vector (tree topology) or matrix (topology + branch lengths).}
 \usage{
 vcovp(vector_or_matrix)
 }
 \arguments{
-\item{vector_or_matrix}{Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)}
+\item{vector_or_matrix}{phylo2vec vector (ndim == 1)/matrix (ndim == 2)}
 }
 \value{
 Variance-covariance matrix
 }
 \description{
-Compute the variance-covariance matrix of a Phylo2Vec
-vector (topological) or matrix (from branch lengths).
+Output shape: (n_leaves, n_leaves)
 }

@@ -120,13 +120,13 @@ test_that(desc = "remove_branch_lengths", {
     for (j in seq_len(N_REPEATS)) {
       m <- sample_matrix(n_leaves, FALSE)
 
-      nw_from_m <- to_newick_from_matrix(m)
+      nw_from_m <- to_newick(m)
 
       nw_no_bl <- remove_branch_lengths(nw_from_m)
 
       v <- as.integer(m[, 1])
 
-      nw_from_v <- to_newick_from_vector(v)
+      nw_from_v <- to_newick(v)
 
       expect_equal(nw_no_bl, nw_from_v)
     }
@@ -137,13 +137,13 @@ test_that(desc = "has_branch_lengths", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
     m <- sample_matrix(n_leaves, FALSE)
 
-    nw_from_m <- to_newick_from_matrix(m)
+    nw_from_m <- to_newick(m)
 
     expect_true(has_branch_lengths(nw_from_m))
 
     v <- as.integer(m[, 1])
 
-    nw_from_v <- to_newick_from_vector(v)
+    nw_from_v <- to_newick(v)
 
     expect_false(has_branch_lengths(nw_from_v))
   }

@@ -3,6 +3,12 @@ ACCEPTED_FILE_EXTENSIONS <- list(
   newick = c("txt", "nwk", "newick", "tree", "treefile")
 )
 
+#' Check if the file path has an accepted extension.
+#'
+#' Raises an error if the file extension is not supported
+#'
+#' @param filepath File path to check.
+#' @param filetype Type of file: "array" or "newick".
 check_path <- function(filepath, filetype) {
   suffix <- tools::file_ext(filepath)
 
@@ -92,6 +98,7 @@ save_newick <- function(vector_or_matrix, filepath, labels = NULL) {
 #'  which satisfies Phylo2Vec constraints
 #' @param filepath Path to the output file
 #' @param delimiter Character used to separate values, defaults to ",".
+#' @export
 save_p2v <- function(vector_or_matrix, filepath, delimiter = ",") {
   check_path(filepath, "array")
 

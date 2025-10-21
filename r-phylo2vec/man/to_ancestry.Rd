@@ -2,10 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{to_ancestry}
 \alias{to_ancestry}
-\title{Get the ancestry matrix of a Phylo2Vec vector}
+\title{Get the ancestry matrix of a phylo2vec vector}
 \usage{
 to_ancestry(vector)
 }
+\arguments{
+\item{vector}{phylo2vec vector representation of a tree topology}
+}
+\value{
+Ancestry representation (shape: \link{n_leaves - 1, 3})
+}
 \description{
-Get the ancestry matrix of a Phylo2Vec vector
+Get the ancestry matrix of a phylo2vec vector
 }

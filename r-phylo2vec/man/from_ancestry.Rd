@@ -2,10 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{from_ancestry}
 \alias{from_ancestry}
-\title{Convert an ancestry matrix to a Phylo2Vec vector}
+\title{Convert an ancestry matrix to a phylo2vec vector}
 \usage{
 from_ancestry(matrix)
 }
+\arguments{
+\item{matrix}{Ancestry representation (shape: \link{n_leaves - 1, 3})}
+}
+\value{
+phylo2vec vector representation
+}
 \description{
-Convert an ancestry matrix to a Phylo2Vec vector
+Convert an ancestry matrix to a phylo2vec vector
 }
