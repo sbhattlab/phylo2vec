@@ -1,10 +1,6 @@
 source("config.R")
 
-library(ape)
-
-# 50 tests with N_REPEATS repeats
-N_TESTS <- 50
-MAX_N_LEAVES <- MIN_N_LEAVES + N_TESTS - 1
+MAX_N_LEAVES_STATS <- 50
 
 #' Adaptation of numpy's allclose function in R
 #' @param a First vector
@@ -17,7 +13,7 @@ allclose <- function(a, b, atol = 1e-8, rtol = 1e-5) {
 }
 
 test_that(desc = "cophenetic_vector", {
-  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       # Generate a random vector
       v <- sample_vector(n_leaves, FALSE)
@@ -27,9 +23,9 @@ test_that(desc = "cophenetic_vector", {
 
       # Cophenetic distances from a tree using ape
       newick <- to_newick(v)
-      tr <- read.tree(text = newick)
-      tr <- compute.brlen(tr, 1)
-      coph_ape <- cophenetic(tr)
+      tr <- ape::read.tree(text = newick)
+      tr <- ape::compute.brlen(tr, 1)
+      coph_ape <- ape::cophenetic.phylo(tr)
       col_order <- order(as.numeric(colnames(coph_ape)))
       coph_ape <- coph_ape[col_order, col_order]
 
@@ -39,7 +35,7 @@ test_that(desc = "cophenetic_vector", {
 })
 
 test_that(desc = "cophenetic_matrix", {
-  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       # Generate a random matrix
       m <- sample_matrix(n_leaves, FALSE)
@@ -49,8 +45,8 @@ test_that(desc = "cophenetic_matrix", {
 
       # Cophenetic distances from a tree using ape
       newick <- to_newick(m)
-      tr <- read.tree(text = newick)
-      coph_ape <- cophenetic(tr)
+      tr <- ape::read.tree(text = newick)
+      coph_ape <- ape::cophenetic.phylo(tr)
       col_order <- order(as.numeric(colnames(coph_ape)))
       coph_ape <- coph_ape[col_order, col_order]
 
@@ -60,7 +56,7 @@ test_that(desc = "cophenetic_matrix", {
 })
 
 test_that(desc = "vcv_vector", {
-  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       # Generate a random vector
       v <- sample_vector(n_leaves, FALSE)
@@ -70,10 +66,10 @@ test_that(desc = "vcv_vector", {
 
       # Variance-covariance matrix from a tree using ape
       newick <- to_newick(v)
-      tr <- read.tree(text = newick)
+      tr <- ape::read.tree(text = newick)
       # Set branch lengths to 1
-      tr <- compute.brlen(tr, 1)
-      vcv_ape <- vcv.phylo(tr)
+      tr <- ape::compute.brlen(tr, 1)
+      vcv_ape <- ape::vcv.phylo(tr)
       col_order <- order(as.numeric(colnames(vcv_ape)))
       vcv_ape <- vcv_ape[col_order, col_order]
 
@@ -83,7 +79,7 @@ test_that(desc = "vcv_vector", {
 })
 
 test_that(desc = "vcv_matrix", {
-  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       # Generate a random matrix
       m <- sample_matrix(n_leaves, FALSE)
@@ -93,8 +89,8 @@ test_that(desc = "vcv_matrix", {
 
       # Variance-covariance matrix from a tree using ape
       newick <- to_newick(m)
-      tr <- read.tree(text = newick)
-      vcv_ape <- vcv.phylo(tr)
+      tr <- ape::read.tree(text = newick)
+      vcv_ape <- ape::vcv.phylo(tr)
       col_order <- order(as.numeric(colnames(vcv_ape)))
       vcv_ape <- vcv_ape[col_order, col_order]
 
@@ -103,14 +99,32 @@ test_that(desc = "vcv_matrix", {
   }
 })
 
-test_that(desc = "vcv_and_precision", {
-  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+test_that(desc = "vcv_and_precision_vector", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    for (j in seq_len(N_REPEATS)) {
+      # Generate a random vector
+      v <- sample_vector(n_leaves, FALSE)
+
+      # Test that the variance-covariance and precision matrices are inverses
+      # vcov_from_vector = same as vcovp for vectors
+      vcv_p2v <- vcov_from_vector(v)
+      prec_p2v <- precision(v)
+      identity <- diag(nrow(vcv_p2v))
+
+      expect_true(allclose(vcv_p2v %*% prec_p2v, identity))
+    }
+  }
+})
+
+test_that(desc = "vcv_and_precision_matrix", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       # Generate a random matrix
       m <- sample_matrix(n_leaves, FALSE)
 
       # Test that the variance-covariance and precision matrices are inverses
-      vcv_p2v <- vcovp(m)
+      # vcov_from_vector = same as vcovp for matrices
+      vcv_p2v <- vcov_from_matrix(m)
       prec_p2v <- precision(m)
       identity <- diag(nrow(vcv_p2v))
 
@@ -121,13 +135,18 @@ test_that(desc = "vcv_and_precision", {
 
 test_incidence_single <- function(v, d) {
   k <- length(v)
+  # Check that format CSC (C) and CSR (R) are equivalent
   expect_equal(incidence(v, "C"), incidence(v, "R"))
+  # Check that format CSC (C) and COO (T) are equivalent
   expect_equal(incidence(v, "C"), incidence(v, "T"))
+  # Check that format DENSE (D) matches expected output
   d_from_c <- as.matrix(incidence(v, "C"))
   expect_equal(d_from_c, d)
   rownames(d_from_c) <- 0:(2 * k)
   colnames(d_from_c) <- 0:(2 * k - 1)
   expect_equal(incidence(v, "D"), d_from_c)
+  # Check that unallowed formats trigger an error
+  expect_error(incidence(v, "unknown"))
 }
 
 test_that(desc = "incidence_all_format", {

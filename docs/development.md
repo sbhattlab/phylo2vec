@@ -98,6 +98,30 @@ Example for env = `py-phylo2vec`, matrix functions and `n_leaves` = 10000:
 pixi run -e py-phylo2vec profile matrix 10000
 ```
 
+## Code coverage
+
+Although not currently implemented in the CI pipeline, we used the following
+packages to monitor test coverage:
+
+* Rust: [cargo-llvm-cov](https://github.com/taiki-e/cargo-llvm-cov)
+```bash
+cargo install cargo-llvm-cov
+
+cargo llvm-cov
+```
+* Python: [pytest-cov](https://github.com/pytest-dev/pytest-cov)
+```bash
+pixi add pytest-cov
+
+pixi run -e py-phylo2vec pytest ./py-phylo2vec/tests --cov=./py-phylo2vec/
+```
+* R: [covr](https://covr.r-lib.org/)
+```r
+install.packages("covr")
+rcov <- package_coverage("./r-phylo2vec", quiet = FALSE)
+```
+
+
 ## Python: py-phylo2vec
 
 This directory contains the phylo2vec Python codebase, which includes Rust
