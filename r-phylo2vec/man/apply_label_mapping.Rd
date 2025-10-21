@@ -8,6 +8,14 @@ and produce a mapped Newick (where leaves are strings (taxa))}
 \usage{
 apply_label_mapping(newick, label_mapping_list)
 }
+\arguments{
+\item{newick}{Newick representation of a tree with integer labels}
+
+\item{label_mapping_list}{A vector where the index corresponds to the integer label}
+}
+\value{
+Newick with string labels
+}
 \description{
 For more details, see \code{create_label_mapping}.
 }

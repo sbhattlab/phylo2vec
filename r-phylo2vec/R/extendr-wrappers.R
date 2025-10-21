@@ -24,6 +24,10 @@ add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, b
 #'
 #' Note 2: the parent nodes are removed from the output,
 #' but the branch lengths/annotations are kept.
+#'
+#' @param newick Newick representation of a tree with integer labels
+#' @param label_mapping_list A vector where the index corresponds to the integer label
+#' @return Newick with string labels
 #' @export
 apply_label_mapping <- function(newick, label_mapping_list) .Call(wrap__apply_label_mapping, newick, label_mapping_list)
 
@@ -51,12 +55,18 @@ cophenetic_from_vector <- function(vector, unrooted) .Call(wrap__cophenetic_from
 #'
 #' Note 2: the parent nodes are removed from the output,
 #' but the branch lengths/annotations are kept.
+#'
+#' @param newick Newick representation of a tree with string labels
+#' @return A list with two elements:
+#' - `newick`: Newick with integer labels
+#' - `mapping`: A vector where the index corresponds to the integer label
 #' @export
 create_label_mapping <- function(newick) .Call(wrap__create_label_mapping, newick)
 
 #' Find the number of leaves in a Newick string
 #'
 #' @param newick Newick representation of a tree
+#' @return Number of leaves
 #' @export
 find_num_leaves <- function(newick) .Call(wrap__find_num_leaves, newick)
 
@@ -76,6 +86,8 @@ from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
 
 #' Check if a newick string has branch lengths
+#'
+#' @param newick Newick representation of a tree
 #' @export
 has_branch_lengths <- function(newick) .Call(wrap__has_branch_lengths, newick)
 
@@ -120,10 +132,16 @@ pre_precision_from_vector <- function(vector) .Call(wrap__pre_precision_from_vec
 queue_shuffle <- function(vector, shuffle_cherries) .Call(wrap__queue_shuffle, vector, shuffle_cherries)
 
 #' Remove parent labels from the Newick string
+#'
+#' @param newick Newick representation of a tree with branch lengths
+#' @return Newick string without branch lengths
 #' @export
 remove_branch_lengths <- function(newick) .Call(wrap__remove_branch_lengths, newick)
 
 #' Remove parent labels from the Newick string
+#'
+#' @param newick Newick representation of a tree with parent labels
+#' @return Newick string without parent labels
 #' @export
 remove_parent_labels <- function(newick) .Call(wrap__remove_parent_labels, newick)
 

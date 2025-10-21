@@ -6,6 +6,12 @@
 \usage{
 remove_parent_labels(newick)
 }
+\arguments{
+\item{newick}{Newick representation of a tree with parent labels}
+}
+\value{
+Newick string without parent labels
+}
 \description{
 Remove parent labels from the Newick string
 }

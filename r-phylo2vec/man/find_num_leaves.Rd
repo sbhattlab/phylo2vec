@@ -9,6 +9,9 @@ find_num_leaves(newick)
 \arguments{
 \item{newick}{Newick representation of a tree}
 }
+\value{
+Number of leaves
+}
 \description{
 Find the number of leaves in a Newick string
 }
