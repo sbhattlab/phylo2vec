@@ -23,19 +23,25 @@ pub fn _cophenetic_distances(
     unrooted: bool,
 ) -> Array2<f64> {
     let k = v.len();
-    let mut ancestry = to_ancestry(v);
+
+    // Special case for 1-leaf tree
+    if k == 0 {
+        return array![[0.0]];
+    }
 
     let bls = match bls {
         Some(b) => b.to_vec(),
         None => ones(k),
     };
 
-    // A 2-leaf tree cannot be unrooted (see ete3)
+    // Special case for a 2-leaf tree
+    // Cannot be unrooted (see ete3)
     // so we return the sum of their branch lengths
-    // if v.len() == 1, unrooted or not
-    if v.len() == 1 {
+    if k == 1 {
         return array![[0.0, bls[0][0] + bls[0][1]], [bls[0][0] + bls[0][1], 0.0]];
     }
+
+    let mut ancestry = to_ancestry(v);
 
     if unrooted {
         let nrows = ancestry.len();
@@ -110,6 +116,11 @@ pub fn cophenetic_distances(v: &[usize], unrooted: bool) -> Array2<f64> {
 /// Inspired from the `inverseA` function in the `MCMCglmm` R package: <https://github.com/cran/MCMCglmm>
 pub fn _pre_precision(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
     let k = v.len();
+
+    assert!(
+        k > 0,
+        "Precision matrix not supported for trees with < 2 leaves."
+    );
 
     let bls = match bls {
         Some(b) => b.to_vec(),
@@ -199,6 +210,12 @@ fn get_descendants_and_edges(pairs: &Pairs) -> (HashMap<usize, BitSet>, Vec<(usi
 /// Adapted from `vcv.phylo` function in the `ape` package: <https://github.com/emmanuelparadis/ape>
 pub fn _vcv(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Array2<f64> {
     let k = v.len();
+
+    assert!(
+        k > 0,
+        "Variance-covariance matrix not supported for trees with < 2 leaves."
+    );
+
     let n_leaves = k + 1;
     let bls = match bls {
         Some(b) => b.to_vec(),
@@ -542,6 +559,7 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
+    #[case(vec![], false, array![[0.0]])]
     #[case(vec![0], false, array![[0.0, 2.0], [2.0, 0.0]])]
     #[case(vec![0], true, array![[0.0, 2.0], [2.0, 0.0]])]
     #[case(vec![0, 0, 1], false, array![
@@ -616,6 +634,13 @@ mod tests {
     }
 
     #[rstest]
+    #[should_panic]
+    #[case(vec![])]
+    fn test_vcv_empty(#[case] v: Vec<usize>) {
+        vcv(&v);
+    }
+
+    #[rstest]
     #[case(vec![0], array![[1.0, 0.0], [0.0, 1.0]])]
     #[case(vec![0, 1, 2], array![
         [1.0,  0.0,  0.0,  0.0,  0.0,  0.0],
@@ -635,6 +660,13 @@ mod tests {
         [0.0,  0.0, -1.0,  0.0,  0.0,  0.0, -1.0,  3.0]])]
     fn test_pre_precision(#[case] v: Vec<usize>, #[case] expected: Array2<f64>) {
         assert_eq!(pre_precision(&v), expected);
+    }
+
+    #[rstest]
+    #[should_panic]
+    #[case(vec![])]
+    fn test_pre_precision_empty(#[case] v: Vec<usize>) {
+        pre_precision(&v);
     }
 
     #[rstest]

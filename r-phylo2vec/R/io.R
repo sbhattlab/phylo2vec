@@ -1,13 +1,10 @@
-library(tools)
-
-
 ACCEPTED_FILE_EXTENSIONS <- list(
   array = c("csv", "txt"),
   newick = c("txt", "nwk", "newick", "tree", "treefile")
 )
 
 check_path <- function(filepath, filetype) {
-  suffix <- file_ext(filepath)
+  suffix <- tools::file_ext(filepath)
 
   if (!suffix %in% ACCEPTED_FILE_EXTENSIONS[[filetype]]) {
     stop(
@@ -35,10 +32,12 @@ load_p2v <- function(filepath, delimiter = ",") {
 
   if (dim(arr)[2] == 1) {
     # Convert to a vector
-    arr <- as.numeric(arr)
+    arr <- as.integer(arr)
+    check_v(arr)
   } else if (dim(arr)[2] == 3) {
     # Remove dimnames to preserve the original structure
     dimnames(arr) <- NULL
+    check_m(arr)
   } else {
     stop(
       paste0(
@@ -96,10 +95,14 @@ save_newick <- function(vector_or_matrix, filepath, labels = NULL) {
 save_p2v <- function(vector_or_matrix, filepath, delimiter = ",") {
   check_path(filepath, "array")
 
-  if (!(is.vector(vector_or_matrix) || is.matrix(vector_or_matrix))) {
+  if (is.vector(vector_or_matrix, "integer")) {
+    check_v(vector_or_matrix)
+  } else if (is.matrix(vector_or_matrix)) {
+    check_m(vector_or_matrix)
+  } else {
     stop(
       paste0(
-        "Input should either be a vector (ndim == 1) ",
+        "Input should either be an integer vector (ndim == 1) ",
         "or matrix (ndim == 2)"
       )
     )
