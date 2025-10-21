@@ -1,5 +1,3 @@
-library(Matrix)
-
 #' Compute the cophenetic distance matrix of a Phylo2Vec
 #' vector (topological) or matrix (from branch lengths).
 #'
@@ -9,12 +7,12 @@ library(Matrix)
 #' @return Cophenetic distance matrix
 #' @export
 cophenetic_distances <- function(vector_or_matrix, unrooted = FALSE) {
-  if (is.vector(vector_or_matrix)) {
+  if (is.vector(vector_or_matrix, "integer")) {
     .Call(wrap__cophenetic_from_vector, vector_or_matrix, unrooted)
   } else if (is.matrix(vector_or_matrix)) {
     .Call(wrap__cophenetic_from_matrix, vector_or_matrix, unrooted)
   } else {
-    stop("Input must be either a vector or a 2D matrix.")
+    stop("Input must be either an integer vector or a 2D matrix.")
   }
 }
 
@@ -25,12 +23,12 @@ cophenetic_distances <- function(vector_or_matrix, unrooted = FALSE) {
 #' @return Variance-covariance matrix
 #' @export
 vcovp <- function(vector_or_matrix) {
-  if (is.vector(vector_or_matrix)) {
+  if (is.vector(vector_or_matrix, "integer")) {
     .Call(wrap__vcov_from_vector, vector_or_matrix)
   } else if (is.matrix(vector_or_matrix)) {
     .Call(wrap__vcov_from_matrix, vector_or_matrix)
   } else {
-    stop("Input must be either a vector or a 2D matrix.")
+    stop("Input must be either an integer vector or a 2D matrix.")
   }
 }
 
@@ -43,18 +41,24 @@ vcovp <- function(vector_or_matrix) {
 #' @return Precision matrix
 #' @export
 precision <- function(vector_or_matrix) {
-  if (is.vector(vector_or_matrix)) {
+  # Rust panics if len(v) == 0
+  if (is.vector(vector_or_matrix, "integer")) {
     precursor <- .Call(wrap__pre_precision_from_vector, vector_or_matrix)
   } else if (is.matrix(vector_or_matrix)) {
     precursor <- .Call(wrap__pre_precision_from_matrix, vector_or_matrix)
   } else {
-    stop("Input must be either a vector or a 2D matrix.")
+    stop("Input must be either an integer vector or a 2D matrix.")
   }
 
-  # Schur complement of the precursor matrix
   # nrow(precursor) = ncol(precursor) = 2*k where k = n_leaves - 1
   n <- nrow(precursor)
+
+  if (n <= 2) {
+    return(precursor)
+  }
+
   n_leaves <- nrow(precursor) / 2 + 1
+  # Schur complement of the precursor matrix
   a <- precursor[1:n_leaves, 1:n_leaves]
   b <- precursor[1:n_leaves, (n_leaves + 1):n]
   c <- precursor[(n_leaves + 1):n, (n_leaves + 1):n]
@@ -77,7 +81,7 @@ incidence <- function(vector, format = "C") {
     dims <- c(2 * k + 1, 2 * k)
     if (format == "coo" || format == "T") {
       coo <- .Call(wrap__incidence_coo, vector)
-      return(sparseMatrix(
+      return(Matrix::sparseMatrix(
         i = coo$rows,
         j = coo$cols,
         x = coo$data,
@@ -86,7 +90,7 @@ incidence <- function(vector, format = "C") {
       ))
     } else if (format == "csr" || format == "R") {
       csr <- .Call(wrap__incidence_csr, vector)
-      return(sparseMatrix(
+      return(Matrix::sparseMatrix(
         j = csr$indices,
         p = csr$indptr,
         x = csr$data,
@@ -95,7 +99,7 @@ incidence <- function(vector, format = "C") {
       ))
     } else if (format == "csc" || format == "C") {
       csc <- .Call(wrap__incidence_csc, vector)
-      return(sparseMatrix(
+      return(Matrix::sparseMatrix(
         i = csc$indices,
         p = csc$indptr,
         x = csc$data,
