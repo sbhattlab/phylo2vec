@@ -6,6 +6,12 @@
 \usage{
 remove_branch_lengths(newick)
 }
+\arguments{
+\item{newick}{Newick representation of a tree with branch lengths}
+}
+\value{
+Newick string without branch lengths
+}
 \description{
 Remove parent labels from the Newick string
 }

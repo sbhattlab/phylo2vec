@@ -262,6 +262,8 @@ fn queue_shuffle(vector: Vec<i32>, shuffle_cherries: bool) -> List {
 }
 
 /// Check if a newick string has branch lengths
+///
+/// @param newick Newick representation of a tree
 /// @export
 #[extendr]
 fn has_branch_lengths(newick: &str) -> bool {
@@ -271,6 +273,7 @@ fn has_branch_lengths(newick: &str) -> bool {
 /// Find the number of leaves in a Newick string
 ///
 /// @param newick Newick representation of a tree
+/// @return Number of leaves
 /// @export
 #[extendr]
 fn find_num_leaves(newick: &str) -> usize {
@@ -285,6 +288,11 @@ fn find_num_leaves(newick: &str) -> usize {
 ///
 /// Note 2: the parent nodes are removed from the output,
 /// but the branch lengths/annotations are kept.
+///
+/// @param newick Newick representation of a tree with string labels
+/// @return A list with two elements:
+/// - `newick`: Newick with integer labels
+/// - `mapping`: A vector where the index corresponds to the integer label
 /// @export
 #[extendr]
 fn create_label_mapping(newick: &str) -> List {
@@ -309,6 +317,10 @@ fn create_label_mapping(newick: &str) -> List {
 ///
 /// Note 2: the parent nodes are removed from the output,
 /// but the branch lengths/annotations are kept.
+///
+/// @param newick Newick representation of a tree with integer labels
+/// @param label_mapping_list A vector where the index corresponds to the integer label
+/// @return Newick with string labels
 /// @export
 #[extendr]
 fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String {
@@ -323,6 +335,9 @@ fn apply_label_mapping(newick: &str, label_mapping_list: Vec<String>) -> String 
 }
 
 /// Remove parent labels from the Newick string
+///
+/// @param newick Newick representation of a tree with branch lengths
+/// @return Newick string without branch lengths
 /// @export
 #[extendr]
 fn remove_branch_lengths(newick: &str) -> String {
@@ -330,6 +345,9 @@ fn remove_branch_lengths(newick: &str) -> String {
 }
 
 /// Remove parent labels from the Newick string
+///
+/// @param newick Newick representation of a tree with parent labels
+/// @return Newick string without parent labels
 /// @export
 #[extendr]
 fn remove_parent_labels(newick: &str) -> String {

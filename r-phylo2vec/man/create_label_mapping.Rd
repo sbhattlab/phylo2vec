@@ -8,6 +8,16 @@ and produce a mapped integer-based newick (where leaves are integers).}
 \usage{
 create_label_mapping(newick)
 }
+\arguments{
+\item{newick}{Newick representation of a tree with string labels}
+}
+\value{
+A list with two elements:
+\itemize{
+\item \code{newick}: Newick with integer labels
+\item \code{mapping}: A vector where the index corresponds to the integer label
+}
+}
 \description{
 Note 1: this does not check for the validity of the Newick string.
 }

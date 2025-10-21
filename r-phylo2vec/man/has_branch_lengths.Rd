@@ -6,6 +6,9 @@
 \usage{
 has_branch_lengths(newick)
 }
+\arguments{
+\item{newick}{Newick representation of a tree}
+}
 \description{
 Check if a newick string has branch lengths
 }
