@@ -54,6 +54,12 @@ cophenetic_from_vector <- function(vector, unrooted) .Call(wrap__cophenetic_from
 #' @export
 create_label_mapping <- function(newick) .Call(wrap__create_label_mapping, newick)
 
+#' Find the number of leaves in a Newick string
+#'
+#' @param newick Newick representation of a tree
+#' @export
+find_num_leaves <- function(newick) .Call(wrap__find_num_leaves, newick)
+
 #' Convert an ancestry matrix to a Phylo2Vec vector
 #' @export
 from_ancestry <- function(matrix) .Call(wrap__from_ancestry, matrix)

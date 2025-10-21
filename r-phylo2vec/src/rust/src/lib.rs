@@ -268,6 +268,15 @@ fn has_branch_lengths(newick: &str) -> bool {
     newick::has_branch_lengths(newick)
 }
 
+/// Find the number of leaves in a Newick string
+///
+/// @param newick Newick representation of a tree
+/// @export
+#[extendr]
+fn find_num_leaves(newick: &str) -> usize {
+    newick::find_num_leaves(newick)
+}
+
 /// Create an integer-taxon label mapping (label_mapping)
 /// from a string-based newick (where leaves are strings)
 /// and produce a mapped integer-based newick (where leaves are integers).
@@ -477,6 +486,7 @@ extendr_module! {
     fn cophenetic_from_matrix;
     fn cophenetic_from_vector;
     fn create_label_mapping;
+    fn find_num_leaves;
     fn from_ancestry;
     fn from_edges;
     fn from_pairs;
