@@ -26,7 +26,7 @@ pub fn _cophenetic_distances(
 
     // Special case for 1-leaf tree
     if k == 0 {
-        return array![[1.0]];
+        return array![[0.0]];
     }
 
     let bls = match bls {
@@ -559,6 +559,7 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
+    #[case(vec![], false, array![[0.0]])]
     #[case(vec![0], false, array![[0.0, 2.0], [2.0, 0.0]])]
     #[case(vec![0], true, array![[0.0, 2.0], [2.0, 0.0]])]
     #[case(vec![0, 0, 1], false, array![
