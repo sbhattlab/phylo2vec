@@ -1,10 +1,10 @@
-#' Sample a random tree as a Phylo2Vec object
+#' Sample a random tree as a phylo2vec object
 #'
 #' @param n_leaves Number of leaves in the tree
 #' @param topology_only If TRUE, a vector corresponding to the topology
 #' is returned. IF FALSE, a matrix is returned
 #' @param ordered If TRUE, sample an ordered tree
-#' @return A Phylo2Vec object (`integer` if topology_only, else `matrix`)
+#' @return A phylo2vec object (`integer` if topology_only, else `matrix`)
 #' @export
 sample_tree <- function(n_leaves, topology_only = FALSE, ordered = FALSE) {
   if (topology_only) {

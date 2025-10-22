@@ -2,13 +2,13 @@
 % Please edit documentation in R/stats.R
 \name{cophenetic_distances}
 \alias{cophenetic_distances}
-\title{Compute the cophenetic distance matrix of a Phylo2Vec
-vector (topological) or matrix (from branch lengths).}
+\title{Compute the cophenetic distance matrix of a phylo2vec
+vector (tree topology) or matrix (topology + branch lengths).}
 \usage{
 cophenetic_distances(vector_or_matrix, unrooted = FALSE)
 }
 \arguments{
-\item{vector_or_matrix}{Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)}
+\item{vector_or_matrix}{phylo2vec vector (ndim == 1)/matrix (ndim == 2)}
 
 \item{unrooted}{Logical indicating whether applying the cophenetic distance
 to an unrooted tree or not (see ete3). Default is FALSE.}
@@ -17,6 +17,5 @@ to an unrooted tree or not (see ete3). Default is FALSE.}
 Cophenetic distance matrix
 }
 \description{
-Compute the cophenetic distance matrix of a Phylo2Vec
-vector (topological) or matrix (from branch lengths).
+Output shape: (n_leaves, n_leaves)
 }

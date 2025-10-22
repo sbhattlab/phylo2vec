@@ -2,10 +2,20 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{add_leaf}
 \alias{add_leaf}
-\title{Add a leaf to a Phylo2Vec vector}
+\title{Add a leaf to a phylo2vec vector}
 \usage{
 add_leaf(vector, leaf, branch)
 }
+\arguments{
+\item{vector}{phylo2vec vector representation of a tree topology}
+
+\item{leaf}{The leaf to add (0-indexed)}
+
+\item{branch}{The branch to attach the new leaf to (0-indexed)}
+}
+\value{
+New vector with the added leaf
+}
 \description{
-Add a leaf to a Phylo2Vec vector
+Add a leaf to a phylo2vec vector
 }

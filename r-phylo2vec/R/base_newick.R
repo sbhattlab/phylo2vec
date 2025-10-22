@@ -1,7 +1,7 @@
-#' Convert a Phylo2Vec vector or matrix to Newick format
+#' Convert a phylo2vec vector or matrix to Newick format
 #'
-#' @param vector_or_matrix Phylo2Vec matrix if branch lengths
-#' are present, otherwise a vector
+#' @param vector_or_matrix phylo2vec matrix (tree with branch
+#' lengths) or a vector (tree topology only)
 #' @return Newick string representation of the tree
 #' @export
 to_newick <- function(vector_or_matrix) {
@@ -16,11 +16,11 @@ to_newick <- function(vector_or_matrix) {
   }
 }
 
-#' Convert a Newick string to a Phylo2Vec vector or matrix
+#' Convert a Newick string to a phylo2vec vector or matrix
 #'
 #' @param newick Newick string representation of the tree
-#' @return A Phylo2Vec matrix (if branch lengths are present),
-#' otherwise a Phylo2Vec vector (no branch lengths)
+#' @return A phylo2vec matrix (tree with branch lengths)
+#' or a phylo2vec vector (tree topology only)
 #' @export
 from_newick <- function(newick) {
   if (.Call(wrap__has_branch_lengths, newick)) {

@@ -7,7 +7,7 @@ test_that(desc = "v2newick2v", {
       v <- sample_vector(n_leaves, FALSE)
 
       # Convert to Newick and back
-      newick <- to_newick_from_vector(v)
+      newick <- to_newick(v)
       v2 <- to_vector(newick)
       expect_equal(v, v2)
     }
@@ -21,7 +21,7 @@ test_that(desc = "m2newick2m", {
       m <- sample_matrix(n_leaves, FALSE)
 
       # Convert to Newick and back
-      newick <- to_newick_from_matrix(m)
+      newick <- to_newick(m)
       m2 <- to_matrix(newick)
       expect_equal(m, m2)
     }

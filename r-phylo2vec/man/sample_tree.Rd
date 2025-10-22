@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{sample_tree}
 \alias{sample_tree}
-\title{Sample a random tree as a Phylo2Vec object}
+\title{Sample a random tree as a phylo2vec object}
 \usage{
 sample_tree(n_leaves, topology_only = FALSE, ordered = FALSE)
 }
@@ -15,8 +15,8 @@ is returned. IF FALSE, a matrix is returned}
 \item{ordered}{If TRUE, sample an ordered tree}
 }
 \value{
-A Phylo2Vec object (\code{integer} if topology_only, else \code{matrix})
+A phylo2vec object (\code{integer} if topology_only, else \code{matrix})
 }
 \description{
-Sample a random tree as a Phylo2Vec object
+Sample a random tree as a phylo2vec object
 }

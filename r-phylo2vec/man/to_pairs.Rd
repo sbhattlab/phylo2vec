@@ -2,10 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{to_pairs}
 \alias{to_pairs}
-\title{Get pairs from a Phylo2Vec vector}
+\title{Get pairs from a phylo2vec vector}
 \usage{
 to_pairs(vector)
 }
+\arguments{
+\item{vector}{phylo2vec vector representation of a tree topology}
+}
+\value{
+Pairs representation (shape: (n_leaves - 1, 2))
+}
 \description{
-Get pairs from a Phylo2Vec vector
+Get pairs from a phylo2vec vector
 }

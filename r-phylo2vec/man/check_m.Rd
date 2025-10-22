@@ -2,10 +2,13 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{check_m}
 \alias{check_m}
-\title{Validate a Phylo2Vec vector}
+\title{Validate a phylo2vec matrix}
 \usage{
 check_m(vector)
 }
+\arguments{
+\item{vector}{phylo2vec matrix representation of a tree (with branch lengths)}
+}
 \description{
-Validate a Phylo2Vec vector
+Raises an error if the matrix is invalid.
 }

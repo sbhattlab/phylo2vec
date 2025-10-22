@@ -2,10 +2,22 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{remove_leaf}
 \alias{remove_leaf}
-\title{Remove a leaf from a Phylo2Vec vector}
+\title{Remove a leaf from a phylo2vec vector}
 \usage{
 remove_leaf(vector, leaf)
 }
+\arguments{
+\item{vector}{phylo2vec vector representation of a tree topology}
+
+\item{leaf}{The leaf to remove (0-indexed)}
+}
+\value{
+A list with two elements:
+\itemize{
+\item \code{v}: New vector with the removed leaf
+\item \code{branch}: The branch the removed leaf was attached to (0-indexed)
+}
+}
 \description{
-Remove a leaf from a Phylo2Vec vector
+Remove a leaf from a phylo2vec vector
 }

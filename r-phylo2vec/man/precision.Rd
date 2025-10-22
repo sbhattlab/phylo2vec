@@ -2,17 +2,20 @@
 % Please edit documentation in R/stats.R
 \name{precision}
 \alias{precision}
-\title{Compute the precision matrix of a Phylo2Vec
-vector (topological) or matrix (from branch lengths).}
+\title{Compute the precision matrix of a phylo2vec
+vector (tree topology) or matrix (topology + branch lengths).}
 \usage{
 precision(vector_or_matrix)
 }
 \arguments{
-\item{vector_or_matrix}{Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)}
+\item{vector_or_matrix}{phylo2vec vector (ndim == 1)/matrix (ndim == 2)}
 }
 \value{
 Precision matrix
 }
 \description{
 The precision matrix is the inverse of the variance-covariance matrix.
+}
+\details{
+Output shape: (n_leaves, n_leaves)
 }
