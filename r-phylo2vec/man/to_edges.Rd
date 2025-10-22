@@ -10,7 +10,7 @@ to_edges(vector)
 \item{vector}{phylo2vec vector representation of a tree topology}
 }
 \value{
-Edge list representation (shape: \link{2*(n_leaves - 1), 2})
+Edge list representation (shape: (2*(n_leaves - 1), 2))
 }
 \description{
 Get the edge list of a phylo2vec vector

@@ -12,7 +12,7 @@ sample_matrix(n_leaves, ordered)
 \item{ordered}{Whether to sample an ordered tree}
 }
 \value{
-A phylo2vec matrix representing the sampled tree with branch lengths (shape: \link{n_leaves - 1, 3})
+A phylo2vec matrix representing the sampled tree with branch lengths (shape: (n_leaves - 1, 3))
 }
 \description{
 Sample a random tree with branch lengths via phylo2vec

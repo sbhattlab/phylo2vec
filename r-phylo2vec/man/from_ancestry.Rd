@@ -7,7 +7,7 @@
 from_ancestry(matrix)
 }
 \arguments{
-\item{matrix}{Ancestry representation (shape: \link{n_leaves - 1, 3})}
+\item{matrix}{Ancestry representation (shape: (n_leaves - 1, 3))}
 }
 \value{
 phylo2vec vector representation

@@ -7,7 +7,7 @@
 from_edges(edges)
 }
 \arguments{
-\item{edges}{Edge list representation (shape: \link{2*(n_leaves - 1), 2})}
+\item{edges}{Edge list representation (shape: (2*(n_leaves - 1), 2))}
 }
 \value{
 phylo2vec vector representation

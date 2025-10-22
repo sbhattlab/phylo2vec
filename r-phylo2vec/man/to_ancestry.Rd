@@ -10,7 +10,7 @@ to_ancestry(vector)
 \item{vector}{phylo2vec vector representation of a tree topology}
 }
 \value{
-Ancestry representation (shape: \link{n_leaves - 1, 3})
+Ancestry representation (shape: (n_leaves - 1, 3))
 }
 \description{
 Get the ancestry matrix of a phylo2vec vector

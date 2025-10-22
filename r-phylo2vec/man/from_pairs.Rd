@@ -7,7 +7,7 @@
 from_pairs(pairs)
 }
 \arguments{
-\item{pairs}{Pairs representation (shape: \link{n_leaves - 1, 2})}
+\item{pairs}{Pairs representation (shape: (n_leaves - 1, 2))}
 }
 \value{
 phylo2vec vector representation

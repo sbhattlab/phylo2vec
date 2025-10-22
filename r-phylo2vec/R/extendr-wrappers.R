@@ -81,21 +81,21 @@ find_num_leaves <- function(newick) .Call(wrap__find_num_leaves, newick)
 
 #' Convert an ancestry matrix to a phylo2vec vector
 #'
-#' @param matrix Ancestry representation (shape: [n_leaves - 1, 3])
+#' @param matrix Ancestry representation (shape: (n_leaves - 1, 3))
 #' @return phylo2vec vector representation
 #' @export
 from_ancestry <- function(matrix) .Call(wrap__from_ancestry, matrix)
 
 #' Convert an edge list to a phylo2vec vector
 #'
-#' @param edges Edge list representation (shape: [2*(n_leaves - 1), 2])
+#' @param edges Edge list representation (shape: (2*(n_leaves - 1), 2))
 #' @return phylo2vec vector representation
 #' @export
 from_edges <- function(edges) .Call(wrap__from_edges, edges)
 
 #' Convert a pairs matrix to a phylo2vec vector
 #'
-#' @param pairs Pairs representation (shape: [n_leaves - 1, 2])
+#' @param pairs Pairs representation (shape: (n_leaves - 1, 2))
 #' @return phylo2vec vector representation
 #' @export
 from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
@@ -175,7 +175,7 @@ remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 #'
 #' @param n_leaves Number of leaves (must be at least 2)
 #' @param ordered Whether to sample an ordered tree
-#' @return A phylo2vec matrix representing the sampled tree with branch lengths (shape: [n_leaves - 1, 3])
+#' @return A phylo2vec matrix representing the sampled tree with branch lengths (shape: (n_leaves - 1, 3))
 #' @export
 sample_matrix <- function(n_leaves, ordered) .Call(wrap__sample_matrix, n_leaves, ordered)
 
@@ -193,14 +193,14 @@ sample_vector <- function(n_leaves, ordered) .Call(wrap__sample_vector, n_leaves
 #' Get the ancestry matrix of a phylo2vec vector
 #'
 #' @param vector phylo2vec vector representation of a tree topology
-#' @return Ancestry representation (shape: [n_leaves - 1, 3])
+#' @return Ancestry representation (shape: (n_leaves - 1, 3))
 #' @export
 to_ancestry <- function(vector) .Call(wrap__to_ancestry, vector)
 
 #' Get the edge list of a phylo2vec vector
 #'
 #' @param vector phylo2vec vector representation of a tree topology
-#' @return Edge list representation (shape: [2*(n_leaves - 1), 2])
+#' @return Edge list representation (shape: (2*(n_leaves - 1), 2))
 #' @export
 to_edges <- function(vector) .Call(wrap__to_edges, vector)
 
@@ -211,7 +211,7 @@ to_newick_from_vector <- function(vector) .Call(wrap__to_newick_from_vector, vec
 #' Get pairs from a phylo2vec vector
 #'
 #' @param vector phylo2vec vector representation of a tree topology
-#' @return Pairs representation (shape: [n_leaves - 1, 2])
+#' @return Pairs representation (shape: (n_leaves - 1, 2))
 #' @export
 to_pairs <- function(vector) .Call(wrap__to_pairs, vector)
 

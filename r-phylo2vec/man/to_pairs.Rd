@@ -10,7 +10,7 @@ to_pairs(vector)
 \item{vector}{phylo2vec vector representation of a tree topology}
 }
 \value{
-Pairs representation (shape: \link{n_leaves - 1, 2})
+Pairs representation (shape: (n_leaves - 1, 2))
 }
 \description{
 Get pairs from a phylo2vec vector

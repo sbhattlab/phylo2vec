@@ -66,7 +66,7 @@ fn sample_vector(n_leaves: isize, ordered: bool) -> Result<Vec<i32>, Error> {
 ///
 /// @param n_leaves Number of leaves (must be at least 2)
 /// @param ordered Whether to sample an ordered tree
-/// @return A phylo2vec matrix representing the sampled tree with branch lengths (shape: [n_leaves - 1, 3])
+/// @return A phylo2vec matrix representing the sampled tree with branch lengths (shape: (n_leaves - 1, 3))
 /// @export
 #[extendr]
 fn sample_matrix(n_leaves: isize, ordered: bool) -> Result<RMatrix<f64>, Error> {
@@ -138,7 +138,7 @@ fn check_m(vector: RMatrix<f64>) {
 /// Get the ancestry matrix of a phylo2vec vector
 ///
 /// @param vector phylo2vec vector representation of a tree topology
-/// @return Ancestry representation (shape: [n_leaves - 1, 3])
+/// @return Ancestry representation (shape: (n_leaves - 1, 3))
 /// @export
 #[extendr]
 fn to_ancestry(vector: Vec<i32>) -> RMatrix<i32> {
@@ -151,7 +151,7 @@ fn to_ancestry(vector: Vec<i32>) -> RMatrix<i32> {
 
 /// Convert an ancestry matrix to a phylo2vec vector
 ///
-/// @param matrix Ancestry representation (shape: [n_leaves - 1, 3])
+/// @param matrix Ancestry representation (shape: (n_leaves - 1, 3))
 /// @return phylo2vec vector representation
 /// @export
 #[extendr]
@@ -181,7 +181,7 @@ fn from_ancestry(matrix: RMatrix<i32>) -> Vec<i32> {
 /// Get pairs from a phylo2vec vector
 ///
 /// @param vector phylo2vec vector representation of a tree topology
-/// @return Pairs representation (shape: [n_leaves - 1, 2])
+/// @return Pairs representation (shape: (n_leaves - 1, 2))
 /// @export
 #[extendr]
 fn to_pairs(vector: Vec<i32>) -> RMatrix<i32> {
@@ -197,7 +197,7 @@ fn to_pairs(vector: Vec<i32>) -> RMatrix<i32> {
 
 /// Convert a pairs matrix to a phylo2vec vector
 ///
-/// @param pairs Pairs representation (shape: [n_leaves - 1, 2])
+/// @param pairs Pairs representation (shape: (n_leaves - 1, 2))
 /// @return phylo2vec vector representation
 /// @export
 #[extendr]
@@ -214,7 +214,7 @@ fn from_pairs(pairs: RMatrix<i32>) -> Vec<i32> {
 /// Get the edge list of a phylo2vec vector
 ///
 /// @param vector phylo2vec vector representation of a tree topology
-/// @return Edge list representation (shape: [2*(n_leaves - 1), 2])
+/// @return Edge list representation (shape: (2*(n_leaves - 1), 2))
 /// @export
 #[extendr]
 fn to_edges(vector: Vec<i32>) -> RMatrix<i32> {
@@ -230,7 +230,7 @@ fn to_edges(vector: Vec<i32>) -> RMatrix<i32> {
 
 /// Convert an edge list to a phylo2vec vector
 ///
-/// @param edges Edge list representation (shape: [2*(n_leaves - 1), 2])
+/// @param edges Edge list representation (shape: (2*(n_leaves - 1), 2))
 /// @return phylo2vec vector representation
 /// @export
 #[extendr]
@@ -433,7 +433,7 @@ fn cophenetic_from_matrix(matrix: ArrayView2<f64>, unrooted: bool) -> RMatrix<f6
 // Get a precursor of the precision matrix of a phylo2vec vector
 // The precision matrix is the inverse of the variance-covariance matrix.
 // The precision matrix can be obtained using Schur's complement on this precursor.
-// Output shape: [2 * (n_leaves - 1), 2 * (n_leaves- 1)]
+// Output shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)]
 #[extendr]
 fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     let v_usize: Vec<usize> = as_usize(vector);
@@ -449,7 +449,7 @@ fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
 // Get the precision matrix of a phylo2vec matrix
 // The precision matrix is the inverse of the variance-covariance matrix.
 // The precision matrix can be obtained using Schur's complement on this precursor.
-// Output shape: [2 * (n_leaves - 1), 2 * (n_leaves- 1)]
+// Output shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)]
 #[extendr]
 fn pre_precision_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
     let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
