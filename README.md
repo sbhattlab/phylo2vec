@@ -2,7 +2,6 @@
 
 [![PyPI version](https://badge.fury.io/py/phylo2vec.svg)](https://pypi.org/project/phylo2vec/)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://phylo2vec.readthedocs.io)
-[![DOI](https://zenodo.org/badge/710195598.svg)](https://zenodo.org/badge/latestdoi/710195598)
 [![Zenodo](https://zenodo.org/badge/710195598.svg)](https://zenodo.org/badge/latestdoi/710195598)
 [![JOSS](https://joss.theoj.org/papers/10.21105/joss.09040/status.svg)](https://doi.org/10.21105/joss.09040)
 
