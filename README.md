@@ -2,7 +2,8 @@
 
 [![PyPI version](https://badge.fury.io/py/phylo2vec.svg)](https://pypi.org/project/phylo2vec/)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://phylo2vec.readthedocs.io)
-[![DOI](https://zenodo.org/badge/710195598.svg)](https://zenodo.org/badge/latestdoi/710195598)
+[![Zenodo](https://zenodo.org/badge/710195598.svg)](https://zenodo.org/badge/latestdoi/710195598)
+[![JOSS](https://joss.theoj.org/papers/10.21105/joss.09040/status.svg)](https://doi.org/10.21105/joss.09040)
 
 <span><img src="https://img.shields.io/badge/SSEC-Project-purple?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAOCAQAAABedl5ZAAAACXBIWXMAAAHKAAABygHMtnUxAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAMNJREFUGBltwcEqwwEcAOAfc1F2sNsOTqSlNUopSv5jW1YzHHYY/6YtLa1Jy4mbl3Bz8QIeyKM4fMaUxr4vZnEpjWnmLMSYCysxTcddhF25+EvJia5hhCudULAePyRalvUteXIfBgYxJufRuaKuprKsbDjVUrUj40FNQ11PTzEmrCmrevPhRcVQai8m1PRVvOPZgX2JttWYsGhD3atbHWcyUqX4oqDtJkJiJHUYv+R1JbaNHJmP/+Q1HLu2GbNoSm3Ft0+Y1YMdPSTSwQAAAABJRU5ErkJggg==&style=plastic"/><span>
 ![LGPL-3.0 License](https://badgen.net/badge/license/LGPL-3.0)
@@ -254,14 +255,17 @@ If you use Phylo2Vec in your research, please cite:
 If you use the software, please cite:
 
 ```bibtex
-@misc{10.48550/arXiv.2506.19490,
-      title={phylo2vec: a library for vector-based phylogenetic tree manipulation},
-      author={Neil Scheidwasser and Ayush Nag and Matthew J Penn and Anthony MV Jakob and Frederik Mølkjær Andersen and Mark P Khurana and Landung Setiawan and David A Duchêne and Samir Bhatt},
-      year={2025},
-      eprint={2506.19490},
-      archivePrefix={arXiv},
-      primaryClass={q-bio.PE},
-      url={https://arxiv.org/abs/2506.19490},
+@article{10.21105/joss.09040,
+    doi = {10.21105/joss.09040},
+    url = {https://doi.org/10.21105/joss.09040},
+    year = {2025},
+    publisher = {The Open Journal},
+    volume = {10},
+    number = {114},
+    pages = {9040},
+    author = {Scheidwasser, Neil and Nag, Ayush and Penn, Matthew J. and Jakob, Anthony and Andersen, Frederik Mølkjær and Khurana, Mark Poulsen and Setiawan, Landung and Duchêne, David A. and Bhatt, Samir},
+    title = {phylo2vec: a library for vector-based phylogenetic tree manipulation},
+    journal = {Journal of Open Source Software}
 }
 ```
 
