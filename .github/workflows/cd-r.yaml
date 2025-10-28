@@ -57,7 +57,7 @@ jobs:
         run: |
           move dist\*.zip dist\phylo2vec_${{ steps.determine-version.outputs.version }}_windows.zip
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: r-package-windows
           path: dist/*.zip
@@ -104,7 +104,7 @@ jobs:
         run: |
           mv dist/*.tgz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_macos-${{ matrix.platform.target }}.tgz
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: r-package-macos-${{ matrix.platform.target }}
           path: dist/*.tgz
@@ -149,7 +149,7 @@ jobs:
         run: |
           mv dist/*.tar.gz dist/phylo2vec_${{ steps.determine-version.outputs.version }}_linux-x86_64.tar.gz
       - name: Upload package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: r-package-linux
           path: dist/*.tar.gz
@@ -165,7 +165,7 @@ jobs:
       contents: write
       attestations: write
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
@@ -194,7 +194,7 @@ jobs:
       contents: write
       attestations: write
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v3
         with:
