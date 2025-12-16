@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "phylo2vec"
 version = "1.6.0"
 description = "Phylo2Vec"
@@ -7,15 +7,12 @@ channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64"]
 
 [tasks]
-# We can build a project using cargo build
 build = "cargo build"
-# We can build and run a project in one step using cargo run
 start = "cargo run"
 test = "cargo test"
 clean = "cargo clean"
 fmt = "cargo fmt"
 lint = { cmd = "cargo clippy", depends-on = ["fmt"] }
-# We can build a project without producing a binary to check for errors using cargo check
 check = "cargo check"
 # Create an executable in target/release instead of target/debug,
 # it will compile with optimizations
@@ -29,7 +26,9 @@ start-release = "cargo run --release"
 open-doc = "cargo doc --open"
 benchmark = "cargo bench && open target/criterion/report/index.html"
 install-samply = "cargo install samply"
-profile = { cmd = "cargo build --profile profiling && samply record target/profiling/profile_main", depends-on = ["install-samply"] }
+profile = { cmd = "cargo build --profile profiling && samply record target/profiling/profile_main", depends-on = [
+    "install-samply",
+] }
 
 # ======= CI Environments ==========
 [environments]
