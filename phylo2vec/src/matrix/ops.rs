@@ -211,10 +211,7 @@ mod tests {
         for node in 0..max_node {
             let depth_matrix = get_node_depth(&m_topo.view(), node);
             let depth_vector = get_node_depth_vector(&v, node);
-            assert_eq!(
-                depth_matrix, depth_vector,
-                "Depth mismatch for node {node}"
-            );
+            assert_eq!(depth_matrix, depth_vector, "Depth mismatch for node {node}");
         }
     }
 }
