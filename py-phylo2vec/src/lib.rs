@@ -8,6 +8,7 @@ use pyo3::prelude::*;
 use phylo2vec::matrix::base as mbase;
 use phylo2vec::matrix::convert as mconvert;
 use phylo2vec::matrix::graph as mgraph;
+use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
@@ -265,6 +266,48 @@ fn get_common_ancestor(v: Vec<usize>, node1: usize, node2: usize) -> usize {
 }
 
 #[pyfunction]
+fn get_node_depth(v: Vec<usize>, node: isize) -> PyResult<f64> {
+    if node < 0 {
+        return Err(PyValueError::new_err("node must be non-negative"));
+    }
+    let node = node as usize;
+    let n_nodes = 2 * v.len() + 1;
+    if node >= n_nodes {
+        return Err(PyValueError::new_err(format!(
+            "node must be less than {n_nodes}"
+        )));
+    }
+    Ok(vops::get_node_depth(&v, node))
+}
+
+#[pyfunction]
+fn get_node_depth_with_bls(input_matrix: PyReadonlyArray2<f64>, node: isize) -> PyResult<f64> {
+    if node < 0 {
+        return Err(PyValueError::new_err("node must be non-negative"));
+    }
+    let node = node as usize;
+    let m = input_matrix.as_array();
+    let n_nodes = 2 * m.nrows() + 1;
+    if node >= n_nodes {
+        return Err(PyValueError::new_err(format!(
+            "node must be less than {n_nodes}"
+        )));
+    }
+    Ok(mops::get_node_depth(&m, node))
+}
+
+#[pyfunction]
+fn get_node_depths(v: Vec<usize>) -> Vec<f64> {
+    vops::get_node_depths(&v)
+}
+
+#[pyfunction]
+fn get_node_depths_with_bls(input_matrix: PyReadonlyArray2<f64>) -> Vec<f64> {
+    let m = input_matrix.as_array();
+    mops::get_node_depths(&m)
+}
+
+#[pyfunction]
 fn queue_shuffle(v: Vec<usize>, shuffle_cherries: bool) -> (Vec<usize>, Vec<usize>) {
     vops::queue_shuffle(&v, shuffle_cherries)
 }
@@ -290,6 +333,10 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_ancestry, m)?)?;
     m.add_function(wrap_pyfunction!(get_common_ancestor, m)?)?;
     m.add_function(wrap_pyfunction!(get_edges, m)?)?;
+    m.add_function(wrap_pyfunction!(get_node_depth, m)?)?;
+    m.add_function(wrap_pyfunction!(get_node_depth_with_bls, m)?)?;
+    m.add_function(wrap_pyfunction!(get_node_depths, m)?)?;
+    m.add_function(wrap_pyfunction!(get_node_depths_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;

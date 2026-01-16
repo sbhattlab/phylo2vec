@@ -112,6 +112,14 @@ from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 #' @export
 get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
 
+get_node_depth_from_matrix <- function(matrix, node) .Call(wrap__get_node_depth_from_matrix, matrix, node)
+
+get_node_depth_from_vector <- function(vector, node) .Call(wrap__get_node_depth_from_vector, vector, node)
+
+get_node_depths_from_matrix <- function(matrix) .Call(wrap__get_node_depths_from_matrix, matrix)
+
+get_node_depths_from_vector <- function(vector) .Call(wrap__get_node_depths_from_vector, vector)
+
 #' Check if a newick string has branch lengths
 #'
 #' @param newick Newick representation of a tree

@@ -7,6 +7,7 @@ use ndarray::{Array2, ArrayView2};
 use phylo2vec::matrix::base as mbase;
 use phylo2vec::matrix::convert as mconvert;
 use phylo2vec::matrix::graph as mgraph;
+use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
@@ -290,6 +291,38 @@ fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
     common_ancestor as i32
 }
 
+// Get the topological depth of a node in a phylo2vec vector
+// Depth is the distance from root to that node. Root has depth 0.
+#[extendr]
+fn get_node_depth_from_vector(vector: Vec<i32>, node: i32) -> f64 {
+    let v_usize: Vec<usize> = as_usize(vector);
+    vops::get_node_depth(&v_usize, node as usize)
+}
+
+// Get the depth of a node in a phylo2vec matrix
+// Depth is the distance from root to that node. Root has depth 0.
+#[extendr]
+fn get_node_depth_from_matrix(matrix: RMatrix<f64>, node: i32) -> f64 {
+    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
+    mops::get_node_depth(&matrix_rs.view(), node as usize)
+}
+
+// Get the depths of all nodes in a phylo2vec vector (topological)
+// Depth is the distance from root to each node. Root has depth 0.
+#[extendr]
+fn get_node_depths_from_vector(vector: Vec<i32>) -> Vec<f64> {
+    let v_usize: Vec<usize> = as_usize(vector);
+    vops::get_node_depths(&v_usize)
+}
+
+// Get the depths of all nodes in a phylo2vec matrix
+// Depth is the distance from root to each node. Root has depth 0.
+#[extendr]
+fn get_node_depths_from_matrix(matrix: RMatrix<f64>) -> Vec<f64> {
+    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
+    mops::get_node_depths(&matrix_rs.view())
+}
+
 /// Produce an ordered version (i.e., birth-death process version)
 /// of a phylo2vec vector using the Queue Shuffle algorithm.
 ///
@@ -556,6 +589,10 @@ extendr_module! {
     fn from_edges;
     fn from_pairs;
     fn get_common_ancestor;
+    fn get_node_depth_from_matrix;
+    fn get_node_depth_from_vector;
+    fn get_node_depths_from_matrix;
+    fn get_node_depths_from_vector;
     fn has_branch_lengths;
     fn incidence_coo;
     fn incidence_csc;
