@@ -1,3 +1,30 @@
+#' Get the most recent common ancestor between two nodes in a phylo2vec tree.
+#'
+#' `node1` and `node2` can be leaf nodes (0 to n_leaves - 1)
+#' or internal nodes (n_leaves to 2 * n_leaves - 2).
+#'
+#' Similar to ape's `getMRCA` function (for leaf nodes)
+#' and ETE's `get_common_ancestor` (for all nodes), but for phylo2vec.
+#'
+#' Note: The MRCA is purely topological, so for matrices, only the vector
+#' component (column 1) is used.
+#'
+#' @param vector_or_matrix phylo2vec vector (integer) or matrix (numeric)
+#' @param node1 A node in the tree (0-indexed)
+#' @param node2 A node in the tree (0-indexed)
+#' @return The most recent common ancestor node (0-indexed)
+#' @export
+get_common_ancestor <- function(vector_or_matrix, node1, node2) {
+  if (is.vector(vector_or_matrix, "integer")) {
+    get_common_ancestor_from_vector(vector_or_matrix, node1, node2)
+  } else if (is.matrix(vector_or_matrix)) {
+    v <- as.integer(vector_or_matrix[, 1])
+    get_common_ancestor_from_vector(v, node1, node2)
+  } else {
+    stop("Input must be either an integer vector or a 2D matrix.")
+  }
+}
+
 #' Get the depth of a node in a phylo2vec tree.
 #'
 #' The depth of a node is the length of the path from the root to that node
