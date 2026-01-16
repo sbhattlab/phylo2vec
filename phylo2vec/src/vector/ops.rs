@@ -184,6 +184,137 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
     min_common_ancestor(&path1, &path2)
 }
 
+/// Generic function to calculate the depths of all nodes in a Phylo2Vec tree.
+///
+/// The depth of a node is the length of the path from the root to that node
+/// (i.e., distance from root). This follows the BEAST/ETE convention.
+///
+/// The root has depth 0, and depths increase as you move toward the leaves.
+///
+/// When `bls` is `None`, all branch lengths are assumed to be 1.0 (topological depth).
+///
+/// # Returns
+/// A vector of depths for all nodes (length = 2 * n_leaves - 1).
+/// Index i contains the depth of node i.
+pub fn _get_node_depths(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Vec<f64> {
+    let k = v.len();
+    let n_leaves = k + 1;
+    let n_nodes = 2 * n_leaves - 1;
+
+    // Special case: single leaf tree (k=0)
+    if k == 0 {
+        return vec![0.0];
+    }
+
+    let ancestry = to_ancestry(v);
+
+    // depths[node] = distance from root to node
+    let mut depths = vec![0.0; n_nodes];
+
+    // Root is the last parent in ancestry, has depth 0
+    let root = ancestry[k - 1][2];
+    depths[root] = 0.0;
+
+    // Traverse ancestry in reverse order (top-down from root)
+    // ancestry[i] = [c1, c2, parent], bls[i] = [bl_to_c1, bl_to_c2]
+    for i in (0..k).rev() {
+        let [c1, c2, parent] = ancestry[i];
+        let [bl1, bl2] = match bls {
+            Some(b) => b[i],
+            None => [1.0, 1.0],
+        };
+        depths[c1] = depths[parent] + bl1;
+        depths[c2] = depths[parent] + bl2;
+    }
+
+    depths
+}
+
+/// Generic function to calculate the depth of a single node in a Phylo2Vec tree.
+///
+/// The depth of a node is the length of the path from the root to that node
+/// (i.e., distance from root). This follows the BEAST/ETE convention.
+///
+/// The root has depth 0, and depths increase as you move toward the leaves.
+///
+/// When `bls` is `None`, all branch lengths are assumed to be 1.0 (topological depth).
+pub fn _get_node_depth(v: &[usize], bls: Option<&Vec<[f64; 2]>>, node: usize) -> f64 {
+    let k = v.len();
+    let n_leaves = k + 1;
+    let n_nodes = 2 * n_leaves - 1;
+
+    if node >= n_nodes {
+        panic!(
+            "Node index out of bounds. Max node = {}, got node = {}",
+            n_nodes - 1,
+            node
+        );
+    }
+
+    _get_node_depths(v, bls)[node]
+}
+
+/// Get the depths of all nodes in a Phylo2Vec vector (topological).
+///
+/// The depth of a node is the length of the path from the root to that node.
+/// The root has depth 0, and depths increase as you move toward the leaves.
+///
+/// For vectors, topological depth is returned (all branch lengths = 1).
+///
+/// # Returns
+/// A vector of depths for all nodes (length = 2 * n_leaves - 1).
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::ops::get_node_depths;
+///
+/// // Tree: (0,(1,(2,3)4)5)6
+/// let v = vec![0, 1, 2];
+/// let depths = get_node_depths(&v);
+/// // Root (node 6) has depth 0
+/// assert_eq!(depths[6], 0.0);
+/// // Node 5 is 1 edge from root
+/// assert_eq!(depths[5], 1.0);
+/// // Node 4 is 2 edges from root
+/// assert_eq!(depths[4], 2.0);
+/// // Leaf 0 is 1 edge from root
+/// assert_eq!(depths[0], 1.0);
+/// // Leaves 2 and 3 are 3 edges from root
+/// assert_eq!(depths[2], 3.0);
+/// assert_eq!(depths[3], 3.0);
+/// ```
+pub fn get_node_depths(v: &[usize]) -> Vec<f64> {
+    _get_node_depths(v, None)
+}
+
+/// Get the depth of a node in a Phylo2Vec vector (topological).
+///
+/// The depth of a node is the length of the path from the root to that node.
+/// The root has depth 0.
+///
+/// For vectors, topological depth is returned (all branch lengths = 1).
+///
+/// # Examples
+///
+/// ```
+/// use phylo2vec::vector::ops::get_node_depth;
+///
+/// // Tree: (0,(1,(2,3)4)5)6
+/// let v = vec![0, 1, 2];
+/// // Root (node 6) has depth 0
+/// assert_eq!(get_node_depth(&v, 6), 0.0);
+/// // Node 5 is 1 edge from root
+/// assert_eq!(get_node_depth(&v, 5), 1.0);
+/// // Node 4 is 2 edges from root
+/// assert_eq!(get_node_depth(&v, 4), 2.0);
+/// // Leaf 0 is 1 edge from root
+/// assert_eq!(get_node_depth(&v, 0), 1.0);
+/// ```
+pub fn get_node_depth(v: &[usize], node: usize) -> f64 {
+    _get_node_depth(v, None, node)
+}
+
 /// Produce an ordered version (i.e., birth-death process version)
 /// of a Phylo2Vec vector using the Queue Shuffle algorithm.
 ///
@@ -445,6 +576,95 @@ mod tests {
             mrca, expected_mrca,
             "Expected mrca of nodes {node1} and {node2} for v = {v:?} to be {expected_mrca}, but got {mrca}"
         );
+    }
+
+    #[rstest]
+    // Tree: (0,1)2 - simplest tree
+    // Depth is distance from root to node
+    #[case(vec![0], 2, 0.0)] // Root has depth 0
+    #[case(vec![0], 0, 1.0)] // Leaf 0 is 1 edge from root
+    #[case(vec![0], 1, 1.0)] // Leaf 1 is 1 edge from root
+    // Asymmetric tree: (1,(2,(0,3)4)5)6;
+    #[case(vec![0, 0, 0], 6, 0.0)] // Root has depth 0
+    #[case(vec![0, 0, 0], 5, 1.0)] // Node 5 is 1 edge from root
+    #[case(vec![0, 0, 0], 4, 2.0)] // Node 4 is 2 edges from root
+    #[case(vec![0, 0, 0], 3, 3.0)] // Leaf 3 is 3 edges from root
+    #[case(vec![0, 0, 0], 2, 2.0)] // Leaf 2 is 2 edges from root
+    #[case(vec![0, 0, 0], 0, 3.0)] // Leaf 0 is 3 edges from root
+    #[case(vec![0, 0, 0], 1, 1.0)] // Leaf 1 is 1 edge from root
+    // Balanced tree: ((0,1)4,(2,3)5)6;
+    #[case(vec![0, 0, 1], 6, 0.0)] // Root has depth 0
+    #[case(vec![0, 0, 1], 4, 1.0)] // Node 4 is 1 edge from root
+    #[case(vec![0, 0, 1], 5, 1.0)] // Node 5 is 1 edge from root
+    #[case(vec![0, 0, 1], 0, 2.0)] // All leaves are 2 edges from root
+    #[case(vec![0, 0, 1], 1, 2.0)]
+    #[case(vec![0, 0, 1], 2, 2.0)]
+    #[case(vec![0, 0, 1], 3, 2.0)]
+    fn test_get_node_depth(
+        #[case] v: Vec<usize>,
+        #[case] node: usize,
+        #[case] expected_depth: f64,
+    ) {
+        let depth = get_node_depth(&v, node);
+        assert!(
+            (depth - expected_depth).abs() < 1e-10,
+            "Expected depth {expected_depth} for node {node} in v = {v:?}, got {depth}"
+        );
+    }
+
+    #[rstest]
+    #[case(5)]
+    #[case(10)]
+    #[case(50)]
+    #[case(100)]
+    fn test_get_node_depth_root_is_zero(#[case] n_leaves: usize) {
+        use crate::vector::base::sample_vector;
+
+        let v = sample_vector(n_leaves, false);
+        let root = 2 * v.len(); // Root node index
+        let depth = get_node_depth(&v, root);
+        assert_eq!(depth, 0.0, "Root should have depth 0");
+    }
+
+    #[rstest]
+    #[case(5)]
+    #[case(10)]
+    #[case(50)]
+    #[case(100)]
+    fn test_get_node_depths_returns_correct_length(#[case] n_leaves: usize) {
+        use crate::vector::base::sample_vector;
+
+        let v = sample_vector(n_leaves, false);
+        let depths = get_node_depths(&v);
+        let expected_len = 2 * n_leaves - 1;
+        assert_eq!(
+            depths.len(),
+            expected_len,
+            "Expected {} depths, got {}",
+            expected_len,
+            depths.len()
+        );
+    }
+
+    #[rstest]
+    #[case(5)]
+    #[case(10)]
+    #[case(50)]
+    fn test_get_node_depths_root_is_zero(#[case] n_leaves: usize) {
+        use crate::vector::base::sample_vector;
+
+        let v = sample_vector(n_leaves, false);
+        let root = 2 * v.len();
+        let depths = get_node_depths(&v);
+        assert_eq!(depths[root], 0.0, "Root should have depth 0");
+    }
+
+    #[rstest]
+    #[case(vec![0, 1, 2], 7)] // Max node is 6
+    #[case(vec![0], 3)] // Max node is 2
+    #[should_panic]
+    fn test_get_node_depth_out_of_bounds(#[case] v: Vec<usize>, #[case] node: usize) {
+        get_node_depth(&v, node);
     }
 
     #[rstest]

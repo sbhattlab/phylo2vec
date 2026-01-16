@@ -13,6 +13,8 @@ from phylo2vec.utils.vector import (
     add_leaf,
     check_vector,
     get_common_ancestor,
+    get_node_depth,
+    get_node_depths,
     remove_leaf,
     reroot,
     reroot_at_random,
@@ -165,6 +167,28 @@ def test_get_common_ancestor(n_leaves):
         ete_common_ancestor = int(tr.common_ancestor(f"{node1}", f"{node2}").name)
 
         assert p2v_common_ancestor == ete_common_ancestor
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES + 1))
+def test_get_common_ancestor_matrix(n_leaves):
+    """Test get_common_ancestor with matrix input
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        v = m[:, 0].astype(int)
+
+        node1, node2 = np.random.choice(np.arange(2 * (n_leaves - 1)), 2, replace=False)
+
+        # Matrix and vector should return the same result
+        mrca_from_matrix = get_common_ancestor(m, node1, node2)
+        mrca_from_vector = get_common_ancestor(v, node1, node2)
+
+        assert mrca_from_matrix == mrca_from_vector
 
 
 class TestGetCommonAncestorEdgeCases:
@@ -337,3 +361,205 @@ def test_reroot_matrix_at_random(n_leaves):
     m_rerooted = reroot_at_random(m)
 
     check_matrix(m_rerooted)
+
+
+MAX_N_LEAVES_STATS = 50
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_get_node_depth_root_is_zero_vector(n_leaves):
+    """Test that root node has depth 0 for vectors.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+        root = 2 * len(v)  # Root node index
+        assert get_node_depth(v, root) == 0.0
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_get_node_depth_root_is_zero_matrix(n_leaves):
+    """Test that root node has depth 0 for matrices.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        root = 2 * len(m)  # Root node index
+        assert get_node_depth(m, root) == 0.0
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_get_node_depth_topological_consistency(n_leaves):
+    """Test that matrix depth with unit branch lengths matches vector depth.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        v = m[:, 0].astype(int)
+
+        # Create matrix with unit branch lengths
+        m_unit = m.copy()
+        m_unit[:, 1] = 1.0
+        m_unit[:, 2] = 1.0
+
+        n_nodes = 2 * n_leaves - 1
+        for node in range(n_nodes):
+            depth_v = get_node_depth(v, node)
+            depth_m = get_node_depth(m_unit, node)
+            assert depth_v == depth_m, f"Mismatch at node {node}"
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_get_node_depths_root_is_zero_vector(n_leaves):
+    """Test that root node has depth 0 in get_node_depths for vectors.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+        root = 2 * len(v)
+        depths = get_node_depths(v)
+        assert depths[root] == 0.0
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_get_node_depths_root_is_zero_matrix(n_leaves):
+    """Test that root node has depth 0 in get_node_depths for matrices.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        m = sample_matrix(n_leaves)
+        root = 2 * len(m)
+        depths = get_node_depths(m)
+        assert depths[root] == 0.0
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_get_node_depths_returns_correct_length(n_leaves):
+    """Test that get_node_depths returns correct length.
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+        depths = get_node_depths(v)
+        expected_len = 2 * n_leaves - 1
+        assert len(depths) == expected_len
+
+
+@pytest.mark.parametrize(
+    "v, node, expected_depth",
+    [
+        # Tree: (0,(1,(2,3)4)5)6
+        # Depth is distance from root to node
+        (np.array([0, 1, 2]), 6, 0.0),  # Root has depth 0
+        (np.array([0, 1, 2]), 5, 1.0),  # Node 5 is 1 edge from root
+        (np.array([0, 1, 2]), 4, 2.0),  # Node 4 is 2 edges from root
+        (np.array([0, 1, 2]), 0, 1.0),  # Leaf 0 is 1 edge from root
+        (np.array([0, 1, 2]), 1, 2.0),  # Leaf 1 is 2 edges from root
+        (np.array([0, 1, 2]), 2, 3.0),  # Leaf 2 is 3 edges from root
+        (np.array([0, 1, 2]), 3, 3.0),  # Leaf 3 is 3 edges from root
+        # Asymmetric tree: (1,(2,(0,3)4)5)6
+        (np.array([0, 0, 0]), 6, 0.0),  # Root has depth 0
+        (np.array([0, 0, 0]), 5, 1.0),  # Node 5 is 1 edge from root
+        (np.array([0, 0, 0]), 4, 2.0),  # Node 4 is 2 edges from root
+        (np.array([0, 0, 0]), 1, 1.0),  # Leaf 1 is 1 edge from root
+        (np.array([0, 0, 0]), 2, 2.0),  # Leaf 2 is 2 edges from root
+        (np.array([0, 0, 0]), 0, 3.0),  # Leaf 0 is 3 edges from root
+        (np.array([0, 0, 0]), 3, 3.0),  # Leaf 3 is 3 edges from root
+        # Balanced tree: ((0,1)4,(2,3)5)6
+        (np.array([0, 0, 1]), 6, 0.0),  # Root has depth 0
+        (np.array([0, 0, 1]), 4, 1.0),  # Node 4 is 1 edge from root
+        (np.array([0, 0, 1]), 5, 1.0),  # Node 5 is 1 edge from root
+        (np.array([0, 0, 1]), 0, 2.0),  # All leaves are 2 edges from root
+        (np.array([0, 0, 1]), 1, 2.0),
+        (np.array([0, 0, 1]), 2, 2.0),
+        (np.array([0, 0, 1]), 3, 2.0),
+    ],
+)
+def test_get_node_depth_specific_vectors(v, node, expected_depth):
+    """Test get_node_depth with specific known vectors.
+
+    Parameters
+    ----------
+    v : np.ndarray
+        Input vector
+    node : int
+        Node to get depth for
+    expected_depth : float
+        Expected depth value (distance from root)
+    """
+    assert get_node_depth(v, node) == expected_depth
+
+
+@pytest.mark.parametrize(
+    "m, node, expected_depth",
+    [
+        # Tree: ((0:0.3,2:0.7)3:0.5,1:0.2)4  (v = [0, 0])
+        # Depth is distance from root to node
+        (np.array([[0.0, 0.3, 0.7], [0.0, 0.5, 0.2]]), 4, 0.0),  # Root has depth 0
+        (np.array([[0.0, 0.3, 0.7], [0.0, 0.5, 0.2]]), 3, 0.5),  # Node 3 is 0.5 from root
+        (np.array([[0.0, 0.3, 0.7], [0.0, 0.5, 0.2]]), 0, 0.8),  # Leaf 0 is 0.5+0.3 from root
+        (np.array([[0.0, 0.3, 0.7], [0.0, 0.5, 0.2]]), 1, 0.2),  # Leaf 1 is 0.2 from root
+        (np.array([[0.0, 0.3, 0.7], [0.0, 0.5, 0.2]]), 2, 1.2),  # Leaf 2 is 0.5+0.7 from root
+        # Tree: (0:0.7,(1:0.5,2:0.8)3:0.6)4  (v = [0, 1])
+        (np.array([[0.0, 0.5, 0.8], [1.0, 0.7, 0.6]]), 4, 0.0),  # Root has depth 0
+        (np.array([[0.0, 0.5, 0.8], [1.0, 0.7, 0.6]]), 3, 0.6),  # Node 3 is 0.6 from root
+        (np.array([[0.0, 0.5, 0.8], [1.0, 0.7, 0.6]]), 0, 0.7),  # Leaf 0 is 0.7 from root
+        (np.array([[0.0, 0.5, 0.8], [1.0, 0.7, 0.6]]), 1, 1.1),  # Leaf 1 is 0.6+0.5 from root
+        (np.array([[0.0, 0.5, 0.8], [1.0, 0.7, 0.6]]), 2, 1.4),  # Leaf 2 is 0.6+0.8 from root
+    ],
+)
+def test_get_node_depth_specific_matrices(m, node, expected_depth):
+    """Test get_node_depth with specific known matrices.
+
+    Parameters
+    ----------
+    m : np.ndarray
+        Input matrix
+    node : int
+        Node to get depth for
+    expected_depth : float
+        Expected depth value (distance from root)
+    """
+    assert abs(get_node_depth(m, node) - expected_depth) < 1e-10
+
+
+class TestGetNodeDepthEdgeCases:
+    """Edge case tests for get_node_depth."""
+
+    def test_get_node_depth_negative_node(self):
+        """Test that negative nodes raise an error."""
+        v = sample_vector(5)
+        with pytest.raises(ValueError):
+            get_node_depth(v, -1)
+
+    def test_get_node_depth_node_out_of_bounds(self):
+        """Test that out of bounds nodes raise an error."""
+        v = sample_vector(5)
+        n_leaves = len(v) + 1
+        max_node = 2 * n_leaves - 1
+        with pytest.raises(ValueError):
+            get_node_depth(v, max_node + 1)

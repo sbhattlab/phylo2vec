@@ -1,3 +1,51 @@
+#' Get the depth of a node in a phylo2vec tree.
+#'
+#' The depth of a node is the length of the path from the root to that node
+#' (i.e., distance from root). This follows the BEAST/ETE convention.
+#'
+#' The root has depth 0, and depths increase as you move toward the leaves.
+#'
+#' For vectors, topological depth is returned (all branch lengths = 1).
+#' For matrices, actual branch lengths are used.
+#'
+#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
+#' @param node A node in the tree (0-indexed, from 0 to 2*n_leaves - 2)
+#' @return Depth of the node (distance from root)
+#' @export
+get_node_depth <- function(vector_or_matrix, node) {
+  if (is.vector(vector_or_matrix, "integer")) {
+    get_node_depth_from_vector(vector_or_matrix, node)
+  } else if (is.matrix(vector_or_matrix)) {
+    get_node_depth_from_matrix(vector_or_matrix, node)
+  } else {
+    stop("Input must be either an integer vector or a 2D matrix.")
+  }
+}
+
+#' Get the depths of all nodes in a phylo2vec tree.
+#'
+#' The depth of a node is the length of the path from the root to that node
+#' (i.e., distance from root). This follows the BEAST/ETE convention.
+#'
+#' The root has depth 0, and depths increase as you move toward the leaves.
+#'
+#' For vectors, topological depth is returned (all branch lengths = 1).
+#' For matrices, actual branch lengths are used.
+#'
+#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
+#' @return Vector of depths for all nodes (length = 2 * n_leaves - 1).
+#'   Index i+1 contains the depth of node i (R is 1-indexed).
+#' @export
+get_node_depths <- function(vector_or_matrix) {
+  if (is.vector(vector_or_matrix, "integer")) {
+    get_node_depths_from_vector(vector_or_matrix)
+  } else if (is.matrix(vector_or_matrix)) {
+    get_node_depths_from_matrix(vector_or_matrix)
+  } else {
+    stop("Input must be either an integer vector or a 2D matrix.")
+  }
+}
+
 #' Compute the cophenetic distance matrix of a phylo2vec
 #' vector (tree topology) or matrix (topology + branch lengths).
 #'
