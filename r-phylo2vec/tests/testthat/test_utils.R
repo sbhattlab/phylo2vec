@@ -68,25 +68,28 @@ test_that(desc = "remove_and_add", {
 test_that(desc = "get_common_ancestor", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
     for (j in seq_len(N_REPEATS)) {
-      # Generate a random vector
-      v <- sample_vector(n_leaves, FALSE)
+      # Generate a random matrix and extract vector
+      m <- sample_matrix(n_leaves, FALSE)
+      v <- as.integer(m[, 1])
 
       # Generate two random leaf nodes
       nodes <- sample.int(n_leaves, 2)
       node1 <- nodes[1] - 1
       node2 <- nodes[2] - 1
 
-      # Get the common ancestor using the Phylo2Vec function
-      ca <- get_common_ancestor(v, node1, node2)
+      # Get common ancestor from vector and matrix
+      ca_vector <- get_common_ancestor(v, node1, node2)
+      ca_matrix <- get_common_ancestor(m, node1, node2)
 
-      # Get the common ancestor using ape
+      # Matrix and vector should match (MRCA is purely topological)
+      expect_equal(ca_matrix, ca_vector)
+
+      # Compare with ape
       tr <- ape::read.tree(text = to_newick(v))
-
       ca_ape <- ape::getMRCA(tr, c(as.character(node1), as.character(node2)))
-
       ca_ape_converted <- as.integer(tr$node.label[[ca_ape - n_leaves]])
 
-      expect_equal(ca, ca_ape_converted)
+      expect_equal(ca_vector, ca_ape_converted)
     }
   }
 })
