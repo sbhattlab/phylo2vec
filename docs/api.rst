@@ -10,10 +10,14 @@ Base
     :nosignatures:
     :toctree: generated/
 
-    from_newick
-    to_newick
     from_ancestry
+    from_edges
+    from_newick
+    from_pairs
     to_ancestry
+    to_edges
+    to_newick
+    to_pairs
 
 IO
 ----------------
@@ -36,10 +40,11 @@ Statistics
     :toctree: generated/
 
     stats.cophenetic_distances
-    stats.pairwise_distances
     stats.cov
-    stats.precision
     stats.incidence
+    stats.pairwise_distances
+    stats.precision
+    stats.robinson_foulds
 
 Utils
 ----------------
@@ -56,7 +61,12 @@ Utils
     utils.newick.find_num_leaves
     utils.newick.remove_branch_lengths
     utils.newick.remove_parent_labels
-    utils.vector.check_vector
     utils.vector.add_leaf
+    utils.vector.check_vector
     utils.vector.get_common_ancestor
+    utils.vector.get_node_depth
+    utils.vector.get_node_depths
+    utils.vector.queue_shuffle
     utils.vector.remove_leaf
+    utils.vector.reroot
+    utils.vector.reroot_at_random
