@@ -545,7 +545,7 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "phylo2vec"
-version = "0.6.0"
+version = "1.7.0"
 dependencies = [
  "bit-set",
  "criterion",
@@ -641,7 +641,7 @@ dependencies = [
 
 [[package]]
 name = "py-phylo2vec"
-version = "1.5.0"
+version = "1.7.0"
 dependencies = [
  "ndarray",
  "numpy",
@@ -730,7 +730,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 
 [[package]]
 name = "r-phylo2vec"
-version = "1.2.0"
+version = "1.7.0"
 dependencies = [
  "extendr-api",
  "ndarray",
