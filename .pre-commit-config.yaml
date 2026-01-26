@@ -52,6 +52,13 @@ repos:
         entry: cargo fmt
         pass_filenames: false
 
+  - repo: https://github.com/kynan/nbstripout
+    rev: "0.8.1"
+    hooks:
+      - id: nbstripout
+        args: [--keep-output]
+        files: ^docs/
+
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: "0.36.0"
     hooks:
