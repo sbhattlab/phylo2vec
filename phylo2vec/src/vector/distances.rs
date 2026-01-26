@@ -138,18 +138,16 @@ fn canonicalize_split(desc: &BitSet, n_leaves: usize) -> BitSet {
     let desc_len = desc.len();
     let comp_len = n_leaves - desc_len;
 
-    if desc_len < comp_len {
-        // Original is smaller, keep it
-        desc.clone()
-    } else if desc_len > comp_len {
-        // Complement is smaller, return it
-        complement_bitset(desc, n_leaves)
-    } else {
-        // Equal sizes: pick the one containing leaf 0
-        if desc.contains(0) {
-            desc.clone()
-        } else {
-            complement_bitset(desc, n_leaves)
+    match desc_len.cmp(&comp_len) {
+        std::cmp::Ordering::Less => desc.clone(), // Original is smaller, keep it
+        std::cmp::Ordering::Greater => complement_bitset(desc, n_leaves), // Complement is smaller, return it
+        std::cmp::Ordering::Equal => {
+            // Equal sizes: pick the one containing leaf 0
+            if desc.contains(0) {
+                desc.clone()
+            } else {
+                complement_bitset(desc, n_leaves)
+            }
         }
     }
 }
