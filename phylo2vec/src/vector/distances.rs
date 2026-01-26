@@ -93,8 +93,8 @@ fn get_bipartitions(v: &[usize]) -> HashSet<BitSet> {
     }
 
     // Leaves are their own descendants
-    for i in 0..n_leaves {
-        descendants[i].insert(i);
+    for (i, desc) in descendants.iter_mut().enumerate().take(n_leaves) {
+        desc.insert(i);
     }
 
     // Build internal node descendants bottom-up through ancestry
@@ -195,7 +195,7 @@ mod tests {
         let v1 = vec![0, 1, 2, 3];
         let v2 = vec![0, 0, 1, 2];
         let rf_norm = robinson_foulds(&v1, &v2, true);
-        assert!(rf_norm >= 0.0 && rf_norm <= 1.0);
+        assert!((0.0..=1.0).contains(&rf_norm));
     }
 
     #[test]
@@ -216,7 +216,7 @@ mod tests {
         let v2 = vec![0, 1, 0];
         let rf = robinson_foulds(&v1, &v2, false);
         // RF should be 0, 1, or 2 for 4-leaf trees
-        assert!(rf >= 0.0 && rf <= 2.0);
+        assert!((0.0..=2.0).contains(&rf));
     }
 
     #[test]
