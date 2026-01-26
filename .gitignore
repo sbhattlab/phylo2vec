@@ -216,3 +216,13 @@ py-phylo2vec/phylo2vec/datasets/data/
 
 # Profiling
 profile.json.gz
+
+# Claude
+.claude
+
+# Coverage files
+*.gcov
+*.gcda
+*.gcno
+lcov.info
+.coverage

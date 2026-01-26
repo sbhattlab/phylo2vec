@@ -67,6 +67,14 @@ pixi run profile [vector|matrix] [n_leaves]  # Profile with samply
   - `phylo2vec/` - Python API wrapping Rust bindings
 - `r-phylo2vec/` - R package
   - `src/rust/` - extendr bindings
+  - `R/` - R wrappers (structure mirrors Python)
+    - `utils.R` - Tree operations (`sample_tree`, `get_common_ancestor`,
+      `get_node_depth`, `get_node_depths`)
+    - `stats.R` - Statistics (`cophenetic_distances`, `vcovp`, `precision`,
+      `incidence`)
+    - `base_newick.R` - Newick conversion (`to_newick`, `from_newick`)
+    - `io.R` - File I/O
+    - `extendr-wrappers.R` - Auto-generated Rust bindings
 
 ### Key Data Structures
 
@@ -99,8 +107,10 @@ from phylo2vec import _phylo2vec_core as core
 1. Implement in `phylo2vec/src/`
 2. Add PyO3 binding in `py-phylo2vec/src/lib.rs` with `#[pyfunction]`
 3. Create Python wrapper in `py-phylo2vec/phylo2vec/`
-4. Add tests (Python: `test_utils.py` for ops, `test_stats.py` for graph/stats;
-   R: `test_utils.R`, `test_stats.R`)
+4. Add tests:
+   - Python: `test_utils.py` for tree ops, `test_stats.py` for statistics
+   - R: `test_utils.R` for tree ops (mirrors `utils.R`), `test_stats.R` for
+     statistics (mirrors `stats.R`)
 
 **Vector/Matrix API Pattern** (see `get_node_depth` in `vector/ops.rs` and
 `matrix/ops.rs`):
