@@ -128,9 +128,6 @@ r-treedist = ">=2.11.0"
 [feature.r.target.osx-64.dependencies]
 r-treedist = ">=2.11.0"
 
-[feature.r.target.win-64.dependencies]
-r-treedist = ">=2.11.0"
-
 [feature.r.tasks.install-r]
 cmd = "Rscript ./r-phylo2vec/scripts/install-package.R"
 
