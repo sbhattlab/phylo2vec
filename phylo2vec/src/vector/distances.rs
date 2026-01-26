@@ -186,7 +186,10 @@ mod tests {
     fn test_rf_symmetric() {
         let v1 = vec![0, 1, 2, 3];
         let v2 = vec![0, 0, 1, 2];
-        assert_eq!(robinson_foulds(&v1, &v2, false), robinson_foulds(&v2, &v1, false));
+        assert_eq!(
+            robinson_foulds(&v1, &v2, false),
+            robinson_foulds(&v2, &v1, false)
+        );
     }
 
     #[test]
