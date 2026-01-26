@@ -21,14 +21,14 @@ crate-type = ["cdylib"]
 
 [dependencies]
 rand = "*"
-pyo3 = { version = "0.25.0", features = [
+pyo3 = { version = "0.27.2", features = [
     "abi3-py312",
     "abi3-py311",
     "abi3-py310",
     "extension-module"
 ] }
 phylo2vec = { workspace = true }
-numpy = "0.25.0"
+numpy = "0.27.0"
 ndarray = "0.16.1"
 
 [dev-dependencies]
