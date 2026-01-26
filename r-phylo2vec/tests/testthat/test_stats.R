@@ -151,6 +151,7 @@ test_incidence_single <- function(v, d) {
 
 test_that(desc = "incidence_all_format", {
   v1 <- as.integer(c(0))
+  # fmt: skip
   d1 <- matrix(
     c(
       1, 0,
@@ -160,6 +161,7 @@ test_that(desc = "incidence_all_format", {
     nrow = 3, ncol = 2, byrow = TRUE
   )
   v2 <- as.integer(c(0, 1))
+  # fmt: skip
   d2 <- matrix(
     c(
       1, 0, 0, 0,
@@ -171,6 +173,7 @@ test_that(desc = "incidence_all_format", {
     nrow = 5, ncol = 4, byrow = TRUE
   )
   v3 <- as.integer(c(0, 1, 2))
+  # fmt: skip
   d3 <- matrix(
     c(
       1, 0, 0, 0, 0, 0,
@@ -186,4 +189,63 @@ test_that(desc = "incidence_all_format", {
   test_incidence_single(v1, d1)
   test_incidence_single(v2, d2)
   test_incidence_single(v3, d3)
+})
+
+# Robinson-Foulds distance tests
+
+test_that(desc = "robinson_foulds_identical_vectors", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    v <- sample_vector(n_leaves, FALSE)
+    expect_equal(robinson_foulds(v, v), 0)
+  }
+})
+
+test_that(desc = "robinson_foulds_identical_matrices", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    m <- sample_matrix(n_leaves, FALSE)
+    expect_equal(robinson_foulds(m, m), 0)
+  }
+})
+
+test_that(desc = "robinson_foulds_symmetric", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    v1 <- sample_vector(n_leaves, FALSE)
+    v2 <- sample_vector(n_leaves, FALSE)
+    expect_equal(robinson_foulds(v1, v2), robinson_foulds(v2, v1))
+  }
+})
+
+test_that(desc = "robinson_foulds_normalized_bounds", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    v1 <- sample_vector(n_leaves, FALSE)
+    v2 <- sample_vector(n_leaves, FALSE)
+    rf_norm <- robinson_foulds(v1, v2, normalize = TRUE)
+    expect_true(rf_norm >= 0 && rf_norm <= 1)
+  }
+})
+
+test_that(desc = "robinson_foulds_matches_treedist", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    for (j in seq_len(N_REPEATS)) {
+      v1 <- sample_vector(n_leaves, FALSE)
+      v2 <- sample_vector(n_leaves, FALSE)
+
+      # Our implementation
+      rf_ours <- robinson_foulds(v1, v2, normalize = FALSE)
+
+      # TreeDist reference
+      t1 <- ape::read.tree(text = to_newick(v1))
+      t2 <- ape::read.tree(text = to_newick(v2))
+      rf_treedist <- TreeDist::RobinsonFoulds(t1, t2)
+
+      # Check that our RF matches treedist's RF
+      expect_equal(rf_ours, rf_treedist)
+
+      rf_ours_norm <- robinson_foulds(v1, v2, normalize = TRUE)
+      rf_treedist_norm <- TreeDist::RobinsonFoulds(t1, t2, normalize = TRUE)
+
+      # Check that our normalized RF matches treedist's normalized RF
+      expect_equal(rf_ours_norm, rf_treedist_norm)
+    }
+  }
 })

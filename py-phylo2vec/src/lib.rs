@@ -12,6 +12,7 @@ use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
+use phylo2vec::vector::distances as vdist;
 use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
@@ -312,6 +313,12 @@ fn queue_shuffle(v: Vec<usize>, shuffle_cherries: bool) -> (Vec<usize>, Vec<usiz
     vops::queue_shuffle(&v, shuffle_cherries)
 }
 
+#[pyfunction]
+#[pyo3(signature = (v1, v2, normalize=false))]
+fn robinson_foulds(v1: Vec<usize>, v2: Vec<usize>, normalize: bool) -> f64 {
+    vdist::robinson_foulds(&v1, &v2, normalize)
+}
+
 // skipcq: RS-R1000
 /// This module is exposed to Python.
 /// The line below raises an issue in DeepSource stating that this function's cyclomatic complexity is higher than threshold
@@ -350,6 +357,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(remove_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;
     m.add_function(wrap_pyfunction!(remove_parent_labels, m)?)?;
+    m.add_function(wrap_pyfunction!(robinson_foulds, m)?)?;
     m.add_function(wrap_pyfunction!(sample_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(sample_vector, m)?)?;
     m.add_function(wrap_pyfunction!(to_newick_from_vector, m)?)?;

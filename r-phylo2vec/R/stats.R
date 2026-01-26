@@ -72,6 +72,34 @@ precision <- function(vector_or_matrix) {
   a - b %*% solve(c, d)
 }
 
+#' Compute the Robinson-Foulds distance between two trees.
+#'
+#' RF distance counts the number of bipartitions (splits) that differ
+#' between two tree topologies. Lower values indicate more similar trees.
+#'
+#' @param tree1 First tree as phylo2vec vector (1D) or matrix (2D).
+#'   Only topology is used; branch lengths are ignored.
+#' @param tree2 Second tree as phylo2vec vector (1D) or matrix (2D).
+#'   Only topology is used; branch lengths are ignored.
+#' @param normalize If TRUE, return normalized distance in range [0.0, 1.0].
+#'   Default is FALSE.
+#' @return RF distance (numeric). Integer value if normalize=FALSE,
+#'   float in [0,1] otherwise.
+#' @examples
+#' v1 <- sample_tree(10, topology_only = TRUE)
+#' v2 <- sample_tree(10, topology_only = TRUE)
+#' robinson_foulds(v1, v1) # Identical trees: 0
+#' robinson_foulds(v1, v2) # Different trees: >= 0
+#' robinson_foulds(v1, v2, normalize = TRUE) # Normalized: [0, 1]
+#' @export
+robinson_foulds <- function(tree1, tree2, normalize = FALSE) {
+  # Extract topology (first column) if matrix input
+  v1 <- if (is.matrix(tree1)) as.integer(tree1[, 1]) else tree1
+  v2 <- if (is.matrix(tree2)) as.integer(tree2[, 1]) else tree2
+
+  .Call(wrap__robinson_foulds, v1, v2, normalize)
+}
+
 #' Compute the incidence matrix of a phylo2vec vector (tree topology).
 #'
 #' The incidence matrix B_ij is:

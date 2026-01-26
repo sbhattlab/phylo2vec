@@ -100,7 +100,17 @@ from_edges <- function(edges) .Call(wrap__from_edges, edges)
 #' @export
 from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 
-get_common_ancestor_from_vector <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
+#' Get the first recent common ancestor between two nodes in a phylo2vec tree
+#' node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+#' Similar to ape's `getMRCA` function in R (for leaf nodes)
+#' and ETE's `get_common_ancestor` in Python (for all nodes), but for phylo2vec vectors.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @param node1 The first node (0-indexed)
+#' @param node2 The second node (0-indexed)
+#' @return The common ancestor node (0-indexed)
+#' @export
+get_common_ancestor <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
 
 get_node_depth_from_matrix <- function(matrix, node) .Call(wrap__get_node_depth_from_matrix, matrix, node)
 
@@ -168,6 +178,18 @@ remove_parent_labels <- function(newick) .Call(wrap__remove_parent_labels, newic
 #' - `branch`: The branch the removed leaf was attached to (0-indexed)
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
+
+#' Compute the Robinson-Foulds distance between two trees.
+#'
+#' RF distance counts the number of bipartitions (splits) that differ
+#' between two tree topologies. Lower values indicate more similar trees.
+#'
+#' @param v1 First tree as phylo2vec vector
+#' @param v2 Second tree as phylo2vec vector
+#' @param normalize If TRUE, return normalized distance in range [0.0, 1.0]
+#' @return RF distance (numeric)
+#' @export
+robinson_foulds <- function(v1, v2, normalize) .Call(wrap__robinson_foulds, v1, v2, normalize)
 
 #' Sample a random tree with branch lengths via phylo2vec
 #'

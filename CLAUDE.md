@@ -59,7 +59,7 @@ pixi run profile [vector|matrix] [n_leaves]  # Profile with samply
 ### Codebase Structure
 
 - `phylo2vec/` - Rust core library
-  - `src/vector/` - Vector representation (base, convert, ops, graph, avl)
+  - `src/vector/` - Vector representation (base, convert, ops, graph, avl, distances)
   - `src/matrix/` - Matrix representation (base, convert, ops, graph)
   - `src/newick/` - Newick format parsing
 - `py-phylo2vec/` - Python package
@@ -71,7 +71,7 @@ pixi run profile [vector|matrix] [n_leaves]  # Profile with samply
     - `utils.R` - Tree operations (`sample_tree`, `get_common_ancestor`,
       `get_node_depth`, `get_node_depths`)
     - `stats.R` - Statistics (`cophenetic_distances`, `vcovp`, `precision`,
-      `incidence`)
+      `incidence`, `robinson_foulds`)
     - `base_newick.R` - Newick conversion (`to_newick`, `from_newick`)
     - `io.R` - File I/O
     - `extendr-wrappers.R` - Auto-generated Rust bindings
