@@ -226,3 +226,7 @@ profile.json.gz
 *.gcno
 lcov.info
 .coverage
+
+# JOSS outputs
+paper.crossref
+paper.preprint.tex
