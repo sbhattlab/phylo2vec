@@ -71,7 +71,10 @@ in Rust.
 
 ### Installing R package
 
-#### Option 1: from a release (Windows, Mac, Ubuntu >= 22.04)
+#### Option 1: from a release (Windows, Mac ARM64, Ubuntu >= 22.04)
+
+> **Note:** Pre-built Mac binaries are only available for Apple Silicon (ARM64).
+> Intel Mac users should use Option 2 or 3.
 
 Retrieve one of the compiled binaries from the
 [releases](https://github.com/sbhattlab/phylo2vec/releases) that fits your OS.
