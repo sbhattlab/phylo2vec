@@ -3056,7 +3056,7 @@ packages:
   depends:
   - python >=3.10
   constrains:
-  - astroid >=2,<5
+  - asteroid >=2,<5
   license: Apache-2.0
   license_family: Apache
   size: 28797
