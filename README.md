@@ -73,6 +73,10 @@ in Rust.
 
 #### Option 1: from a release (Windows, Mac, Ubuntu >= 22.04)
 
+> **Note:** Pre-built Mac binaries are available for Apple Silicon (ARM64) and
+> Intel (x86_64, macOS 15+ only). Intel Mac users on older macOS versions should
+> use Option 2 or 3.
+
 Retrieve one of the compiled binaries from the
 [releases](https://github.com/sbhattlab/phylo2vec/releases) that fits your OS.
 Once the file is downloaded, simply run `install.packages` in your R command
