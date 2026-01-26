@@ -1,6 +1,6 @@
 [workspace]
 name = "phylo2vec"
-version = "1.6.0"
+version = "1.7.0"
 description = "Phylo2Vec"
 authors = ["Neil Scheidwasser"]
 channels = ["conda-forge"]
