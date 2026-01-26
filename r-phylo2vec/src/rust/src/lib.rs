@@ -11,6 +11,7 @@ use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
+use phylo2vec::vector::distances as vdist;
 use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
@@ -572,6 +573,23 @@ fn incidence_csr(input_vector: Vec<i32>) -> List {
     )
 }
 
+/// Compute the Robinson-Foulds distance between two trees.
+///
+/// RF distance counts the number of bipartitions (splits) that differ
+/// between two tree topologies. Lower values indicate more similar trees.
+///
+/// @param v1 First tree as phylo2vec vector
+/// @param v2 Second tree as phylo2vec vector
+/// @param normalize If TRUE, return normalized distance in range [0.0, 1.0]
+/// @return RF distance (numeric)
+/// @export
+#[extendr]
+fn robinson_foulds(v1: Vec<i32>, v2: Vec<i32>, normalize: bool) -> f64 {
+    let v1_usize = as_usize(v1);
+    let v2_usize = as_usize(v2);
+    vdist::robinson_foulds(&v1_usize, &v2_usize, normalize)
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -604,6 +622,7 @@ extendr_module! {
     fn remove_branch_lengths;
     fn remove_parent_labels;
     fn remove_leaf;
+    fn robinson_foulds;
     fn sample_matrix;
     fn sample_vector;
     fn to_ancestry;

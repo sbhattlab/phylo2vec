@@ -71,6 +71,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/generated/
+docs/plans/
 
 # PyBuilder
 .pybuilder/
@@ -193,6 +194,9 @@ notebooks/
 
 # Benchmarks output files
 .benchmarks/
+
+# R benchmarks (local only)
+r-phylo2vec/benchmarks/
 
 # Temporary files
 tmp/

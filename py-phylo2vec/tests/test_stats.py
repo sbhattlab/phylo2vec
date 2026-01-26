@@ -14,6 +14,7 @@ from phylo2vec.stats.nodewise import (
     pairwise_distances,
     precision,
 )
+from phylo2vec.stats.treewise import robinson_foulds
 from phylo2vec.utils.matrix import sample_matrix
 from phylo2vec.utils.vector import sample_vector
 
@@ -237,3 +238,72 @@ def test_incidence(v, d):
             assert np.array_equal(func((data, (rows, cols))).toarray(), d)
         else:
             assert np.array_equal(func(inc).toarray(), d)
+
+
+# Robinson-Foulds tests
+
+
+def _test_robinson_foulds_identical(n_leaves, sample_fn):
+    """Helper function to test RF distance for identical trees."""
+    vector_or_matrix = sample_fn(n_leaves)
+    assert robinson_foulds(vector_or_matrix, vector_or_matrix) == 0.0
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_robinson_foulds_identical_vectors(n_leaves):
+    """Test that identical trees have RF distance 0."""
+    _test_robinson_foulds_identical(n_leaves, sample_vector)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_robinson_foulds_identical_matrices(n_leaves):
+    """Test that identical matrices have RF distance 0."""
+    _test_robinson_foulds_identical(n_leaves, sample_matrix)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_robinson_foulds_symmetric(n_leaves):
+    """Test that RF distance is symmetric."""
+    v1 = sample_vector(n_leaves)
+    v2 = sample_vector(n_leaves)
+    assert robinson_foulds(v1, v2) == robinson_foulds(v2, v1)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_robinson_foulds_normalized_bounds(n_leaves):
+    """Test that normalized RF distance is in [0, 1]."""
+    v1 = sample_vector(n_leaves)
+    v2 = sample_vector(n_leaves)
+    rf_norm = robinson_foulds(v1, v2, normalize=True)
+    assert 0.0 <= rf_norm <= 1.0
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_robinson_foulds_matches_ete4(n_leaves):
+    """Test that our RF distance matches ete4's implementation."""
+    for _ in range(N_REPEATS):
+        v1 = sample_vector(n_leaves)
+        v2 = sample_vector(n_leaves)
+
+        # Our implementation
+        rf_ours = robinson_foulds(v1, v2, normalize=False)
+
+        # Check that our RF matches ete4's RF
+        t1 = Tree(to_newick(v1), parser=1)
+        t2 = Tree(to_newick(v2), parser=1)
+        t1.unroot()
+        t2.unroot()
+        result = t1.robinson_foulds(t2, unrooted_trees=True)
+        rf_ete4 = result[0]
+
+        assert rf_ours == rf_ete4, f"Mismatch: ours={rf_ours}, ete4={rf_ete4}"
+
+        # Check that our normalized RF matches ete4's normalized RF
+        max_rf = result[1]
+        rf_ete4_norm = rf_ete4 / max_rf
+
+        rf_ours_norm = robinson_foulds(v1, v2, normalize=True)
+
+        assert np.isclose(
+            rf_ours_norm, rf_ete4_norm
+        ), f"Mismatch: ours={rf_ours_norm}, ete4={rf_ete4_norm}"

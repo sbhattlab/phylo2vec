@@ -169,6 +169,18 @@ remove_parent_labels <- function(newick) .Call(wrap__remove_parent_labels, newic
 #' @export
 remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 
+#' Compute the Robinson-Foulds distance between two trees.
+#'
+#' RF distance counts the number of bipartitions (splits) that differ
+#' between two tree topologies. Lower values indicate more similar trees.
+#'
+#' @param v1 First tree as phylo2vec vector
+#' @param v2 Second tree as phylo2vec vector
+#' @param normalize If TRUE, return normalized distance in range [0.0, 1.0]
+#' @return RF distance (numeric)
+#' @export
+robinson_foulds <- function(v1, v2, normalize) .Call(wrap__robinson_foulds, v1, v2, normalize)
+
 #' Sample a random tree with branch lengths via phylo2vec
 #'
 #' @param n_leaves Number of leaves (must be at least 2)
