@@ -69,6 +69,8 @@ jobs:
         platform:
           - runner: macos-14
             target: arm64
+          - runner: macos-15-intel
+            target: x86_64
     steps:
       - uses: actions/checkout@v6
         with:
