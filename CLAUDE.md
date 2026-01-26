@@ -59,7 +59,8 @@ pixi run profile [vector|matrix] [n_leaves]  # Profile with samply
 ### Codebase Structure
 
 - `phylo2vec/` - Rust core library
-  - `src/vector/` - Vector representation (base, convert, ops, graph, avl, distances)
+  - `src/vector/` - Vector representation (base, convert, ops, graph, avl,
+    distances)
   - `src/matrix/` - Matrix representation (base, convert, ops, graph)
   - `src/newick/` - Newick format parsing
 - `py-phylo2vec/` - Python package
