@@ -41,7 +41,7 @@ py313 = ["python", "py313"]
 
 # Default Python Phylo2vec environment
 [environments.py-phylo2vec]
-features = ["pydocs", "pydev", "python", "py313"]
+features = ["pydocs", "pydev", "python", "py310"]
 solve-group = "default"
 
 # ======= r-phylo2vec ==========
