@@ -1,4 +1,4 @@
-use crate::vector::ops::_get_node_depths;
+use crate::vector::ops::get_node_depths;
 
 /// Sackin index from Sackin (1972)
 /// The Sackin index denotes sum of depths of all leaves
@@ -13,13 +13,13 @@ use crate::vector::ops::_get_node_depths;
 /// ```
 pub fn sackin(v: &[usize]) -> usize {
     let n_leaves = v.len() + 1;
-    let depths = _get_node_depths(v, None);
+    let depths = get_node_depths(v);
     depths[..n_leaves].iter().sum::<f64>() as usize
 }
 
 pub fn leaf_depth_variance(v: &[usize]) -> f64 {
     let n_leaves = v.len() + 1;
-    let depths = _get_node_depths(v, None);
+    let depths = get_node_depths(v);
 
     // Calculate variance of depths of leaves (nodes 0 to n_leaves-1)
     let mut sum = 0.0;
@@ -46,7 +46,7 @@ pub fn leaf_depth_variance(v: &[usize]) -> f64 {
 /// See https://doi.org/10.1007/s00285-021-01662-7 for more details
 pub fn b2(v: &[usize]) -> f64 {
     let n_leaves = v.len() + 1;
-    let depths = _get_node_depths(v, None);
+    let depths = get_node_depths(v);
 
     let mut b2 = 0.0;
     for &d in &depths[..n_leaves] {
