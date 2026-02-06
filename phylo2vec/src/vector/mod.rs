@@ -1,4 +1,5 @@
 mod avl;
+pub mod balance;
 pub mod base;
 pub mod convert;
 pub mod distance;
