@@ -33,7 +33,7 @@ pub fn leaf_depth_variance(v: &[usize]) -> f64 {
 }
 
 /// B2 index from Shao and Sokal (1990)
-/// General definition or a finite rooted phylogeny:
+/// General definition of a finite rooted phylogeny:
 /// B2 = -sum_{i=1}^L p_i log_2(p_i)
 /// L is the number of leaves
 /// p_i is the probability of a random walk from the root to leaf i, where at each internal node, the walk chooses one of its children with equal probability.
