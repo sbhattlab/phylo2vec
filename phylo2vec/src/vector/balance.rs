@@ -41,7 +41,7 @@ pub fn leaf_depth_variance(v: &[usize]) -> f64 {
 /// Simplification for a binary rooted tree:
 /// For a binary tree, a random walk has left/right choices at each internal node,
 /// so the probability of reaching leaf i is p_i = 2^{-d_i}, where d_i is the depth of leaf i.
-/// B2 = sum_{i=1}^L 2^{-d_i}
+/// B2 = sum_{i=1}^L d_i * 2^{-d_i}
 /// d_i is the depth of leaf i
 /// See https://doi.org/10.1007/s00285-021-01662-7 for more details
 pub fn b2(v: &[usize]) -> f64 {
