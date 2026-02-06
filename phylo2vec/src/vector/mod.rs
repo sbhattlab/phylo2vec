@@ -1,6 +1,6 @@
 mod avl;
 pub mod base;
 pub mod convert;
-pub mod distances;
+pub mod distance;
 pub mod graph;
 pub mod ops;

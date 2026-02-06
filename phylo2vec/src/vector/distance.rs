@@ -27,7 +27,7 @@ use crate::vector::convert::to_ancestry;
 /// # Examples
 ///
 /// ```
-/// use phylo2vec::vector::distances::robinson_foulds;
+/// use phylo2vec::vector::distance::robinson_foulds;
 ///
 /// // Identical trees have RF distance 0
 /// let v = vec![0, 1, 2];

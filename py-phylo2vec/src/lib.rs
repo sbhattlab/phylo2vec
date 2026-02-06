@@ -12,7 +12,7 @@ use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
-use phylo2vec::vector::distances as vdist;
+use phylo2vec::vector::distance as vdist;
 use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
