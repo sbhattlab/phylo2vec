@@ -10,6 +10,7 @@ use phylo2vec::matrix::convert as mconvert;
 use phylo2vec::matrix::graph as mgraph;
 use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
+use phylo2vec::vector::balance as vbalance;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
 use phylo2vec::vector::distance as vdist;
@@ -319,6 +320,21 @@ fn robinson_foulds(v1: Vec<usize>, v2: Vec<usize>, normalize: bool) -> f64 {
     vdist::robinson_foulds(&v1, &v2, normalize)
 }
 
+#[pyfunction]
+fn sackin(v: Vec<usize>) -> usize {
+    vbalance::sackin(&v)
+}
+
+#[pyfunction]
+fn leaf_depth_variance(v: Vec<usize>) -> f64 {
+    vbalance::leaf_depth_variance(&v)
+}
+
+#[pyfunction]
+fn b2(v: Vec<usize>) -> f64 {
+    vbalance::b2(&v)
+}
+
 // skipcq: RS-R1000
 /// This module is exposed to Python.
 /// The line below raises an issue in DeepSource stating that this function's cyclomatic complexity is higher than threshold
@@ -327,6 +343,7 @@ fn robinson_foulds(v1: Vec<usize>, v2: Vec<usize>, normalize: bool) -> f64 {
 fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(add_leaf, m)?)?;
     m.add_function(wrap_pyfunction!(apply_label_mapping, m)?)?;
+    m.add_function(wrap_pyfunction!(b2, m)?)?;
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(check_m, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
@@ -351,6 +368,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(incidence_csc, m)?)?;
     m.add_function(wrap_pyfunction!(incidence_csr, m)?)?;
     m.add_function(wrap_pyfunction!(incidence_dense, m)?)?;
+    m.add_function(wrap_pyfunction!(leaf_depth_variance, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;
@@ -358,6 +376,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;
     m.add_function(wrap_pyfunction!(remove_parent_labels, m)?)?;
     m.add_function(wrap_pyfunction!(robinson_foulds, m)?)?;
+    m.add_function(wrap_pyfunction!(sackin, m)?)?;
     m.add_function(wrap_pyfunction!(sample_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(sample_vector, m)?)?;
     m.add_function(wrap_pyfunction!(to_newick_from_vector, m)?)?;
