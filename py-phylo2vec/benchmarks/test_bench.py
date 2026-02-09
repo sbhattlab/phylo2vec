@@ -18,7 +18,7 @@ def test_vector_to_newick_ordered(benchmark, sample_size):
     sample_size : int
         Number of leaves in the vector
     """
-    benchmark(core.to_newick_from_vector, core.sample_vector(sample_size, True))
+    benchmark(core.to_newick, core.sample_vector(sample_size, True))
 
 
 @pytest.mark.parametrize("sample_size", BIG_RANGE)
@@ -32,7 +32,7 @@ def test_vector_to_newick(benchmark, sample_size):
     sample_size : int
         Number of leaves in the vector
     """
-    benchmark(core.to_newick_from_vector, core.sample_vector(sample_size, False))
+    benchmark(core.to_newick, core.sample_vector(sample_size, False))
 
 
 @pytest.mark.parametrize("sample_size", BIG_RANGE)
@@ -46,7 +46,7 @@ def test_matrix_to_newick(benchmark, sample_size):
     sample_size : int
         Number of leaves in the vector
     """
-    benchmark(core.to_newick_from_matrix, core.sample_matrix(sample_size, False))
+    benchmark(core.to_newick, core.sample_matrix(sample_size, False))
 
 
 @pytest.mark.parametrize("sample_size", BIG_RANGE)
@@ -62,7 +62,7 @@ def test_vector_from_newick(benchmark, sample_size):
     """
     benchmark(
         core.to_vector,
-        core.to_newick_from_vector(core.sample_vector(sample_size, False)),
+        core.to_newick(core.sample_vector(sample_size, False)),
     )
 
 
@@ -79,5 +79,5 @@ def test_matrix_from_newick(benchmark, sample_size):
     """
     benchmark(
         core.to_matrix,
-        core.to_newick_from_matrix(core.sample_matrix(sample_size, False)),
+        core.to_newick(core.sample_matrix(sample_size, False)),
     )

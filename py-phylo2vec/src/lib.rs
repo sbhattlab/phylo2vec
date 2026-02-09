@@ -90,10 +90,7 @@ fn check_m(input_matrix: PyReadonlyArray2<f64>) -> PyResult<()> {
 #[pyfunction]
 fn to_newick(tree: PyTree) -> String {
     match tree {
-        PyTree::Matrix(m) => {
-            let arr = m.as_array();
-            mconvert::to_newick(&arr)
-        }
+        PyTree::Matrix(m) => mconvert::to_newick(&m.as_array()),
         PyTree::Vector(v) => vconvert::to_newick(&v),
     }
 }
