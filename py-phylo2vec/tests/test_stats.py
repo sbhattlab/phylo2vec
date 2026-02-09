@@ -374,3 +374,15 @@ def test_leaf_depth_variance(v, expected):
 )
 def test_b2(v, expected):
     assert np.isclose(b2(v), expected, rtol=1e-5, atol=1e-8)
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES_STATS + 1))
+def test_balance_indices_matrix(n_leaves):
+    """Test that balance indices give the same result for vector and matrix input."""
+    v = sample_vector(n_leaves)
+    m = sample_matrix(n_leaves)
+    m[:, 0] = v  # same topology, different branch lengths
+
+    assert sackin(m) == sackin(v)
+    assert leaf_depth_variance(m) == leaf_depth_variance(v)
+    assert b2(m) == b2(v)
