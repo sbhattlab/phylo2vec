@@ -52,9 +52,16 @@ check_m <- function(vector) invisible(.Call(wrap__check_m, vector))
 #' @export
 check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
 
-cophenetic_from_matrix <- function(matrix, unrooted) .Call(wrap__cophenetic_from_matrix, matrix, unrooted)
-
-cophenetic_from_vector <- function(vector, unrooted) .Call(wrap__cophenetic_from_vector, vector, unrooted)
+#' Get the (topological) cophenetic distance matrix of a phylo2vec tree
+#'
+#' The cophenetic distance between two leaves is the distance from each leaf to their most recent common ancestor.
+#' For phylo2vec vectors, this is the topological distance. For phylo2vec matrices, this is the distance with branch lengths.
+#'
+#' @param tree A phylo2vec tree
+#' @param unrooted If true, the distance is calculated as the distance between each leaf and their most recent common ancestor, multiplied by 2. If false, the distance is calculated as the distance from each leaf to their most recent common ancestor.
+#' @return Cophenetic distance matrix (shape: (n_leaves, n_leaves))
+#' @export
+cophenetic_distances <- function(tree, unrooted) .Call(wrap__cophenetic_distances, tree, unrooted)
 
 #' Create an integer-taxon label mapping (label_mapping)
 #' from a string-based newick (where leaves are strings)
@@ -100,15 +107,35 @@ from_edges <- function(edges) .Call(wrap__from_edges, edges)
 #' @export
 from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 
-get_common_ancestor_from_vector <- function(vector, node1, node2) .Call(wrap__get_common_ancestor, vector, node1, node2)
+#' Get the first recent common ancestor between two nodes in a phylo2vec tree
+#' node1 and node2 can be leaf nodes (0 to n_leaves) or internal nodes (n_leaves to 2*(n_leaves-1)).
+#' Similar to ape's `getMRCA` function in R (for leaf nodes)
+#' and ETE's `get_common_ancestor` in Python (for all nodes), but for phylo2vec vectors.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @param node1 The first node (0-indexed)
+#' @param node2 The second node (0-indexed)
+#' @return The common ancestor node (0-indexed)
+#' @export
+get_common_ancestor <- function(tree, node1, node2) .Call(wrap__get_common_ancestor, tree, node1, node2)
 
-get_node_depth_from_matrix <- function(matrix, node) .Call(wrap__get_node_depth_from_matrix, matrix, node)
+#' Get the depth of a node in a phylo2vec tree
+#' Depth is the distance from root to that node. Root has depth 0.
+#' For vectors, this is the topological depth. For matrices, this is the depth with branch lengths.
+#'
+#' @param tree A phylo2vec tree
+#' @param node The node to get the depth of (0-indexed)
+#' @return The depth of the node
+#' @export
+get_node_depth <- function(tree, node) .Call(wrap__get_node_depth, tree, node)
 
-get_node_depth_from_vector <- function(vector, node) .Call(wrap__get_node_depth_from_vector, vector, node)
-
-get_node_depths_from_matrix <- function(matrix) .Call(wrap__get_node_depths_from_matrix, matrix)
-
-get_node_depths_from_vector <- function(vector) .Call(wrap__get_node_depths_from_vector, vector)
+#' Get the depths of all nodes in a phylo2vec tree
+#' Depth is the distance from root to each node. Root has depth 0.
+#'
+#' @param tree A phylo2vec tree
+#' @return A vector of depths for all nodes (length: 2*n_leaves - 1)
+#' @export
+get_node_depths <- function(tree) .Call(wrap__get_node_depths, tree)
 
 #' Check if a newick string has branch lengths
 #'
@@ -124,10 +151,6 @@ incidence_csc <- function(input_vector) .Call(wrap__incidence_csc, input_vector)
 incidence_csr <- function(input_vector) .Call(wrap__incidence_csr, input_vector)
 
 incidence_dense <- function(input_vector) .Call(wrap__incidence_dense, input_vector)
-
-pre_precision_from_matrix <- function(matrix) .Call(wrap__pre_precision_from_matrix, matrix)
-
-pre_precision_from_vector <- function(vector) .Call(wrap__pre_precision_from_vector, vector)
 
 #' Produce an ordered version (i.e., birth-death process version)
 #' of a phylo2vec vector using the Queue Shuffle algorithm.
@@ -159,6 +182,16 @@ remove_branch_lengths <- function(newick) .Call(wrap__remove_branch_lengths, new
 #' @export
 remove_parent_labels <- function(newick) .Call(wrap__remove_parent_labels, newick)
 
+#' Get a precursor of the precision matrix of a phylo2vec tree
+#' The precision matrix is the inverse of the variance-covariance matrix.
+#' The precision matrix can be obtained using Schur's complement on this precursor.
+#' Output shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)]
+#'
+#' @param tree A phylo2vec tree
+#' @return A precursor of the precision matrix (shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)))
+#' @export
+pre_precision <- function(tree) .Call(wrap__pre_precision, tree)
+
 #' Remove a leaf from a phylo2vec vector
 #'
 #' @param vector phylo2vec vector representation of a tree topology
@@ -176,7 +209,7 @@ remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 #'
 #' @param v1 First tree as phylo2vec vector
 #' @param v2 Second tree as phylo2vec vector
-#' @param normalize If TRUE, return normalized distance in range [0.0, 1.0]
+#' @param normalize If TRUE, return normalized distance in range `[0.0, 1.0]`
 #' @return RF distance (numeric)
 #' @export
 robinson_foulds <- function(v1, v2, normalize) .Call(wrap__robinson_foulds, v1, v2, normalize)
@@ -214,9 +247,12 @@ to_ancestry <- function(vector) .Call(wrap__to_ancestry, vector)
 #' @export
 to_edges <- function(vector) .Call(wrap__to_edges, vector)
 
-to_newick_from_matrix <- function(matrix) .Call(wrap__to_newick_from_matrix, matrix)
-
-to_newick_from_vector <- function(vector) .Call(wrap__to_newick_from_vector, vector)
+#' Recover a rooted tree (in Newick format) from a phylo2vec tree
+#'
+#' @param tree A phylo2vec tree
+#' @return Newick string representation of the tree
+#' @export
+to_newick <- function(tree) .Call(wrap__to_newick, tree)
 
 #' Get pairs from a phylo2vec vector
 #'
@@ -229,9 +265,12 @@ to_matrix <- function(newick) .Call(wrap__to_matrix, newick)
 
 to_vector <- function(newick) .Call(wrap__to_vector, newick)
 
-vcov_from_matrix <- function(matrix) .Call(wrap__vcov_from_matrix, matrix)
-
-vcov_from_vector <- function(vector) .Call(wrap__vcov_from_vector, vector)
+#' Get the variance-covariance matrix of a phylo2vec tree
+#'
+#' @param tree A phylo2vec tree
+#' @return Variance-covariance matrix (shape: (n_leaves, n_leaves))
+#' @export
+vcovp <- function(tree) .Call(wrap__vcovp, tree)
 
 
 # nolint end

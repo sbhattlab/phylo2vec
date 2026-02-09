@@ -107,7 +107,7 @@ test_that(desc = "vcv_and_precision_vector", {
 
       # Test that the variance-covariance and precision matrices are inverses
       # vcov_from_vector = same as vcovp for vectors
-      vcv_p2v <- vcov_from_vector(v)
+      vcv_p2v <- vcovp(v)
       prec_p2v <- precision(v)
       identity <- diag(nrow(vcv_p2v))
 
@@ -124,7 +124,7 @@ test_that(desc = "vcv_and_precision_matrix", {
 
       # Test that the variance-covariance and precision matrices are inverses
       # vcov_from_vector = same as vcovp for matrices
-      vcv_p2v <- vcov_from_matrix(m)
+      vcv_p2v <- vcovp(m)
       prec_p2v <- precision(m)
       identity <- diag(nrow(vcv_p2v))
 

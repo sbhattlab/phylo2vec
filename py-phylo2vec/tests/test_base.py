@@ -35,17 +35,17 @@ def test_v2newick2v(n_leaves):
 
 class TestToNewickEdgeCases:
     def test_to_newick_empty(self):
-        # dim 0
+        # Empty array
         v0 = np.array(0)
-        # Check that we raise a ValueError
-        with pytest.raises(ValueError):
+        # Check that we raise a TypeError
+        with pytest.raises(TypeError):
             to_newick(v0)
 
     def test_to_newick_ndim3(self):
         # array with 3 dimensions
         t = np.zeros((MIN_N_LEAVES, 3, 1))
-        # Check that we raise a ValueError
-        with pytest.raises(ValueError):
+        # Check that we raise a TypeError
+        with pytest.raises(TypeError):
             to_newick(t)
 
 

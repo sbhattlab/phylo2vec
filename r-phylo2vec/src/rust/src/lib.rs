@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::result::Result;
 
 use extendr_api::prelude::*;
-use ndarray::{Array2, ArrayView2};
+use ndarray::Array2;
 
 use phylo2vec::matrix::base as mbase;
 use phylo2vec::matrix::convert as mconvert;
@@ -14,6 +14,23 @@ use phylo2vec::vector::convert as vconvert;
 use phylo2vec::vector::distance as vdist;
 use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
+
+enum RTree {
+    Matrix(RMatrix<f64>),
+    Vector(Vec<i32>),
+}
+
+impl TryFrom<Robj> for RTree {
+    type Error = Error;
+
+    fn try_from(robj: Robj) -> Result<Self, Self::Error> {
+        if robj.is_matrix() {
+            Ok(RTree::Matrix(robj.try_into()?))
+        } else {
+            Ok(RTree::Vector(robj.try_into()?))
+        }
+    }
+}
 
 // Convert Vec<i32> to Vec<usize>
 fn as_usize(v: Vec<i32>) -> Vec<usize> {
@@ -83,18 +100,23 @@ fn sample_matrix(n_leaves: isize, ordered: bool) -> Result<RMatrix<f64>, Error> 
     }
 }
 
-// Recover a rooted tree (in Newick format) from a phylo2vec vector
+/// Recover a rooted tree (in Newick format) from a phylo2vec tree
+///
+/// @param tree A phylo2vec tree
+/// @return Newick string representation of the tree
+/// @export
 #[extendr]
-fn to_newick_from_vector(vector: Vec<i32>) -> String {
-    let v_usize = as_usize(vector);
-    vconvert::to_newick(&v_usize)
-}
-
-// Recover a rooted tree (in Newick format) from a phylo2vec matrix
-#[extendr]
-fn to_newick_from_matrix(matrix: RMatrix<f64>) -> String {
-    let matrix = convert_from_rmatrix(&matrix).unwrap();
-    mconvert::to_newick(&matrix.view())
+fn to_newick(tree: RTree) -> String {
+    match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            mconvert::to_newick(&matrix.view())
+        }
+        RTree::Vector(v) => {
+            let v_usize = as_usize(v);
+            vconvert::to_newick(&v_usize)
+        }
+    }
 }
 
 // Convert a newick string to a phylo2vec vector
@@ -133,7 +155,6 @@ fn check_v(vector: Vec<i32>) {
 #[extendr]
 fn check_m(vector: RMatrix<f64>) {
     let matrix = convert_from_rmatrix(&vector).unwrap();
-
     mbase::check_m(&matrix.view());
 }
 
@@ -280,48 +301,72 @@ fn remove_leaf(vector: Vec<i32>, leaf: i32) -> Robj {
 /// Similar to ape's `getMRCA` function in R (for leaf nodes)
 /// and ETE's `get_common_ancestor` in Python (for all nodes), but for phylo2vec vectors.
 ///
-/// @param vector phylo2vec vector representation of a tree topology
+/// @param tree A phylo2vec tree
 /// @param node1 The first node (0-indexed)
 /// @param node2 The second node (0-indexed)
 /// @return The common ancestor node (0-indexed)
 /// @export
 #[extendr]
-fn get_common_ancestor(vector: Vec<i32>, node1: i32, node2: i32) -> i32 {
-    let v_usize: Vec<usize> = as_usize(vector);
-    let common_ancestor = vops::get_common_ancestor(&v_usize, node1 as usize, node2 as usize);
-    common_ancestor as i32
+fn get_common_ancestor(tree: RTree, node1: i32, node2: i32) -> Result<i32, Error> {
+    let node1 = node1 as usize;
+    let node2 = node2 as usize;
+    let mrca = match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            let (v, _) = mbase::parse_matrix(&matrix.view());
+            vops::get_common_ancestor(&v, node1, node2)
+        }
+        RTree::Vector(v) => {
+            let v_usize: Vec<usize> = as_usize(v);
+            vops::get_common_ancestor(&v_usize, node1, node2)
+        }
+    };
+    mrca.map(|node| node as i32)
+        .map_err(|e| Error::OutOfRange(e.into()))
 }
 
-// Get the topological depth of a node in a phylo2vec vector
-// Depth is the distance from root to that node. Root has depth 0.
+/// Get the depth of a node in a phylo2vec tree
+/// Depth is the distance from root to that node. Root has depth 0.
+/// For vectors, this is the topological depth. For matrices, this is the depth with branch lengths.
+///
+/// @param tree A phylo2vec tree
+/// @param node The node to get the depth of (0-indexed)
+/// @return The depth of the node
+/// @export
 #[extendr]
-fn get_node_depth_from_vector(vector: Vec<i32>, node: i32) -> f64 {
-    let v_usize: Vec<usize> = as_usize(vector);
-    vops::get_node_depth(&v_usize, node as usize)
+fn get_node_depth(tree: RTree, node: i32) -> Result<f64, Error> {
+    let node_usize = node as usize;
+    let depth = match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            mops::get_node_depth(&matrix.view(), node_usize)
+        }
+        RTree::Vector(v) => {
+            let v_usize: Vec<usize> = as_usize(v);
+            vops::get_node_depth(&v_usize, node_usize)
+        }
+    };
+    depth.map_err(|e| Error::OutOfRange(e.into()))
 }
 
-// Get the depth of a node in a phylo2vec matrix
-// Depth is the distance from root to that node. Root has depth 0.
+/// Get the depths of all nodes in a phylo2vec tree
+/// Depth is the distance from root to each node. Root has depth 0.
+///
+/// @param tree A phylo2vec tree
+/// @return A vector of depths for all nodes (length: 2*n_leaves - 1)
+/// @export
 #[extendr]
-fn get_node_depth_from_matrix(matrix: RMatrix<f64>, node: i32) -> f64 {
-    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
-    mops::get_node_depth(&matrix_rs.view(), node as usize)
-}
-
-// Get the depths of all nodes in a phylo2vec vector (topological)
-// Depth is the distance from root to each node. Root has depth 0.
-#[extendr]
-fn get_node_depths_from_vector(vector: Vec<i32>) -> Vec<f64> {
-    let v_usize: Vec<usize> = as_usize(vector);
-    vops::get_node_depths(&v_usize)
-}
-
-// Get the depths of all nodes in a phylo2vec matrix
-// Depth is the distance from root to each node. Root has depth 0.
-#[extendr]
-fn get_node_depths_from_matrix(matrix: RMatrix<f64>) -> Vec<f64> {
-    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
-    mops::get_node_depths(&matrix_rs.view())
+fn get_node_depths(tree: RTree) -> Vec<f64> {
+    match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            mops::get_node_depths(&matrix.view())
+        }
+        RTree::Vector(v) => {
+            let v_usize: Vec<usize> = as_usize(v);
+            vops::get_node_depths(&v_usize)
+        }
+    }
 }
 
 /// Produce an ordered version (i.e., birth-death process version)
@@ -439,23 +484,27 @@ fn remove_parent_labels(newick: &str) -> String {
     newick::remove_parent_labels(newick)
 }
 
-// Get the topological cophenetic distance matrix of a phylo2vec vector
+/// Get the (topological) cophenetic distance matrix of a phylo2vec tree
+///
+/// The cophenetic distance between two leaves is the distance from each leaf to their most recent common ancestor.
+/// For phylo2vec vectors, this is the topological distance. For phylo2vec matrices, this is the distance with branch lengths.
+///
+/// @param tree A phylo2vec tree
+/// @param unrooted If true, the distance is calculated as the distance between each leaf and their most recent common ancestor, multiplied by 2. If false, the distance is calculated as the distance from each leaf to their most recent common ancestor.
+/// @return Cophenetic distance matrix (shape: (n_leaves, n_leaves))
+/// @export
 #[extendr]
-fn cophenetic_from_vector(vector: Vec<i32>, unrooted: bool) -> RMatrix<i32> {
-    let v_usize: Vec<usize> = as_usize(vector);
-    let k = v_usize.len();
-    let coph_rs = vgraph::cophenetic_distances(&v_usize, unrooted);
-    let mut coph_r = RMatrix::new_matrix(k + 1, k + 1, |r, c| coph_rs[[r, c]] as i32);
-    let dimnames = (0..=k).map(|x| x as i32).collect::<Vec<i32>>();
-    coph_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
-
-    coph_r
-}
-
-// Get the cophenetic distance matrix of a phylo2vec matrix
-#[extendr]
-fn cophenetic_from_matrix(matrix: ArrayView2<f64>, unrooted: bool) -> RMatrix<f64> {
-    let coph_rs = mgraph::cophenetic_distances(&matrix.view(), unrooted);
+fn cophenetic_distances(tree: RTree, #[default = "FALSE"] unrooted: bool) -> RMatrix<f64> {
+    let coph_rs = match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            mgraph::cophenetic_distances(&matrix.view(), unrooted)
+        }
+        RTree::Vector(v) => {
+            let v_usize: Vec<usize> = as_usize(v);
+            vgraph::cophenetic_distances(&v_usize, unrooted)
+        }
+    };
     let n_leaves = coph_rs.shape()[0];
     let mut coph_r = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| coph_rs[[r, c]]);
     let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
@@ -464,14 +513,26 @@ fn cophenetic_from_matrix(matrix: ArrayView2<f64>, unrooted: bool) -> RMatrix<f6
     coph_r
 }
 
-// Get a precursor of the precision matrix of a phylo2vec vector
-// The precision matrix is the inverse of the variance-covariance matrix.
-// The precision matrix can be obtained using Schur's complement on this precursor.
-// Output shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)]
+/// Get a precursor of the precision matrix of a phylo2vec tree
+/// The precision matrix is the inverse of the variance-covariance matrix.
+/// The precision matrix can be obtained using Schur's complement on this precursor.
+/// Output shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)]
+///
+/// @param tree A phylo2vec tree
+/// @return A precursor of the precision matrix (shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)))
+/// @export
 #[extendr]
-fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
-    let v_usize: Vec<usize> = as_usize(vector);
-    let pre_precision_rs = vgraph::pre_precision(&v_usize);
+fn pre_precision(tree: RTree) -> RMatrix<f64> {
+    let pre_precision_rs = match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            mgraph::pre_precision(&matrix.view())
+        }
+        RTree::Vector(v) => {
+            let v_usize: Vec<usize> = as_usize(v);
+            vgraph::pre_precision(&v_usize)
+        }
+    };
     let n = pre_precision_rs.shape()[0];
     let mut preprecision_r = RMatrix::new_matrix(n, n, |r, c| pre_precision_rs[[r, c]]);
     let dimnames = (0..n).map(|x| x as i32).collect::<Vec<i32>>();
@@ -480,46 +541,29 @@ fn pre_precision_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
     preprecision_r
 }
 
-// Get the precision matrix of a phylo2vec matrix
-// The precision matrix is the inverse of the variance-covariance matrix.
-// The precision matrix can be obtained using Schur's complement on this precursor.
-// Output shape: (2 * (n_leaves - 1), 2 * (n_leaves- 1)]
+/// Get the variance-covariance matrix of a phylo2vec tree
+///
+/// @param tree A phylo2vec tree
+/// @return Variance-covariance matrix (shape: (n_leaves, n_leaves))
+/// @export
 #[extendr]
-fn pre_precision_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
-    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
-    let pre_precision_rs = mgraph::pre_precision(&matrix_rs.view());
-    let n = pre_precision_rs.shape()[0];
-    let mut pre_precision_r = RMatrix::new_matrix(n, n, |r, c| pre_precision_rs[[r, c]]);
-    let dimnames = (0..n).map(|x| x as i32).collect::<Vec<i32>>();
-    pre_precision_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
-
-    pre_precision_r
-}
-
-// Get the variance-covariance matrix of a phylo2vec vector
-#[extendr]
-fn vcov_from_vector(vector: Vec<i32>) -> RMatrix<f64> {
-    let v_usize: Vec<usize> = as_usize(vector);
-    let vcv_rs = vgraph::vcv(&v_usize);
+fn vcovp(tree: RTree) -> RMatrix<f64> {
+    let vcv_rs = match tree {
+        RTree::Matrix(m) => {
+            let matrix = convert_from_rmatrix(&m).unwrap();
+            mgraph::vcv(&matrix.view())
+        }
+        RTree::Vector(v) => {
+            let v_usize: Vec<usize> = as_usize(v);
+            vgraph::vcv(&v_usize)
+        }
+    };
     let n_leaves = vcv_rs.shape()[0];
     let mut vcv_r = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| vcv_rs[[r, c]]);
     let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
     vcv_r.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
 
     vcv_r
-}
-
-// Get the variance-covariance matrix of a phylo2vec matrix
-#[extendr]
-fn vcov_from_matrix(matrix: RMatrix<f64>) -> RMatrix<f64> {
-    let matrix_rs = convert_from_rmatrix(&matrix).unwrap();
-    let vcv_rs = mgraph::vcv(&matrix_rs.view());
-    let n_leaves = vcv_rs.shape()[0];
-    let mut vcv_matrix = RMatrix::new_matrix(n_leaves, n_leaves, |r, c| vcv_rs[[r, c]]);
-    let dimnames = (0..n_leaves).map(|x| x as i32).collect::<Vec<i32>>();
-    vcv_matrix.set_dimnames(List::from_values(vec![dimnames.clone(), dimnames]));
-
-    vcv_matrix
 }
 
 // Get the oriented incidence matrix of a phylo2vec vector in dense format
@@ -580,7 +624,7 @@ fn incidence_csr(input_vector: Vec<i32>) -> List {
 ///
 /// @param v1 First tree as phylo2vec vector
 /// @param v2 Second tree as phylo2vec vector
-/// @param normalize If TRUE, return normalized distance in range [0.0, 1.0]
+/// @param normalize If TRUE, return normalized distance in range `[0.0, 1.0]`
 /// @return RF distance (numeric)
 /// @export
 #[extendr]
@@ -599,39 +643,33 @@ extendr_module! {
     fn apply_label_mapping;
     fn check_m;
     fn check_v;
-    fn cophenetic_from_matrix;
-    fn cophenetic_from_vector;
+    fn cophenetic_distances;
     fn create_label_mapping;
     fn find_num_leaves;
     fn from_ancestry;
     fn from_edges;
     fn from_pairs;
     fn get_common_ancestor;
-    fn get_node_depth_from_matrix;
-    fn get_node_depth_from_vector;
-    fn get_node_depths_from_matrix;
-    fn get_node_depths_from_vector;
+    fn get_node_depth;
+    fn get_node_depths;
     fn has_branch_lengths;
     fn incidence_coo;
     fn incidence_csc;
     fn incidence_csr;
     fn incidence_dense;
-    fn pre_precision_from_matrix;
-    fn pre_precision_from_vector;
     fn queue_shuffle;
     fn remove_branch_lengths;
     fn remove_parent_labels;
+    fn pre_precision;
     fn remove_leaf;
     fn robinson_foulds;
     fn sample_matrix;
     fn sample_vector;
     fn to_ancestry;
     fn to_edges;
-    fn to_newick_from_matrix;
-    fn to_newick_from_vector;
+    fn to_newick;
     fn to_pairs;
     fn to_matrix;
     fn to_vector;
-    fn vcov_from_matrix;
-    fn vcov_from_vector;
+    fn vcovp;
 }

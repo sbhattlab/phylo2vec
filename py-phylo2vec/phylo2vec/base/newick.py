@@ -39,13 +39,4 @@ def to_newick(vector_or_matrix: np.ndarray) -> str:
     newick : str
         Newick tree
     """
-    if vector_or_matrix.ndim == 2:
-        newick = core.to_newick_from_matrix(vector_or_matrix)
-    elif vector_or_matrix.ndim == 1:
-        newick = core.to_newick_from_vector(vector_or_matrix)
-    else:
-        raise ValueError(
-            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-        )
-
-    return newick
+    return core.to_newick(vector_or_matrix)

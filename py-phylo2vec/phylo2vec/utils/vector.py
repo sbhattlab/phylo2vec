@@ -251,22 +251,10 @@ def get_common_ancestor(vector_or_matrix, node1, node2):
 
     Returns
     -------
-    mrca : int
+    int
         Most recent common ancestor node between node1 and node2
     """
-    if vector_or_matrix.ndim == 2:
-        v = vector_or_matrix[:, 0].astype(int)
-    elif vector_or_matrix.ndim == 1:
-        v = vector_or_matrix
-    else:
-        raise ValueError(
-            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-        )
-
-    if not (0 <= node1 <= 2 * len(v) and 0 <= node2 <= 2 * len(v)):
-        raise ValueError("Nodes must be in the range [0, 2 * n_leaves]")
-
-    return core.get_common_ancestor(v.tolist(), node1, node2)
+    return core.get_common_ancestor(vector_or_matrix, node1, node2)
 
 
 def get_node_depth(vector_or_matrix, node: int) -> float:
@@ -303,19 +291,7 @@ def get_node_depth(vector_or_matrix, node: int) -> float:
     >>> get_node_depth(v, 0)  # Leaf 0 is 1 edge from root
     1.0
     """
-    n_leaves = vector_or_matrix.shape[0] + 1
-    max_node = 2 * n_leaves - 1
-    if not 0 <= node < max_node:
-        raise ValueError(f"node must be in the range [0, {max_node})")
-
-    if vector_or_matrix.ndim == 2:
-        return core.get_node_depth_with_bls(vector_or_matrix, node)
-    if vector_or_matrix.ndim == 1:
-        return core.get_node_depth(vector_or_matrix.tolist(), node)
-
-    raise ValueError(
-        "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-    )
+    return core.get_node_depth(vector_or_matrix, node)
 
 
 def get_node_depths(vector_or_matrix) -> np.ndarray:
@@ -352,14 +328,7 @@ def get_node_depths(vector_or_matrix) -> np.ndarray:
     >>> depths[0]  # Leaf 0 is 1 edge from root
     1.0
     """
-    if vector_or_matrix.ndim == 2:
-        return np.asarray(core.get_node_depths_with_bls(vector_or_matrix))
-    if vector_or_matrix.ndim == 1:
-        return np.asarray(core.get_node_depths(vector_or_matrix.tolist()))
-
-    raise ValueError(
-        "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-    )
+    return np.asarray(core.get_node_depths(vector_or_matrix))
 
 
 def reroot(vector_or_matrix, node) -> np.ndarray:

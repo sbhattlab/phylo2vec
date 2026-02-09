@@ -1,41 +1,3 @@
-#' Compute the cophenetic distance matrix of a phylo2vec
-#' vector (tree topology) or matrix (topology + branch lengths).
-#'
-#' Output shape: (n_leaves, n_leaves)
-#'
-#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
-#' @param unrooted Logical indicating whether applying the cophenetic distance
-#'  to an unrooted tree or not (see ete3). Default is FALSE.
-#' @return Cophenetic distance matrix
-#' @export
-cophenetic_distances <- function(vector_or_matrix, unrooted = FALSE) {
-  if (is.vector(vector_or_matrix, "integer")) {
-    .Call(wrap__cophenetic_from_vector, vector_or_matrix, unrooted)
-  } else if (is.matrix(vector_or_matrix)) {
-    .Call(wrap__cophenetic_from_matrix, vector_or_matrix, unrooted)
-  } else {
-    stop("Input must be either an integer vector or a 2D matrix.")
-  }
-}
-
-#' Compute the variance-covariance matrix of a phylo2vec
-#' vector (tree topology) or matrix (topology + branch lengths).
-#'
-#' Output shape: (n_leaves, n_leaves)
-#'
-#' @param vector_or_matrix phylo2vec vector (ndim == 1)/matrix (ndim == 2)
-#' @return Variance-covariance matrix
-#' @export
-vcovp <- function(vector_or_matrix) {
-  if (is.vector(vector_or_matrix, "integer")) {
-    .Call(wrap__vcov_from_vector, vector_or_matrix)
-  } else if (is.matrix(vector_or_matrix)) {
-    .Call(wrap__vcov_from_matrix, vector_or_matrix)
-  } else {
-    stop("Input must be either an integer vector or a 2D matrix.")
-  }
-}
-
 #' Compute the precision matrix of a phylo2vec
 #' vector (tree topology) or matrix (topology + branch lengths).
 #'
@@ -47,14 +9,7 @@ vcovp <- function(vector_or_matrix) {
 #' @return Precision matrix
 #' @export
 precision <- function(vector_or_matrix) {
-  # Rust panics if len(v) == 0
-  if (is.vector(vector_or_matrix, "integer")) {
-    precursor <- .Call(wrap__pre_precision_from_vector, vector_or_matrix)
-  } else if (is.matrix(vector_or_matrix)) {
-    precursor <- .Call(wrap__pre_precision_from_matrix, vector_or_matrix)
-  } else {
-    stop("Input must be either an integer vector or a 2D matrix.")
-  }
+  precursor <- pre_precision(vector_or_matrix)
 
   # nrow(precursor) = ncol(precursor) = 2*k where k = n_leaves - 1
   n <- nrow(precursor)
@@ -72,6 +27,21 @@ precision <- function(vector_or_matrix) {
   a - b %*% solve(c, d)
 }
 
+#' Compute the cophenetic distance matrix of a phylo2vec tree.
+#'
+#' The cophenetic distance between two leaves is the distance from each leaf
+#' to their most recent common ancestor.
+#' For vectors, this is the topological distance.
+#' For matrices, this uses branch lengths.
+#'
+#' @param tree phylo2vec vector (1D) or matrix (2D)
+#' @param unrooted If TRUE, compute unrooted distances. Default is FALSE.
+#' @return Cophenetic distance matrix (shape: (n_leaves, n_leaves))
+#' @export
+cophenetic_distances <- function(tree, unrooted = FALSE) {
+  .Call(wrap__cophenetic_distances, tree, unrooted)
+}
+
 #' Compute the Robinson-Foulds distance between two trees.
 #'
 #' RF distance counts the number of bipartitions (splits) that differ
@@ -81,10 +51,10 @@ precision <- function(vector_or_matrix) {
 #'   Only topology is used; branch lengths are ignored.
 #' @param tree2 Second tree as phylo2vec vector (1D) or matrix (2D).
 #'   Only topology is used; branch lengths are ignored.
-#' @param normalize If TRUE, return normalized distance in range [0.0, 1.0].
+#' @param normalize If TRUE, return normalized distance in range `[0.0, 1.0]`.
 #'   Default is FALSE.
 #' @return RF distance (numeric). Integer value if normalize=FALSE,
-#'   float in [0,1] otherwise.
+#'   float in `[0, 1]` otherwise.
 #' @examples
 #' v1 <- sample_tree(10, topology_only = TRUE)
 #' v2 <- sample_tree(10, topology_only = TRUE)
