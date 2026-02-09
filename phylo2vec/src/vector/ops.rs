@@ -160,20 +160,22 @@ fn min_common_ancestor(path1: &[usize], path2: &[usize]) -> usize {
 /// use phylo2vec::vector::ops::get_common_ancestor;
 ///
 /// let v = vec![0, 1, 2, 3, 4];
-/// let mrca = get_common_ancestor(&v, 2, 3);
+/// let mrca = get_common_ancestor(&v, 2, 3).unwrap();
 /// // Newick string of v = (0,(1,(2,(3,(4,5)6)7)8)9)10;
 /// // So 2 and 3 share the MRCA 8.
 /// assert_eq!(mrca, 8);
 /// ```
-pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
+pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> Result<usize, String> {
     let node_max = 2 * v.len();
 
     if node1 > node_max || node2 > node_max {
-        panic!("Node indices must be within the range of the Phylo2Vec vector. Max = {node_max}, got node1 = {node1} and node2 = {node2}");
+        return Err(format!(
+              "Node indices must be within range. Max = {node_max}, got node1 = {node1} and node2 = {node2}"
+          ));
     }
 
     if node1 == node2 {
-        return node1;
+        return Ok(node1);
     }
 
     let pairs = to_pairs(v);
@@ -181,7 +183,7 @@ pub fn get_common_ancestor(v: &[usize], node1: usize, node2: usize) -> usize {
     let path1 = get_ancestry_path_of_node(&pairs, node1);
     let path2 = get_ancestry_path_of_node(&pairs, node2);
 
-    min_common_ancestor(&path1, &path2)
+    Ok(min_common_ancestor(&path1, &path2))
 }
 
 /// Generic function to calculate the depths of all nodes in a Phylo2Vec tree.
@@ -238,20 +240,24 @@ pub fn _get_node_depths(v: &[usize], bls: Option<&Vec<[f64; 2]>>) -> Vec<f64> {
 /// The root has depth 0, and depths increase as you move toward the leaves.
 ///
 /// When `bls` is `None`, all branch lengths are assumed to be 1.0 (topological depth).
-pub fn _get_node_depth(v: &[usize], bls: Option<&Vec<[f64; 2]>>, node: usize) -> f64 {
+pub fn _get_node_depth(
+    v: &[usize],
+    bls: Option<&Vec<[f64; 2]>>,
+    node: usize,
+) -> Result<f64, String> {
     let k = v.len();
     let n_leaves = k + 1;
     let n_nodes = 2 * n_leaves - 1;
 
     if node >= n_nodes {
-        panic!(
+        return Err(format!(
             "Node index out of bounds. Max node = {}, got node = {}",
             n_nodes - 1,
             node
-        );
+        ));
     }
 
-    _get_node_depths(v, bls)[node]
+    Ok(_get_node_depths(v, bls)[node])
 }
 
 /// Get the depths of all nodes in a Phylo2Vec vector (topological).
@@ -297,15 +303,15 @@ pub fn get_node_depths(v: &[usize]) -> Vec<f64> {
 /// // Tree: (0,(1,(2,3)4)5)6
 /// let v = vec![0, 1, 2];
 /// // Root (node 6) has depth 0
-/// assert_eq!(get_node_depth(&v, 6), 0.0);
+/// assert_eq!(get_node_depth(&v, 6).unwrap(), 0.0);
 /// // Node 5 is 1 edge from root
-/// assert_eq!(get_node_depth(&v, 5), 1.0);
+/// assert_eq!(get_node_depth(&v, 5).unwrap(), 1.0);
 /// // Node 4 is 2 edges from root
-/// assert_eq!(get_node_depth(&v, 4), 2.0);
+/// assert_eq!(get_node_depth(&v, 4).unwrap(), 2.0);
 /// // Leaf 0 is 1 edge from root
-/// assert_eq!(get_node_depth(&v, 0), 1.0);
+/// assert_eq!(get_node_depth(&v, 0).unwrap(), 1.0);
 /// ```
-pub fn get_node_depth(v: &[usize], node: usize) -> f64 {
+pub fn get_node_depth(v: &[usize], node: usize) -> Result<f64, String> {
     _get_node_depth(v, None, node)
 }
 
@@ -565,7 +571,7 @@ mod tests {
         #[case] node2: usize,
         #[case] expected_mrca: usize,
     ) {
-        let mrca = get_common_ancestor(&v, node1, node2);
+        let mrca = get_common_ancestor(&v, node1, node2).unwrap();
         assert_eq!(
             mrca, expected_mrca,
             "Expected mrca of nodes {node1} and {node2} for v = {v:?} to be {expected_mrca}, but got {mrca}"
@@ -599,7 +605,7 @@ mod tests {
         #[case] node: usize,
         #[case] expected_depth: f64,
     ) {
-        let depth = get_node_depth(&v, node);
+        let depth = get_node_depth(&v, node).unwrap();
         assert!(
             (depth - expected_depth).abs() < 1e-10,
             "Expected depth {expected_depth} for node {node} in v = {v:?}, got {depth}"
@@ -616,7 +622,7 @@ mod tests {
 
         let v = sample_vector(n_leaves, false);
         let root = 2 * v.len(); // Root node index
-        let depth = get_node_depth(&v, root);
+        let depth = get_node_depth(&v, root).unwrap();
         assert_eq!(depth, 0.0, "Root should have depth 0");
     }
 
@@ -656,9 +662,9 @@ mod tests {
     #[rstest]
     #[case(vec![0, 1, 2], 7)] // Max node is 6
     #[case(vec![0], 3)] // Max node is 2
-    #[should_panic]
+    #[should_panic(expected = "Node index out of bounds")]
     fn test_get_node_depth_out_of_bounds(#[case] v: Vec<usize>, #[case] node: usize) {
-        get_node_depth(&v, node);
+        get_node_depth(&v, node).unwrap();
     }
 
     #[rstest]

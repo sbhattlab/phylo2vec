@@ -65,13 +65,13 @@ pub fn get_node_depths(m: &ArrayView2<f64>) -> Vec<f64> {
 ///     [0.0, 0.5, 0.2],
 /// ];
 /// // Root (node 4) has depth 0
-/// assert_eq!(get_node_depth(&m.view(), 4), 0.0);
+/// assert_eq!(get_node_depth(&m.view(), 4).unwrap(), 0.0);
 /// // Node 3 is 0.5 from root
-/// assert!((get_node_depth(&m.view(), 3) - 0.5).abs() < 1e-10);
+/// assert!((get_node_depth(&m.view(), 3).unwrap() - 0.5).abs() < 1e-10);
 /// // Leaf 0 is 0.5 + 0.3 = 0.8 from root
-/// assert!((get_node_depth(&m.view(), 0) - 0.8).abs() < 1e-10);
+/// assert!((get_node_depth(&m.view(), 0).unwrap() - 0.8).abs() < 1e-10);
 /// ```
-pub fn get_node_depth(m: &ArrayView2<f64>, node: usize) -> f64 {
+pub fn get_node_depth(m: &ArrayView2<f64>, node: usize) -> Result<f64, String> {
     let (v, bls) = parse_matrix(m);
     _get_node_depth(&v, Some(&bls), node)
 }
@@ -160,7 +160,7 @@ mod tests {
         #[case] node: usize,
         #[case] expected_depth: f64,
     ) {
-        let depth = get_node_depth(&m.view(), node);
+        let depth = get_node_depth(&m.view(), node).unwrap();
         assert!(
             (depth - expected_depth).abs() < 1e-10,
             "Expected depth {expected_depth}, got {depth}"
@@ -175,7 +175,7 @@ mod tests {
     fn test_get_node_depth_root_is_zero(#[case] n_leaves: usize) {
         let m = sample_matrix(n_leaves, false);
         let root = 2 * m.nrows(); // Root node index
-        let depth = get_node_depth(&m.view(), root);
+        let depth = get_node_depth(&m.view(), root).unwrap();
         assert_eq!(depth, 0.0, "Root should have depth 0");
     }
 

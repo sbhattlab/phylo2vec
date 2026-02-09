@@ -17,6 +17,12 @@ use phylo2vec::vector::distance as vdist;
 use phylo2vec::vector::graph as vgraph;
 use phylo2vec::vector::ops as vops;
 
+#[derive(FromPyObject)]
+enum PyTree<'py> {
+    Matrix(PyReadonlyArray2<'py, f64>),
+    Vector(Vec<usize>),
+}
+
 #[pyfunction]
 fn sample_vector(n_leaves: isize, ordered: bool) -> PyResult<Vec<usize>> {
     if n_leaves < 2 {
@@ -82,16 +88,11 @@ fn check_m(input_matrix: PyReadonlyArray2<f64>) -> PyResult<()> {
 }
 
 #[pyfunction]
-fn to_newick_from_vector(input_vector: Vec<usize>) -> PyResult<String> {
-    let newick = vconvert::to_newick(&input_vector);
-    Ok(newick)
-}
-
-#[pyfunction]
-fn to_newick_from_matrix(input_matrix: PyReadonlyArray2<f64>) -> PyResult<String> {
-    let arr = input_matrix.as_array();
-    let newick = mconvert::to_newick(&arr);
-    Ok(newick)
+fn to_newick(tree: PyTree) -> String {
+    match tree {
+        PyTree::Matrix(m) => mconvert::to_newick(&m.as_array()),
+        PyTree::Vector(v) => vconvert::to_newick(&v),
+    }
 }
 
 #[pyfunction]
@@ -141,50 +142,33 @@ fn build_newick(input_pairs: Vec<(usize, usize)>) -> String {
 }
 
 #[pyfunction]
-fn cophenetic_distances(
-    py: Python<'_>,
-    input_vector: Vec<usize>,
+fn cophenetic_distances<'py>(
+    py: Python<'py>,
+    tree: PyTree<'py>,
     unrooted: bool,
-) -> Bound<'_, PyArray2<f64>> {
-    vgraph::cophenetic_distances(&input_vector, unrooted).into_pyarray(py)
-}
-
-#[pyfunction]
-fn cophenetic_distances_with_bls<'py>(
-    py: Python<'py>,
-    input_matrix: PyReadonlyArray2<f64>,
-    unrooted: bool,
-) -> Bound<'py, PyArray2<f64>> {
-    let m = input_matrix.as_array();
-    mgraph::cophenetic_distances(&m, unrooted).into_pyarray(py)
-}
-
-#[pyfunction]
-fn pre_precision(py: Python<'_>, input_vector: Vec<usize>) -> PyResult<Bound<'_, PyArray2<f64>>> {
-    Ok(vgraph::pre_precision(&input_vector).into_pyarray(py))
-}
-
-#[pyfunction]
-fn pre_precision_with_bls<'py>(
-    py: Python<'py>,
-    input_matrix: PyReadonlyArray2<f64>,
 ) -> PyResult<Bound<'py, PyArray2<f64>>> {
-    let m = input_matrix.as_array();
-    Ok(mgraph::pre_precision(&m).into_pyarray(py))
+    match tree {
+        PyTree::Matrix(m) => {
+            Ok(mgraph::cophenetic_distances(&m.as_array(), unrooted).into_pyarray(py))
+        }
+        PyTree::Vector(v) => Ok(vgraph::cophenetic_distances(&v, unrooted).into_pyarray(py)),
+    }
 }
 
 #[pyfunction]
-fn vcv(py: Python<'_>, input_vector: Vec<usize>) -> PyResult<Bound<'_, PyArray2<f64>>> {
-    Ok(vgraph::vcv(&input_vector).into_pyarray(py))
+fn pre_precision<'py>(py: Python<'py>, tree: PyTree<'py>) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    match tree {
+        PyTree::Matrix(m) => Ok(mgraph::pre_precision(&m.as_array()).into_pyarray(py)),
+        PyTree::Vector(v) => Ok(vgraph::pre_precision(&v).into_pyarray(py)),
+    }
 }
 
 #[pyfunction]
-fn vcv_with_bls<'py>(
-    py: Python<'py>,
-    input_matrix: PyReadonlyArray2<f64>,
-) -> PyResult<Bound<'py, PyArray2<f64>>> {
-    let m = input_matrix.as_array();
-    Ok(mgraph::vcv(&m).into_pyarray(py))
+fn vcv<'py>(py: Python<'py>, tree: PyTree<'py>) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    match tree {
+        PyTree::Matrix(m) => Ok(mgraph::vcv(&m.as_array()).into_pyarray(py)),
+        PyTree::Vector(v) => Ok(vgraph::vcv(&v).into_pyarray(py)),
+    }
 }
 
 #[pyfunction]
@@ -263,50 +247,43 @@ fn create_label_mapping(newick: String) -> PyResult<(String, HashMap<usize, Stri
 }
 
 #[pyfunction]
-fn get_common_ancestor(v: Vec<usize>, node1: usize, node2: usize) -> usize {
-    vops::get_common_ancestor(&v, node1, node2)
+fn get_common_ancestor(tree: PyTree, node1: isize, node2: isize) -> PyResult<usize> {
+    if node1 < 0 || node2 < 0 {
+        return Err(PyValueError::new_err("nodes must be non-negative"));
+    }
+    let node1 = node1 as usize;
+    let node2 = node2 as usize;
+    let v = match tree {
+        PyTree::Matrix(m) => {
+            let (v, _) = mbase::parse_matrix(&m.as_array());
+            v
+        }
+        PyTree::Vector(v) => v,
+    };
+
+    vops::get_common_ancestor(&v, node1, node2).map_err(PyValueError::new_err)
 }
 
 #[pyfunction]
-fn get_node_depth(v: Vec<usize>, node: isize) -> PyResult<f64> {
+fn get_node_depth(tree: PyTree, node: isize) -> PyResult<f64> {
     if node < 0 {
         return Err(PyValueError::new_err("node must be non-negative"));
     }
     let node = node as usize;
-    let n_nodes = 2 * v.len() + 1;
-    if node >= n_nodes {
-        return Err(PyValueError::new_err(format!(
-            "node must be less than {n_nodes}"
-        )));
-    }
-    Ok(vops::get_node_depth(&v, node))
+    let depth = match tree {
+        PyTree::Matrix(m) => mops::get_node_depth(&m.as_array(), node),
+        PyTree::Vector(v) => vops::get_node_depth(&v, node),
+    };
+
+    depth.map_err(PyValueError::new_err)
 }
 
 #[pyfunction]
-fn get_node_depth_with_bls(input_matrix: PyReadonlyArray2<f64>, node: isize) -> PyResult<f64> {
-    if node < 0 {
-        return Err(PyValueError::new_err("node must be non-negative"));
+fn get_node_depths(tree: PyTree) -> Vec<f64> {
+    match tree {
+        PyTree::Matrix(m) => mops::get_node_depths(&m.as_array()),
+        PyTree::Vector(v) => vops::get_node_depths(&v),
     }
-    let node = node as usize;
-    let m = input_matrix.as_array();
-    let n_nodes = 2 * m.nrows() + 1;
-    if node >= n_nodes {
-        return Err(PyValueError::new_err(format!(
-            "node must be less than {n_nodes}"
-        )));
-    }
-    Ok(mops::get_node_depth(&m, node))
-}
-
-#[pyfunction]
-fn get_node_depths(v: Vec<usize>) -> Vec<f64> {
-    vops::get_node_depths(&v)
-}
-
-#[pyfunction]
-fn get_node_depths_with_bls(input_matrix: PyReadonlyArray2<f64>) -> Vec<f64> {
-    let m = input_matrix.as_array();
-    mops::get_node_depths(&m)
 }
 
 #[pyfunction]
@@ -315,8 +292,19 @@ fn queue_shuffle(v: Vec<usize>, shuffle_cherries: bool) -> (Vec<usize>, Vec<usiz
 }
 
 #[pyfunction]
-#[pyo3(signature = (v1, v2, normalize=false))]
-fn robinson_foulds(v1: Vec<usize>, v2: Vec<usize>, normalize: bool) -> f64 {
+fn robinson_foulds(tree1: PyTree, tree2: PyTree, normalize: bool) -> f64 {
+    let (v1, v2) = match (tree1, tree2) {
+        (PyTree::Matrix(m1), PyTree::Matrix(m2)) => (
+            mbase::parse_matrix(&m1.as_array()).0,
+            mbase::parse_matrix(&m2.as_array()).0,
+        ),
+        (PyTree::Vector(v1), PyTree::Vector(v2)) => (v1, v2),
+        (PyTree::Matrix(m), PyTree::Vector(v)) | (PyTree::Vector(v), PyTree::Matrix(m)) => {
+            let v_from_m = mbase::parse_matrix(&m.as_array()).0;
+            (v_from_m, v)
+        }
+    };
+
     vdist::robinson_foulds(&v1, &v2, normalize)
 }
 
@@ -348,7 +336,6 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(check_m, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;
     m.add_function(wrap_pyfunction!(cophenetic_distances, m)?)?;
-    m.add_function(wrap_pyfunction!(cophenetic_distances_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(create_label_mapping, m)?)?;
     m.add_function(wrap_pyfunction!(find_num_leaves, m)?)?;
     m.add_function(wrap_pyfunction!(from_ancestry, m)?)?;
@@ -358,9 +345,7 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_common_ancestor, m)?)?;
     m.add_function(wrap_pyfunction!(get_edges, m)?)?;
     m.add_function(wrap_pyfunction!(get_node_depth, m)?)?;
-    m.add_function(wrap_pyfunction!(get_node_depth_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(get_node_depths, m)?)?;
-    m.add_function(wrap_pyfunction!(get_node_depths_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(get_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(has_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(has_parents, m)?)?;
@@ -370,7 +355,6 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(incidence_dense, m)?)?;
     m.add_function(wrap_pyfunction!(leaf_depth_variance, m)?)?;
     m.add_function(wrap_pyfunction!(pre_precision, m)?)?;
-    m.add_function(wrap_pyfunction!(pre_precision_with_bls, m)?)?;
     m.add_function(wrap_pyfunction!(queue_shuffle, m)?)?;
     m.add_function(wrap_pyfunction!(remove_branch_lengths, m)?)?;
     m.add_function(wrap_pyfunction!(remove_leaf, m)?)?;
@@ -379,12 +363,10 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(sackin, m)?)?;
     m.add_function(wrap_pyfunction!(sample_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(sample_vector, m)?)?;
-    m.add_function(wrap_pyfunction!(to_newick_from_vector, m)?)?;
-    m.add_function(wrap_pyfunction!(to_newick_from_matrix, m)?)?;
     m.add_function(wrap_pyfunction!(to_matrix, m)?)?;
+    m.add_function(wrap_pyfunction!(to_newick, m)?)?;
     m.add_function(wrap_pyfunction!(to_vector, m)?)?;
     m.add_function(wrap_pyfunction!(vcv, m)?)?;
-    m.add_function(wrap_pyfunction!(vcv_with_bls, m)?)?;
     // Metadata about the package bindings
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())

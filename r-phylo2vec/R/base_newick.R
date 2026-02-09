@@ -1,21 +1,3 @@
-#' Convert a phylo2vec vector or matrix to Newick format
-#'
-#' @param vector_or_matrix phylo2vec matrix (tree with branch
-#' lengths) or a vector (tree topology only)
-#' @return Newick string representation of the tree
-#' @export
-to_newick <- function(vector_or_matrix) {
-  if (is.vector(vector_or_matrix, "integer")) {
-    # If the input is a vector, call the C function for vector
-    .Call(wrap__to_newick_from_vector, vector_or_matrix)
-  } else if (is.matrix(vector_or_matrix)) {
-    # If the input is a matrix, call the C function for matrix
-    .Call(wrap__to_newick_from_matrix, vector_or_matrix)
-  } else {
-    stop("Input must be either an integer vector or a 2D matrix.")
-  }
-}
-
 #' Convert a Newick string to a phylo2vec vector or matrix
 #'
 #' @param newick Newick string representation of the tree

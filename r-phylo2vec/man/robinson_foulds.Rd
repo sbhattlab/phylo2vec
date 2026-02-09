@@ -15,7 +15,7 @@ Only topology is used; branch lengths are ignored.}
 \item{tree2}{Second tree as phylo2vec vector (1D) or matrix (2D).
 Only topology is used; branch lengths are ignored.}
 
-\item{normalize}{If TRUE, return normalized distance in range \link{0.0, 1.0}.
+\item{normalize}{If TRUE, return normalized distance in range \verb{[0.0, 1.0]}.
 Default is FALSE.}
 
 \item{v1}{First tree as phylo2vec vector}
@@ -26,7 +26,7 @@ Default is FALSE.}
 RF distance (numeric)
 
 RF distance (numeric). Integer value if normalize=FALSE,
-float in \link{0,1} otherwise.
+float in \verb{[0, 1]} otherwise.
 }
 \description{
 RF distance counts the number of bipartitions (splits) that differ

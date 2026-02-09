@@ -7,14 +7,14 @@ from phylo2vec.utils.matrix import check_matrix
 from phylo2vec.utils.vector import check_vector
 
 
-def cophenetic_distances(vector_or_matrix, unrooted=False):
+def cophenetic_distances(tree, unrooted=False):
     """
     Compute the cophenetic distance matrix of a Phylo2Vec
     vector (topological) or matrix (from branch lengths).
 
     Parameters
     ----------
-    vector_or_matrix : numpy.ndarray
+    tree : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
@@ -22,21 +22,13 @@ def cophenetic_distances(vector_or_matrix, unrooted=False):
     numpy.ndarray
         Cophenetic distance matrix
     """
-    if vector_or_matrix.ndim == 2:
-        coph = core.cophenetic_distances_with_bls(vector_or_matrix, unrooted=unrooted)
-    elif vector_or_matrix.ndim == 1:
-        coph = core.cophenetic_distances(vector_or_matrix, unrooted=unrooted)
-    else:
-        raise ValueError(
-            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-        )
-    return coph
+    return core.cophenetic_distances(tree, unrooted=unrooted)
 
 
 NODEWISE_DISTANCES = {"cophenetic": cophenetic_distances}
 
 
-def pairwise_distances(vector_or_matrix, metric="cophenetic"):
+def pairwise_distances(tree, metric="cophenetic"):
     """
     Compute a pairwise distance matrix
     for tree nodes from a Phylo2Vec vector.
@@ -45,7 +37,7 @@ def pairwise_distances(vector_or_matrix, metric="cophenetic"):
 
     Parameters
     ----------
-    vector_or_matrix : numpy.ndarray
+    tree : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
     metric : str, optional
         Pairwise distance metric, by default "cophenetic"
@@ -55,21 +47,12 @@ def pairwise_distances(vector_or_matrix, metric="cophenetic"):
     numpy.ndarray
         Distance matrix
     """
-    if vector_or_matrix.ndim == 2:
-        check_matrix(vector_or_matrix)
-    elif vector_or_matrix.ndim == 1:
-        check_vector(vector_or_matrix)
-    else:
-        raise ValueError(
-            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-        )
-
     func = NODEWISE_DISTANCES[metric]
 
-    return func(vector_or_matrix)
+    return func(tree)
 
 
-def cov(vector_or_matrix):
+def cov(tree):
     """
     Compute the covariance matrix of a Phylo2Vec vector or matrix.
 
@@ -77,7 +60,7 @@ def cov(vector_or_matrix):
 
     Parameters
     ----------
-    vector_or_matrix : numpy.ndarray
+    tree : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
@@ -85,18 +68,10 @@ def cov(vector_or_matrix):
     vcv : numpy.ndarray
         Covariance matrix
     """
-    if vector_or_matrix.ndim == 2:
-        vcv = core.vcv_with_bls(vector_or_matrix)
-    elif vector_or_matrix.ndim == 1:
-        vcv = core.vcv(vector_or_matrix)
-    else:
-        raise ValueError(
-            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-        )
-    return vcv
+    return core.vcv(tree)
 
 
-def precision(vector_or_matrix):
+def precision(tree):
     """
     Compute the precision matrix of a Phylo2Vec vector or matrix.
 
@@ -104,7 +79,7 @@ def precision(vector_or_matrix):
 
     Parameters
     ----------
-    vector_or_matrix : numpy.ndarray
+    tree : numpy.ndarray
         Phylo2Vec vector (ndim == 1)/matrix (ndim == 2)
 
     Returns
@@ -112,17 +87,10 @@ def precision(vector_or_matrix):
     precision: numpy.ndarray
         Precision matrix
     """
-    if vector_or_matrix.ndim == 2:
-        precursor = core.pre_precision_with_bls(vector_or_matrix)
-    elif vector_or_matrix.ndim == 1:
-        precursor = core.pre_precision(vector_or_matrix)
-    else:
-        raise ValueError(
-            "vector_or_matrix should either be a vector (ndim == 1) or matrix (ndim == 2)"
-        )
+    precursor = core.pre_precision(tree)
 
     # Schur complement of the precursor matrix
-    n_leaves = vector_or_matrix.shape[0] + 1
+    n_leaves = tree.shape[0] + 1
     a = precursor[:n_leaves, :n_leaves]
     b = precursor[:n_leaves, n_leaves:]
     c = precursor[n_leaves:, n_leaves:]

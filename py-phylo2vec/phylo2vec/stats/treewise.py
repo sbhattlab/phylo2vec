@@ -55,8 +55,4 @@ def robinson_foulds(
     ete3.Tree.robinson_foulds : Reference implementation in ete3
     ape::dist.topo : Reference implementation in R's ape package
     """
-    # Extract topology (column 0) if matrix input
-    v1 = tree1[:, 0].astype(int).tolist() if tree1.ndim == 2 else tree1.tolist()
-    v2 = tree2[:, 0].astype(int).tolist() if tree2.ndim == 2 else tree2.tolist()
-
-    return core.robinson_foulds(v1, v2, normalize)
+    return core.robinson_foulds(tree1, tree2, normalize)
