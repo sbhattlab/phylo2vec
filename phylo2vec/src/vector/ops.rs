@@ -160,7 +160,7 @@ fn min_common_ancestor(path1: &[usize], path2: &[usize]) -> usize {
 /// use phylo2vec::vector::ops::get_common_ancestor;
 ///
 /// let v = vec![0, 1, 2, 3, 4];
-/// let mrca = get_common_ancestor(&v, 2, 3);
+/// let mrca = get_common_ancestor(&v, 2, 3).unwrap();
 /// // Newick string of v = (0,(1,(2,(3,(4,5)6)7)8)9)10;
 /// // So 2 and 3 share the MRCA 8.
 /// assert_eq!(mrca, 8);
@@ -303,13 +303,13 @@ pub fn get_node_depths(v: &[usize]) -> Vec<f64> {
 /// // Tree: (0,(1,(2,3)4)5)6
 /// let v = vec![0, 1, 2];
 /// // Root (node 6) has depth 0
-/// assert_eq!(get_node_depth(&v, 6), 0.0);
+/// assert_eq!(get_node_depth(&v, 6).unwrap(), 0.0);
 /// // Node 5 is 1 edge from root
-/// assert_eq!(get_node_depth(&v, 5), 1.0);
+/// assert_eq!(get_node_depth(&v, 5).unwrap(), 1.0);
 /// // Node 4 is 2 edges from root
-/// assert_eq!(get_node_depth(&v, 4), 2.0);
+/// assert_eq!(get_node_depth(&v, 4).unwrap(), 2.0);
 /// // Leaf 0 is 1 edge from root
-/// assert_eq!(get_node_depth(&v, 0), 1.0);
+/// assert_eq!(get_node_depth(&v, 0).unwrap(), 1.0);
 /// ```
 pub fn get_node_depth(v: &[usize], node: usize) -> Result<f64, String> {
     _get_node_depth(v, None, node)
