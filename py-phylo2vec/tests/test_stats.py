@@ -7,6 +7,7 @@ from ete4 import Tree
 from scipy import sparse
 
 from phylo2vec.base.newick import to_newick
+from phylo2vec.stats.balance import b2, leaf_depth_variance, sackin
 from phylo2vec.stats.nodewise import (
     cophenetic_distances,
     cov,
@@ -307,3 +308,69 @@ def test_robinson_foulds_matches_ete4(n_leaves):
         assert np.isclose(
             rf_ours_norm, rf_ete4_norm
         ), f"Mismatch: ours={rf_ours_norm}, ete4={rf_ete4_norm}"
+
+
+@pytest.mark.parametrize(
+    "v, expected",
+    [
+        # Small trees
+        (np.array([0]), 2),
+        (np.array([0, 2, 2, 3]), 12),  # n=5
+        # Ladder trees: S = n(n + 1) / 2 - 1
+        (np.array([0, 0]), 5),
+        (np.array([0, 0, 0]), 9),
+        (np.array([0, 0, 0, 0]), 14),  # n=5 -> 5*6/2 - 1 = 14
+        (np.zeros(49, dtype=int), 1274),  # n=50 -> 50*51/2 - 1 = 1274
+        (np.zeros(99, dtype=int), 5049),  # n=100 -> 100*101/2 - 1 = 5049
+        # Balanced trees: S = n * log2(n)
+        (np.array([0, 2, 2]), 8),
+        (np.array([0, 2, 2, 6, 4, 6, 6]), 24),  # n=8 -> 8*3 = 24
+        (np.array([0, 2, 2, 6, 4, 6, 6, 14, 8, 10, 10, 14, 12, 14, 14]), 64),  # n=16 -> 16*4
+    ],
+)
+def test_sackin(v, expected):
+    assert sackin(v) == expected
+
+
+@pytest.mark.parametrize(
+    "v, expected",
+    [
+        # Small trees
+        (np.array([0]), 0.0),  # n=2
+        (np.array([0, 2, 2, 3]), 0.24),  # n=5
+        # Balanced trees: Var = 0
+        (np.array([0, 2, 2]), 0.0),  # n=4
+        (np.array([0, 2, 2, 6, 4, 6, 6]), 0.0),  # n=8
+        (np.array([0, 2, 2, 6, 4, 6, 6, 14, 8, 10, 10, 14, 12, 14, 14]), 0.0),  # n=16
+        # Ladder trees: Var = (n-1)(n-2)(n^2+3n-6) / (12n^2)
+        (np.array([0, 0]), 0.2222222),  # n=3
+        (np.array([0, 0, 0]), 0.6875),  # n=4
+        (np.array([0, 0, 0, 0]), 1.36),  # n=5
+        (np.zeros(49, dtype=int), 207.2896),  # n=50
+    ],
+)
+def test_leaf_depth_variance(v, expected):
+    assert np.isclose(leaf_depth_variance(v), expected, rtol=1e-5, atol=1e-8)
+
+
+@pytest.mark.parametrize(
+    "v, expected",
+    [
+        # Small trees
+        (np.array([0]), 1.0),
+        (np.array([0, 2, 2, 3]), 2.25),
+        # Ladder trees: B2 = 2 - 2^(2 - n)
+        (np.array([0, 0]), 1.5),  # n=3 -> 2 - 2^(-1)
+        (np.array([0, 0, 0]), 1.75),  # n=4 -> 2 - 2^(-2)
+        (np.array([0, 0, 0, 0]), 1.875),  # n=5 -> 2 - 2^(-3)
+        (np.array([0, 0, 0, 0, 0]), 1.9375),  # n=6 -> 2 - 2^(-4)
+        (np.zeros(49, dtype=int), 2.0),  # n=50 -> ~2.0
+        (np.zeros(99, dtype=int), 2.0),  # n=100 -> ~2.0
+        # Balanced trees: B2 = log2(n)
+        (np.array([0, 2, 2]), 2.0),  # n=4 -> log2(4) = 2
+        (np.array([0, 2, 2, 6, 4, 6, 6]), 3.0),  # n=8 -> log2(8) = 3
+        (np.array([0, 2, 2, 6, 4, 6, 6, 14, 8, 10, 10, 14, 12, 14, 14]), 4.0),  # n=16
+    ],
+)
+def test_b2(v, expected):
+    assert np.isclose(b2(v), expected, rtol=1e-5, atol=1e-8)
