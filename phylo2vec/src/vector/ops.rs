@@ -272,17 +272,11 @@ pub fn _get_node_depth(v: &[usize], bls: Option<&Vec<[f64; 2]>>, node: usize) ->
 /// // Tree: (0,(1,(2,3)4)5)6
 /// let v = vec![0, 1, 2];
 /// let depths = get_node_depths(&v);
-/// // Root (node 6) has depth 0
-/// assert_eq!(depths[6], 0.0);
-/// // Node 5 is 1 edge from root
-/// assert_eq!(depths[5], 1.0);
-/// // Node 4 is 2 edges from root
-/// assert_eq!(depths[4], 2.0);
-/// // Leaf 0 is 1 edge from root
-/// assert_eq!(depths[0], 1.0);
-/// // Leaves 2 and 3 are 3 edges from root
-/// assert_eq!(depths[2], 3.0);
-/// assert_eq!(depths[3], 3.0);
+/// // Nodes 0 and 5 are 1 edge from root
+/// // Nodes 1 and 4 are 2 edges from root
+/// // Nodes 2 and 3 are 3 edges from root
+/// // Node 6 is the root, has depth 0
+/// assert_eq!(depths, vec![1.0, 2.0, 3.0, 3.0, 2.0, 1.0, 0.0]);
 /// ```
 pub fn get_node_depths(v: &[usize]) -> Vec<f64> {
     _get_node_depths(v, None)
