@@ -27,21 +27,6 @@ precision <- function(vector_or_matrix) {
   a - b %*% solve(c, d)
 }
 
-#' Compute the cophenetic distance matrix of a phylo2vec tree.
-#'
-#' The cophenetic distance between two leaves is the distance from each leaf
-#' to their most recent common ancestor.
-#' For vectors, this is the topological distance.
-#' For matrices, this uses branch lengths.
-#'
-#' @param tree phylo2vec vector (1D) or matrix (2D)
-#' @param unrooted If TRUE, compute unrooted distances. Default is FALSE.
-#' @return Cophenetic distance matrix (shape: (n_leaves, n_leaves))
-#' @export
-cophenetic_distances <- function(tree, unrooted = FALSE) {
-  .Call(wrap__cophenetic_distances, tree, unrooted)
-}
-
 #' Compute the Robinson-Foulds distance between two trees.
 #'
 #' RF distance counts the number of bipartitions (splits) that differ

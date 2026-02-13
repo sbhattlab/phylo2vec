@@ -9,6 +9,7 @@ use phylo2vec::matrix::convert as mconvert;
 use phylo2vec::matrix::graph as mgraph;
 use phylo2vec::matrix::ops as mops;
 use phylo2vec::newick;
+use phylo2vec::vector::balance as vbalance;
 use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
 use phylo2vec::vector::distance as vdist;
@@ -628,10 +629,53 @@ fn incidence_csr(input_vector: Vec<i32>) -> List {
 /// @return RF distance (numeric)
 /// @export
 #[extendr]
-fn robinson_foulds(v1: Vec<i32>, v2: Vec<i32>, normalize: bool) -> f64 {
+fn robinson_foulds(v1: Vec<i32>, v2: Vec<i32>, #[default = "FALSE"] normalize: bool) -> f64 {
     let v1_usize = as_usize(v1);
     let v2_usize = as_usize(v2);
     vdist::robinson_foulds(&v1_usize, &v2_usize, normalize)
+}
+
+/// Compute the Sackin index of a tree.
+///
+/// The Sackin index is a measure of tree imbalance, defined as the sum of the depths of all leaves in the tree.
+/// Higher values indicate more imbalanced trees, while lower values indicate more balanced trees.
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @return Sackin index (numeric)
+/// @export
+#[extendr]
+fn sackin(vector: Vec<i32>) -> i32 {
+    let v_usize = as_usize(vector);
+    vbalance::sackin(&v_usize) as i32
+}
+
+/// Compute the variance of leaf depths in a tree.
+///
+/// Higher values indicate more imbalanced trees, while lower values indicate more balanced trees.
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @return Variance of leaf depths (numeric)
+/// @export
+#[extendr]
+fn leaf_depth_variance(vector: Vec<i32>) -> f64 {
+    let v_usize = as_usize(vector);
+    vbalance::leaf_depth_variance(&v_usize)
+}
+
+/// Compute the B2 index of a tree from Shao and Sokal (1990).
+///
+/// The B2 index is a measure of tree balance based on the probabilities of random walks from the root to each leaf.
+/// For a binary tree, the B2 index can be calculated as the sum of the depth of each leaf multiplied by 2 raised to the power of negative depth of that leaf.
+/// Higher values indicate more balanced trees, while lower values indicate more imbalanced trees.
+/// For more details, see https://doi.org/10.1007/s00285-021-01662-7.
+///
+/// @param vector phylo2vec vector representation of a tree topology
+/// @return B2 index (numeric)
+/// @export
+#[extendr]
+fn b2(vector: Vec<i32>) -> f64 {
+    let v_usize = as_usize(vector);
+    vbalance::b2(&v_usize)
 }
 
 // Macro to generate exports.
@@ -640,6 +684,7 @@ fn robinson_foulds(v1: Vec<i32>, v2: Vec<i32>, normalize: bool) -> f64 {
 extendr_module! {
     mod phylo2vec;
     fn add_leaf;
+    fn b2;
     fn apply_label_mapping;
     fn check_m;
     fn check_v;
@@ -657,12 +702,14 @@ extendr_module! {
     fn incidence_csc;
     fn incidence_csr;
     fn incidence_dense;
+    fn leaf_depth_variance;
     fn queue_shuffle;
     fn remove_branch_lengths;
     fn remove_parent_labels;
     fn pre_precision;
     fn remove_leaf;
     fn robinson_foulds;
+    fn sackin;
     fn sample_matrix;
     fn sample_vector;
     fn to_ancestry;

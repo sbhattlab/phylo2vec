@@ -158,6 +158,13 @@ To quickly install the package and run it, simply run the following
 pixi run -e r-phylo2vec install-r
 ```
 
+Some R test dependencies are not available on conda-forge and must be installed
+once from CRAN:
+
+```console
+pixi run -e r-phylo2vec Rscript -e "install.packages('treestats', repos='https://cloud.r-project.org')"
+```
+
 Once the package is installed you can open up the R terminal:
 
 ```console
