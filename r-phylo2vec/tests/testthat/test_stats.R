@@ -277,6 +277,7 @@ test_that(desc = "b2_manual", {
 })
 
 test_that(desc = "sackin_matches_treestats", {
+  skip_if_not_installed("treestats")
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       v <- sample_vector(n_leaves, FALSE)
@@ -287,6 +288,7 @@ test_that(desc = "sackin_matches_treestats", {
 })
 
 test_that(desc = "b2_matches_treestats", {
+  skip_if_not_installed("treestats")
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       v <- sample_vector(n_leaves, FALSE)
@@ -297,6 +299,7 @@ test_that(desc = "b2_matches_treestats", {
 })
 
 test_that(desc = "leaf_depth_variance_matches_treestats", {
+  skip_if_not_installed("treestats")
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {
       v <- sample_vector(n_leaves, FALSE)
