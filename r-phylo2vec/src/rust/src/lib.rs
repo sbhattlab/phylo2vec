@@ -629,7 +629,7 @@ fn incidence_csr(input_vector: Vec<i32>) -> List {
 /// @return RF distance (numeric)
 /// @export
 #[extendr]
-fn robinson_foulds(v1: Vec<i32>, v2: Vec<i32>, normalize: bool) -> f64 {
+fn robinson_foulds(v1: Vec<i32>, v2: Vec<i32>, #[default = "FALSE"] normalize: bool) -> f64 {
     let v1_usize = as_usize(v1);
     let v2_usize = as_usize(v2);
     vdist::robinson_foulds(&v1_usize, &v2_usize, normalize)

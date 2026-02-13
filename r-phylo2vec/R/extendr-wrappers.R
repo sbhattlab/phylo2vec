@@ -233,7 +233,7 @@ remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 #' @param normalize If TRUE, return normalized distance in range `[0.0, 1.0]`
 #' @return RF distance (numeric)
 #' @export
-robinson_foulds <- function(v1, v2, normalize) .Call(wrap__robinson_foulds, v1, v2, normalize)
+robinson_foulds <- function(v1, v2, normalize = FALSE) .Call(wrap__robinson_foulds, v1, v2, normalize)
 
 #' Compute the Sackin index of a tree.
 #'
