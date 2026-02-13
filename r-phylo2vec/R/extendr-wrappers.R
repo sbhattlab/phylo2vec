@@ -19,6 +19,18 @@ NULL
 #' @export
 add_leaf <- function(vector, leaf, branch) .Call(wrap__add_leaf, vector, leaf, branch)
 
+#' Compute the B2 index of a tree from Shao and Sokal (1990).
+#'
+#' The B2 index is a measure of tree balance based on the probabilities of random walks from the root to each leaf.
+#' For a binary tree, the B2 index can be calculated as the sum of the depth of each leaf multiplied by 2 raised to the power of negative depth of that leaf.
+#' Higher values indicate more balanced trees, while lower values indicate more imbalanced trees.
+#' For more details, see https://doi.org/10.1007/s00285-021-01662-7.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @return B2 index (numeric)
+#' @export
+b2 <- function(vector) .Call(wrap__b2, vector)
+
 #' Apply an integer-taxon label mapping (label_mapping)
 #' to an integer-based newick (where leaves are integers)
 #' and produce a mapped Newick (where leaves are strings (taxa))
@@ -61,7 +73,7 @@ check_v <- function(vector) invisible(.Call(wrap__check_v, vector))
 #' @param unrooted If true, the distance is calculated as the distance between each leaf and their most recent common ancestor, multiplied by 2. If false, the distance is calculated as the distance from each leaf to their most recent common ancestor.
 #' @return Cophenetic distance matrix (shape: (n_leaves, n_leaves))
 #' @export
-cophenetic_distances <- function(tree, unrooted) .Call(wrap__cophenetic_distances, tree, unrooted)
+cophenetic_distances <- function(tree, unrooted = FALSE) .Call(wrap__cophenetic_distances, tree, unrooted)
 
 #' Create an integer-taxon label mapping (label_mapping)
 #' from a string-based newick (where leaves are strings)
@@ -112,7 +124,7 @@ from_pairs <- function(pairs) .Call(wrap__from_pairs, pairs)
 #' Similar to ape's `getMRCA` function in R (for leaf nodes)
 #' and ETE's `get_common_ancestor` in Python (for all nodes), but for phylo2vec vectors.
 #'
-#' @param vector phylo2vec vector representation of a tree topology
+#' @param tree A phylo2vec tree
 #' @param node1 The first node (0-indexed)
 #' @param node2 The second node (0-indexed)
 #' @return The common ancestor node (0-indexed)
@@ -151,6 +163,15 @@ incidence_csc <- function(input_vector) .Call(wrap__incidence_csc, input_vector)
 incidence_csr <- function(input_vector) .Call(wrap__incidence_csr, input_vector)
 
 incidence_dense <- function(input_vector) .Call(wrap__incidence_dense, input_vector)
+
+#' Compute the variance of leaf depths in a tree.
+#'
+#' Higher values indicate more imbalanced trees, while lower values indicate more balanced trees.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @return Variance of leaf depths (numeric)
+#' @export
+leaf_depth_variance <- function(vector) .Call(wrap__leaf_depth_variance, vector)
 
 #' Produce an ordered version (i.e., birth-death process version)
 #' of a phylo2vec vector using the Queue Shuffle algorithm.
@@ -213,6 +234,16 @@ remove_leaf <- function(vector, leaf) .Call(wrap__remove_leaf, vector, leaf)
 #' @return RF distance (numeric)
 #' @export
 robinson_foulds <- function(v1, v2, normalize) .Call(wrap__robinson_foulds, v1, v2, normalize)
+
+#' Compute the Sackin index of a tree.
+#'
+#' The Sackin index is a measure of tree imbalance, defined as the sum of the depths of all leaves in the tree.
+#' Higher values indicate more imbalanced trees, while lower values indicate more balanced trees.
+#'
+#' @param vector phylo2vec vector representation of a tree topology
+#' @return Sackin index (numeric)
+#' @export
+sackin <- function(vector) .Call(wrap__sackin, vector)
 
 #' Sample a random tree with branch lengths via phylo2vec
 #'

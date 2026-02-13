@@ -224,6 +224,91 @@ test_that(desc = "robinson_foulds_normalized_bounds", {
   }
 })
 
+# Balance index tests
+
+test_that(desc = "sackin_manual", {
+  # Small trees
+  expect_equal(sackin(as.integer(c(0))), 2)
+  expect_equal(sackin(as.integer(c(0, 2, 2, 3))), 12)
+  # Ladder trees: S = n(n + 1) / 2 - 1
+  expect_equal(sackin(as.integer(c(0, 0))), 5)
+  expect_equal(sackin(as.integer(c(0, 0, 0))), 9)
+  expect_equal(sackin(as.integer(c(0, 0, 0, 0))), 14)
+  expect_equal(sackin(as.integer(rep(0, 49))), 1274)
+  # Balanced trees: S = n * log2(n)
+  expect_equal(sackin(as.integer(c(0, 2, 2))), 8)
+  expect_equal(sackin(as.integer(c(0, 2, 2, 6, 4, 6, 6))), 24)
+  expect_equal(
+    sackin(as.integer(c(0, 2, 2, 6, 4, 6, 6, 14, 8, 10, 10, 14, 12, 14, 14))),
+    64
+  )
+})
+
+test_that(desc = "leaf_depth_variance_manual", {
+  # Small trees
+  expect_equal(leaf_depth_variance(as.integer(c(0))), 0.0)
+  expect_true(allclose(leaf_depth_variance(as.integer(c(0, 2, 2, 3))), 0.24))
+  # Balanced trees: Var = 0
+  expect_equal(leaf_depth_variance(as.integer(c(0, 2, 2))), 0.0)
+  expect_equal(leaf_depth_variance(as.integer(c(0, 2, 2, 6, 4, 6, 6))), 0.0)
+  # Ladder trees: Var = (n - 1)(n - 2)(n^2 + 3n - 6) / (12n^2)
+  expect_true(allclose(leaf_depth_variance(as.integer(c(0, 0))), 0.2222222))
+  expect_true(allclose(leaf_depth_variance(as.integer(c(0, 0, 0))), 0.6875))
+  expect_true(allclose(leaf_depth_variance(as.integer(c(0, 0, 0, 0))), 1.36))
+  expect_true(allclose(leaf_depth_variance(as.integer(rep(0, 49))), 207.2896))
+})
+
+test_that(desc = "b2_manual", {
+  # Small trees
+  expect_true(allclose(b2(as.integer(c(0))), 1.0))
+  expect_true(allclose(b2(as.integer(c(0, 2, 2, 3))), 2.25))
+  # Ladder trees: B2 = 2 - 2^(2 - n)
+  expect_true(allclose(b2(as.integer(c(0, 0))), 1.5))
+  expect_true(allclose(b2(as.integer(c(0, 0, 0))), 1.75))
+  expect_true(allclose(b2(as.integer(c(0, 0, 0, 0))), 1.875))
+  expect_true(allclose(b2(as.integer(c(0, 0, 0, 0, 0))), 1.9375))
+  # Balanced trees: B2 = log2(n)
+  expect_true(allclose(b2(as.integer(c(0, 2, 2))), 2.0))
+  expect_true(allclose(b2(as.integer(c(0, 2, 2, 6, 4, 6, 6))), 3.0))
+  expect_true(allclose(
+    b2(as.integer(c(0, 2, 2, 6, 4, 6, 6, 14, 8, 10, 10, 14, 12, 14, 14))),
+    4.0
+  ))
+})
+
+test_that(desc = "sackin_matches_treestats", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    for (j in seq_len(N_REPEATS)) {
+      v <- sample_vector(n_leaves, FALSE)
+      tr <- ape::read.tree(text = to_newick(v))
+      expect_equal(sackin(v), treestats::sackin(tr))
+    }
+  }
+})
+
+test_that(desc = "b2_matches_treestats", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    for (j in seq_len(N_REPEATS)) {
+      v <- sample_vector(n_leaves, FALSE)
+      tr <- ape::read.tree(text = to_newick(v))
+      expect_true(allclose(b2(v), treestats::b2(tr)))
+    }
+  }
+})
+
+test_that(desc = "leaf_depth_variance_matches_treestats", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
+    for (j in seq_len(N_REPEATS)) {
+      v <- sample_vector(n_leaves, FALSE)
+      tr <- ape::read.tree(text = to_newick(v))
+      expect_true(allclose(
+        leaf_depth_variance(v),
+        treestats::var_leaf_depth(tr)
+      ))
+    }
+  }
+})
+
 test_that(desc = "robinson_foulds_matches_treedist", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES_STATS)) {
     for (j in seq_len(N_REPEATS)) {

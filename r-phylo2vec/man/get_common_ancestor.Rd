@@ -10,11 +10,11 @@ and ETE's \code{get_common_ancestor} in Python (for all nodes), but for phylo2ve
 get_common_ancestor(tree, node1, node2)
 }
 \arguments{
+\item{tree}{A phylo2vec tree}
+
 \item{node1}{The first node (0-indexed)}
 
 \item{node2}{The second node (0-indexed)}
-
-\item{vector}{phylo2vec vector representation of a tree topology}
 }
 \value{
 The common ancestor node (0-indexed)
