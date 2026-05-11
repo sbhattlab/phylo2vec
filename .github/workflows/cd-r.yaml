@@ -43,6 +43,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ${{ env.R_PACKAGE_DIR }}
+          dependencies: '"hard"'
           extra-packages: |
             any::devtools
       - name: Install rextendr
@@ -92,6 +93,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ${{ env.R_PACKAGE_DIR }}
+          dependencies: '"hard"'
           extra-packages: |
             any::devtools
       - name: Install rextendr
@@ -137,6 +139,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: ${{ env.R_PACKAGE_DIR }}
+          dependencies: '"hard"'
           extra-packages: |
             any::devtools
       - name: Install rextendr
