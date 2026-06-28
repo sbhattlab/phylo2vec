@@ -22,7 +22,7 @@ jobs:
       matrix:
         python-environment: ['py310', 'py311', 'py312', 'py313']
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: prefix-dev/setup-pixi@v0.9.6
         with:
           environments: ${{ matrix.python-environment }}
@@ -31,7 +31,7 @@ jobs:
     name: Python benchmarks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: prefix-dev/setup-pixi@v0.9.6
         with:
           environments: py-phylo2vec
@@ -40,7 +40,7 @@ jobs:
     name: Test main demo notebook
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: prefix-dev/setup-pixi@v0.9.6
         with:
           environments: py-phylo2vec
