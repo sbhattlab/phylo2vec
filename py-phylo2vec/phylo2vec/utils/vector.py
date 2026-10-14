@@ -433,13 +433,15 @@ def reroot(vector_or_matrix, node) -> np.ndarray:
     >>> p2v.to_newick(v_rerooted)
     '(((0,1)4,3)5,2)6;'
     """
-    if node < 0 or node > 2 * len(vector_or_matrix):
+    # len(vector_or_matrix) == n_leaves - 1, so the root is 2 * len(vector_or_matrix)
+    root = 2 * len(vector_or_matrix)
+    if node < 0 or node > root:
         raise ValueError(
             f"Node {node} is out of bounds for tree with "
-            f"{len(vector_or_matrix)} leaves. "
-            f"Valid range is [0, {2 * len(vector_or_matrix)}]"
+            f"{len(vector_or_matrix) + 1} leaves. "
+            f"Valid range is [0, {root - 1}]"
         )
-    if node == 2 * len(vector_or_matrix):
+    if node == root:
         raise ValueError("Cannot reroot at the current root node")
 
     # Reroot via ete
