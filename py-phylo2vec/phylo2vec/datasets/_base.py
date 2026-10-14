@@ -63,7 +63,7 @@ def read_fasta(data_path):
 
 
 def load_fasta(data_file_name, data_module=DATA_MODULE):
-    """Loaded a preloaded fasta file
+    """Load a fasta file stored in the package data
 
     Parameters
     ----------
@@ -145,6 +145,50 @@ def load_alignment(
     url_key="Link",
     overwrite=False,
 ):
+    """Load a multiple sequence alignment
+
+    `dataset` can be the name of a built-in dataset (see `list_datasets`),
+    a path to a local file, or a URL. Built-in datasets are downloaded
+    on first use and stored in the package data.
+
+    Parameters
+    ----------
+    dataset : str
+        Name of a built-in dataset, path to a local file, or URL
+    data_format : str, optional
+        Format of a custom (i.e., not built-in) dataset, by default None
+        Required for custom datasets. Supported formats: "fasta"
+    data_module : str, optional
+        Location of the data module, by default DATA_MODULE
+    descr_module : str, optional
+        Location of the description module, by default DESCR_MODULE
+    url_key : str, optional
+        Column of the description table containing the download URL
+        of a built-in dataset, by default "Link"
+    overwrite : bool, optional
+        If True, download a built-in dataset again even if it is already
+        stored, by default False
+
+    Returns
+    -------
+    records : Generator
+        An iterator for all sequences
+        Each element has "id" (taxon name) and "seq" (sequence) attributes
+    descr : Dict[str, Any] or None
+        Description of a built-in dataset (see `load_descr`),
+        None for a custom dataset
+
+    Examples
+    --------
+    >>> from phylo2vec.datasets import load_alignment
+    >>> records, descr = load_alignment("fluA")  # doctest: +SKIP
+    >>> descr["Number of Taxa"]  # doctest: +SKIP
+    69
+
+    A custom dataset needs its format:
+
+    >>> records, _ = load_alignment("alignment.fa", data_format="fasta")  # doctest: +SKIP
+    """
     if dataset in DATASETS:
         # Load description
         print(f"Loading {dataset}...")
@@ -208,14 +252,14 @@ def load_alignment(
 
 
 def load_descr(descr_file_name, descr_module=DESCR_MODULE, header_line=2, data_line=4):
-    """Loaded the description of a preloaded fasta file
+    """Load the description of a built-in dataset
 
     Parameters
     ----------
-    dsecr_file_name : str
+    descr_file_name : str
         Description file name
-    data_module : str, optional
-        Location of the data module, by default DATA_MODULE
+    descr_module : str, optional
+        Location of the description module, by default DESCR_MODULE
     header_line : int, optional
         Line number of the header in the markdown table, by default 2
     data_line : int, optional
@@ -223,8 +267,16 @@ def load_descr(descr_file_name, descr_module=DESCR_MODULE, header_line=2, data_l
 
     Returns
     -------
-    str
-        Contents of the description file
+    Dict[str, Any]
+        Columns of the description table mapped to their values
+        "Number of Taxa" and "Number of Bases" are integers, other values are strings
+
+    Examples
+    --------
+    >>> from phylo2vec.datasets import load_descr
+    >>> descr = load_descr("fluA.md")
+    >>> descr["Number of Taxa"], descr["Number of Bases"]
+    (69, 987)
     """
     text = _read_text(descr_module, descr_file_name)
     # Parse markdown content to a dictionary

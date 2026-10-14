@@ -39,12 +39,15 @@ Statistics
     :nosignatures:
     :toctree: generated/
 
+    stats.b2
     stats.cophenetic_distances
     stats.cov
     stats.incidence
+    stats.leaf_depth_variance
     stats.pairwise_distances
     stats.precision
     stats.robinson_foulds
+    stats.sackin
 
 Utils
 ----------------
@@ -70,3 +73,30 @@ Utils
     utils.vector.remove_leaf
     utils.vector.reroot
     utils.vector.reroot_at_random
+
+Datasets
+----------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    datasets.list_datasets
+    datasets.load_alignment
+    datasets.load_descr
+    datasets.load_fasta
+    datasets.read_fasta
+
+Optimisation
+----------------
+
+Requires the optional dependencies: ``pip install phylo2vec[opt]``
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    opt.GradME
+    opt.HillClimbing
+    opt.gradme_loss
+    opt.list_methods

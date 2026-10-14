@@ -148,7 +148,7 @@ def add_leaf(v, leaf, pos) -> np.ndarray:
 
 
 def queue_shuffle(v, shuffle_cherries=False) -> Tuple[np.ndarray, List[int]]:
-    """
+    r"""
     Produce an ordered version (i.e., birth-death process version)
     of a Phylo2Vec vector using the Queue Shuffle algorithm.
 
@@ -156,50 +156,40 @@ def queue_shuffle(v, shuffle_cherries=False) -> Tuple[np.ndarray, List[int]]:
     while also ensuring a smooth path through the space of orderings
 
     For more details, see https://doi.org/10.1093/gbe/evad213
-    Illustration of the algorithm:
-                    ////-3
-                ////6|
-        ////7|      \\\\-2
-        |     |
-    -8|      \\\\-1
-        |
-        |      ////-4
-        \\\\5|
-                \\\\-0
 
-    The ancestry array of this tree is:
-    [8, 7, 5]
-    [7, 6, 1]
-    [6, 3, 2]
-    [5, 4, 0]
+    Illustration of the algorithm on the tree ``(((3,2)6,1)7,(4,0)5)8;``::
 
-    Unrolled, it becomes:
-    8 7 5 6 1 3 2 4 0
+                 /-3
+              /6|
+           /7|   \-2
+          |  |
+        -8|   \-1
+          |
+          |   /-4
+           \5|
+              \-0
 
-    We encode the nodes as it:
-    Start by encoding the first two non-root nodes as 0, 1
-    For the next pairs:
-        * The left member takes the label was the previous parent node
-        * The right member increments the previous right member by 1
+    Its ancestry array (see :func:`phylo2vec.to_ancestry`) is::
 
-    Ex:
-    8 7 5 6 1 3 2 4 0
-        0 1 0 2
+        [[0, 4, 5],
+         [2, 3, 6],
+         [1, 6, 7],
+         [5, 7, 8]]
 
-    then
+    Internal nodes are visited breadth-first from the root using a queue.
+    For each visited node (row ``[child1, child2, parent]``), ``child2``
+    inherits the label of its parent (0 for the root) and ``child1`` takes
+    the next label (1, 2, 3, ...)::
 
-    8 7 5 6 1 3 2 4 0
-        0 1 0 2 1 3
+        node  label   child2 -> label   child1 -> label
+        8     0       7 -> 0            5 -> 1
+        7     0       6 -> 0            1 -> 2
+        5     1       4 -> 1            0 -> 3
+        6     0       3 -> 0            2 -> 4
 
-    then
-
-    8 7 5 6 1 3 2 4 0
-        0 1 0 2 1 3 0 4
-
-    The code for the leaf nodes (0, 1, 2, 3, 4) is their new label
-
-    Note that the full algorithm also features a queue of internal nodes
-    which could switch the processing order of rows in the ancestry array.
+    The new labels of the leaves are their labels in the ordered tree, and the
+    (child2, child1) label pairs, in reverse order, are the pairs of the new
+    vector (see :func:`phylo2vec.from_pairs`).
 
     Parameters
     ----------
@@ -214,18 +204,21 @@ def queue_shuffle(v, shuffle_cherries=False) -> Tuple[np.ndarray, List[int]]:
     v_new : numpy.ndarray
         Reordered Phylo2Vec vector
     vec_mapping : List[int]
-        Mapping of the original vector to the new vector
-        index: leaf
-        value: new leaf index in the reordered vector
+        Mapping of the new leaf labels to the original ones:
+        leaf ``i`` in ``v_new`` is leaf ``vec_mapping[i]`` in ``v``
 
     Examples
     --------
-    >>> import numpy as np
+    >>> import phylo2vec as p2v
     >>> from phylo2vec.utils.vector import queue_shuffle
-    >>> v = np.array([0, 0, 0, 2, 5, 3])
+    >>> v = p2v.from_newick("(((3,2)6,1)7,(4,0)5)8;")  # Tree illustrated above
+    >>> v
+    array([0, 1, 2, 0])
     >>> v_new, mapping = queue_shuffle(v)
-    >>> all(v_new[i] <= i for i in range(len(v_new)))
-    True
+    >>> v_new  # Ordered: v_new[i] <= i
+    array([0, 0, 1, 0])
+    >>> mapping  # e.g., leaf 0 in v_new was leaf 3 in v
+    [3, 4, 1, 0, 2]
     """
     v_new, vec_mapping = core.queue_shuffle(v, shuffle_cherries)
 
