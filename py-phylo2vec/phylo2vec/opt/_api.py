@@ -36,5 +36,18 @@ def register_method(name: str = None) -> Type[BaseOptimizer]:
 
 
 def list_methods() -> List:
-    """List all registered optimization schemes."""
+    """List all registered optimization schemes.
+
+    Returns
+    -------
+    List[str]
+        Names of registered optimization methods.
+
+    Examples
+    --------
+    >>> from phylo2vec.opt import list_methods
+    >>> methods = list_methods()
+    >>> "HillClimbing" in methods
+    True
+    """
     return list(OPTIMIZER_REGISTRY.keys())

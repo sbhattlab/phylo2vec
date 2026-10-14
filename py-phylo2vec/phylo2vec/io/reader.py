@@ -14,6 +14,27 @@ from ._validation import check_path
 
 
 def read(buffer: str, delimiter: str = ",") -> np.ndarray:
+    """Parse a string buffer into a Phylo2Vec vector or matrix.
+
+    Parameters
+    ----------
+    buffer : str
+        String containing comma-separated values.
+    delimiter : str, optional
+        Character used to separate values, by default ","
+
+    Returns
+    -------
+    numpy.ndarray
+        A vector (ndim == 1) or matrix (ndim == 2)
+
+    Examples
+    --------
+    >>> from phylo2vec.io.reader import read
+    >>> v = read("0,1,2")
+    >>> v
+    array([0, 1, 2])
+    """
     return load(StringIO(buffer), delimiter=delimiter)
 
 
@@ -34,6 +55,11 @@ def load(
     arr : numpy.ndarray
         A vector (ndim == 1) or matrix (ndim == 2)
         which satisfies Phylo2Vec constraints
+
+    Examples
+    --------
+    >>> import phylo2vec as p2v
+    >>> v = p2v.load("tree.csv")  # doctest: +SKIP
     """
     if not hasattr(filepath_or_buffer, "read"):
         if not os.path.isfile(filepath_or_buffer):
@@ -70,6 +96,19 @@ def load_newick(filepath_or_buffer: str) -> np.ndarray:
     numpy.ndarray
         A vector (ndim == 1) or matrix (ndim == 2)
         which satisfies Phylo2Vec constraints
+
+    Examples
+    --------
+    From a Newick string:
+
+    >>> import phylo2vec as p2v
+    >>> v = p2v.load_newick("((0,1),(2,3));")
+    >>> v
+    array([0, 2, 2])
+
+    From a file:
+
+    >>> v = p2v.load_newick("tree.nwk")  # doctest: +SKIP
     """
     if os.path.isfile(filepath_or_buffer):
         check_path(filepath_or_buffer, "newick")

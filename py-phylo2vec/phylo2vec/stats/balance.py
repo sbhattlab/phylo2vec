@@ -22,6 +22,14 @@ def sackin(vector_or_matrix: np.ndarray) -> int:
     int
         Sackin index.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import sackin
+    >>> v = np.array([0, 1, 2])  # Ladder tree
+    >>> sackin(v)
+    9
+
     References
     ----------
     Sackin MJ (1972). "Good" and "Bad" phenograms.
@@ -56,6 +64,14 @@ def b2(vector_or_matrix: np.ndarray) -> float:
     float
         B2 index.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import b2
+    >>> v = np.array([0, 1, 2])  # Ladder tree
+    >>> b2(v)
+    1.75
+
     References
     ----------
     Shao KT, Sokal RR (1990). Tree balance.
@@ -89,6 +105,14 @@ def leaf_depth_variance(vector_or_matrix: np.ndarray) -> float:
     -------
     float
         Variance of leaf depths.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import leaf_depth_variance
+    >>> v = np.array([0, 2, 2])  # Balanced tree (4 leaves, all at depth 2)
+    >>> leaf_depth_variance(v)
+    0.0
     """
     if vector_or_matrix.ndim == 2:
         v = vector_or_matrix[:, 0].astype(int)
