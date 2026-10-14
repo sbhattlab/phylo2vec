@@ -23,6 +23,13 @@ def from_pairs(pairs: List[Tuple[int, int]]) -> np.ndarray:
     -------
     v : numpy.ndarray
         Phylo2Vec vector
+
+    Examples
+    --------
+    >>> import phylo2vec as p2v
+    >>> pairs = [(1, 4), (0, 3), (0, 2), (0, 1)]
+    >>> p2v.from_pairs(pairs)
+    array([0, 0, 0, 1])
     """
     v = core.from_pairs(pairs)
     return np.asarray(v)
@@ -43,6 +50,14 @@ def to_pairs(v: np.ndarray) -> List[Tuple[int, int]]:
     -------
     pairs : List[Tuple[int, int]]
         List of (branch, leaf) pairs
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> v = np.array([0, 0, 0, 1])
+    >>> p2v.to_pairs(v)
+    [(1, 4), (0, 3), (0, 2), (0, 1)]
     """
     pairs = core.get_pairs(v)
     return pairs

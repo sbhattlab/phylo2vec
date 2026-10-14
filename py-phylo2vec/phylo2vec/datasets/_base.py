@@ -51,6 +51,13 @@ def read_fasta(data_path):
     Generator
         An iterator for all sequences
         Each element has "id" (taxon name) and "seq" (sequence) attributes
+
+    Examples
+    --------
+    >>> from phylo2vec.datasets import read_fasta
+    >>> records = read_fasta("alignment.fa")  # doctest: +SKIP
+    >>> for record in records:  # doctest: +SKIP
+    ...     print(record.id, len(record.seq))
     """
     return SeqIO.parse(data_path, "fasta")
 
@@ -83,7 +90,20 @@ FORMATS = {
 
 
 def list_datasets():
-    """List all available datasets."""
+    """List all available datasets.
+
+    Returns
+    -------
+    List[str]
+        Names of available datasets.
+
+    Examples
+    --------
+    >>> from phylo2vec.datasets import list_datasets
+    >>> datasets = list_datasets()
+    >>> "fluA" in datasets
+    True
+    """
     # Check that format is supported
     return [dataset for dataset in DATASETS if DATASETS[dataset]["format"] in FORMATS]
 

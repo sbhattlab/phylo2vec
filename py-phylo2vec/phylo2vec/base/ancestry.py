@@ -22,6 +22,14 @@ def from_ancestry(ancestry: np.ndarray) -> np.ndarray:
     -------
     numpy.ndarray
         Phylo2Vec vector
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> ancestry = np.array([[2, 3, 4], [0, 1, 5], [5, 4, 6]])
+    >>> p2v.from_ancestry(ancestry)
+    array([0, 2, 2])
     """
     v_list = core.from_ancestry(ancestry)
     return np.asarray(v_list)
@@ -60,6 +68,16 @@ def to_ancestry(v: np.ndarray) -> np.ndarray:
         1st column: child 1
         2nd column: child 2
         3rd column: parent node
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> v = np.array([0, 2, 2])
+    >>> p2v.to_ancestry(v)
+    array([[2, 3, 4],
+           [0, 1, 5],
+           [5, 4, 6]])
     """
 
     ancestry_list = core.get_ancestry(v)

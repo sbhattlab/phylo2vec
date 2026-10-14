@@ -21,6 +21,17 @@ def cophenetic_distances(tree, unrooted=False):
     -------
     numpy.ndarray
         Cophenetic distance matrix
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import cophenetic_distances
+    >>> v = np.array([0, 1, 2])
+    >>> d = cophenetic_distances(v)
+    >>> d.shape  # 4 leaves -> 4x4 matrix
+    (4, 4)
+    >>> float(d[0, 0])  # Distance to self is 0
+    0.0
     """
     return core.cophenetic_distances(tree, unrooted=unrooted)
 
@@ -46,6 +57,15 @@ def pairwise_distances(tree, metric="cophenetic"):
     -------
     numpy.ndarray
         Distance matrix
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import pairwise_distances
+    >>> v = np.array([0, 1, 2])
+    >>> d = pairwise_distances(v)
+    >>> d.shape
+    (4, 4)
     """
     func = NODEWISE_DISTANCES[metric]
 
@@ -67,6 +87,17 @@ def cov(tree):
     -------
     vcv : numpy.ndarray
         Covariance matrix
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import cov
+    >>> v = np.array([0, 1, 2])  # (0,(1,(2,3)4)5)6
+    >>> cov(v)  # Entry (i, j): shared path length from the root to i and j
+    array([[1., 0., 0., 0.],
+           [0., 2., 1., 1.],
+           [0., 1., 3., 2.],
+           [0., 1., 2., 3.]])
     """
     return core.vcv(tree)
 
@@ -86,6 +117,15 @@ def precision(tree):
     -------
     precision: numpy.ndarray
         Precision matrix
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import cov, precision
+    >>> v = np.array([0, 1, 2])
+    >>> p = precision(v)
+    >>> np.allclose(p @ cov(v), np.eye(4))  # Inverse of the covariance matrix
+    True
     """
     precursor = core.pre_precision(tree)
 
@@ -115,6 +155,19 @@ def incidence(vector, format="coo"):
     -------
     numpy.ndarray or List[List[int], List[int], List[int]] or Dict[Tuple[int, int], int]
         Incidence matrix in the specified format
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.stats import incidence
+    >>> v = np.array([0, 1, 2])
+    >>> data, rows, cols = incidence(v, format="coo")
+
+    Dense format returns a 2D array:
+
+    >>> inc = incidence(v, format="dense")
+    >>> inc.shape  # (2*n_leaves - 1, 2*(n_leaves - 1))
+    (7, 6)
     """
     if vector.ndim != 1:
         raise ValueError("vector should be a 1D array")

@@ -281,13 +281,16 @@ class TestRerootEdgeCases:
 
     def test_reroot_node_out_of_bounds(self):
         """Test reroot with nodes out of bounds"""
-        v = sample_vector(7)
-        n_leaves = len(v)
-        max_node = 2 * n_leaves
+        n_leaves = 7
+        v = sample_vector(n_leaves)
+        root = 2 * len(v)
 
         # Node out of bounds
-        with pytest.raises(ValueError):
-            reroot(v, max_node + 1)
+        with pytest.raises(
+            ValueError,
+            match=rf"{n_leaves} leaves\. Valid range is \[0, {root - 1}\]",
+        ):
+            reroot(v, root + 1)
 
     def test_reroot_at_current_root(self):
         """Test reroot at the current root node"""

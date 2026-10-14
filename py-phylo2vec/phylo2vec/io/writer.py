@@ -11,6 +11,27 @@ from ._validation import check_path
 
 
 def write(vector_or_matrix: np.ndarray, delimiter: str = ",") -> str:
+    """Serialize a Phylo2Vec vector or matrix to a string.
+
+    Parameters
+    ----------
+    vector_or_matrix : numpy.ndarray
+        A vector (ndim == 1) or matrix (ndim == 2)
+    delimiter : str, optional
+        Character used to separate values, by default ","
+
+    Returns
+    -------
+    str
+        String representation of the vector or matrix.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.io.writer import write
+    >>> write(np.array([0, 1, 2]))
+    '0,1,2'
+    """
     if vector_or_matrix.ndim == 2:
         buffer = StringIO()
         np.savetxt(buffer, vector_or_matrix, delimiter=delimiter)
@@ -36,6 +57,13 @@ def save(vector_or_matrix: np.ndarray, filepath: str, delimiter: str = ",") -> N
         Path to the output file
     delimiter : str, optional
         Delimiter to use for saving the file, by default ","
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> v = np.array([0, 1, 2])
+    >>> p2v.save(v, "tree.csv")  # doctest: +SKIP
     """
     check_path(filepath, "array")
     if vector_or_matrix.ndim == 2:
@@ -65,6 +93,13 @@ def save_newick(
         Path to the output file
     labels : Dict[str, str], optional
         A mapping of integer labels (as string) to taxon names, by default None
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> v = np.array([0, 1, 2])
+    >>> p2v.save_newick(v, "tree.nwk")  # doctest: +SKIP
     """
     check_path(filepath, "newick")
     newick = to_newick(vector_or_matrix)

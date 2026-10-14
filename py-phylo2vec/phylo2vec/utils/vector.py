@@ -22,6 +22,17 @@ def check_vector(v: np.ndarray) -> None:
     ----------
     v : numpy.ndarray
         Phylo2Vec vector
+
+    Raises
+    ------
+    ValueError
+        If the vector violates Phylo2Vec constraints.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.utils.vector import check_vector
+    >>> check_vector(np.array([0, 0, 1]))  # Valid vector, no error
     """
     core.check_v(v.tolist())
 
@@ -46,6 +57,19 @@ def sample_vector(n_leaves: int, ordered: bool = False) -> np.ndarray:
     -------
     numpy.ndarray
         Phylo2Vec vector
+
+    Examples
+    --------
+    >>> import phylo2vec as p2v
+    >>> v = p2v.sample_vector(5)
+    >>> v.shape
+    (4,)
+
+    Sample an ordered tree (v[i] <= i):
+
+    >>> v = p2v.sample_vector(5, ordered=True)
+    >>> all(v[i] <= i for i in range(len(v)))
+    True
     """
 
     v_list = core.sample_vector(n_leaves, ordered)
@@ -68,6 +92,17 @@ def remove_leaf(v, leaf) -> Tuple[np.ndarray, int]:
         Phylo2Vec vector without `leaf`
     sister : int
         Sister node of leaf
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.utils.vector import remove_leaf
+    >>> v = np.array([0, 1, 2])  # (0,(1,(2,3)4)5)6
+    >>> v_sub, sister = remove_leaf(v, 2)
+    >>> v_sub
+    array([0, 1])
+    >>> sister
+    3
     """
     v_sub, sister = core.remove_leaf(v, leaf)
 
@@ -90,6 +125,23 @@ def add_leaf(v, leaf, pos) -> np.ndarray:
     -------
     v_add : numpy.ndarray
         Phylo2Vec vector including the new leaf
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> from phylo2vec.utils.vector import add_leaf
+    >>> v = np.array([0, 1])
+    >>> p2v.to_newick(v)
+    '(0,(1,2)3)4;'
+
+    Add a new leaf 2 next to leaf 1 (the former leaf 2 becomes leaf 3):
+
+    >>> v_new = add_leaf(v, leaf=2, pos=1)
+    >>> v_new
+    array([0, 1, 3])
+    >>> p2v.to_newick(v_new)
+    '(0,((1,2)4,3)5)6;'
     """
     v_add = core.add_leaf(v, leaf, pos)
     return np.asarray(v_add)
@@ -165,6 +217,15 @@ def queue_shuffle(v, shuffle_cherries=False) -> Tuple[np.ndarray, List[int]]:
         Mapping of the original vector to the new vector
         index: leaf
         value: new leaf index in the reordered vector
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.utils.vector import queue_shuffle
+    >>> v = np.array([0, 0, 0, 2, 5, 3])
+    >>> v_new, mapping = queue_shuffle(v)
+    >>> all(v_new[i] <= i for i in range(len(v_new)))
+    True
     """
     v_new, vec_mapping = core.queue_shuffle(v, shuffle_cherries)
 
@@ -253,6 +314,14 @@ def get_common_ancestor(vector_or_matrix, node1, node2):
     -------
     int
         Most recent common ancestor node between node1 and node2
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.utils.vector import get_common_ancestor
+    >>> v = np.array([0, 1, 2, 3, 4])
+    >>> get_common_ancestor(v, 2, 3)
+    8
     """
     return core.get_common_ancestor(vector_or_matrix, node1, node2)
 
@@ -323,9 +392,9 @@ def get_node_depths(vector_or_matrix) -> np.ndarray:
     >>> # Tree: (0,(1,(2,3)4)5)6
     >>> v = np.array([0, 1, 2])
     >>> depths = get_node_depths(v)
-    >>> depths[6]  # Root has depth 0
+    >>> float(depths[6])  # Root has depth 0
     0.0
-    >>> depths[0]  # Leaf 0 is 1 edge from root
+    >>> float(depths[0])  # Leaf 0 is 1 edge from root
     1.0
     """
     return np.asarray(core.get_node_depths(vector_or_matrix))
@@ -341,22 +410,38 @@ def reroot(vector_or_matrix, node) -> np.ndarray:
     node : int
         A node to reroot the tree at
 
-        Must be a valid node in the tree, i.e., in the range [0, 2 * n_leaves - 1]
+        Must be a valid node in the tree, i.e., in the range [0, 2 * n_leaves - 3]
 
-        Cannot be the current root node, i.e., 2 * n_leaves
+        Cannot be the current root node, i.e., 2 * n_leaves - 2
 
     Returns
     -------
     numpy.ndarray
         rerooted vector
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import phylo2vec as p2v
+    >>> from phylo2vec.utils.vector import reroot
+    >>> v = np.array([0, 1, 2])
+    >>> p2v.to_newick(v)
+    '(0,(1,(2,3)4)5)6;'
+    >>> v_rerooted = reroot(v, node=2)  # Leaf 2 becomes a child of the root
+    >>> v_rerooted
+    array([0, 2, 3])
+    >>> p2v.to_newick(v_rerooted)
+    '(((0,1)4,3)5,2)6;'
     """
-    if node < 0 or node > 2 * len(vector_or_matrix):
+    # len(vector_or_matrix) == n_leaves - 1, so the root is 2 * len(vector_or_matrix)
+    root = 2 * len(vector_or_matrix)
+    if node < 0 or node > root:
         raise ValueError(
             f"Node {node} is out of bounds for tree with "
-            f"{len(vector_or_matrix)} leaves. "
-            f"Valid range is [0, {2 * len(vector_or_matrix)}]"
+            f"{len(vector_or_matrix) + 1} leaves. "
+            f"Valid range is [0, {root - 1}]"
         )
-    if node == 2 * len(vector_or_matrix):
+    if node == root:
         raise ValueError("Cannot reroot at the current root node")
 
     # Reroot via ete
@@ -405,6 +490,15 @@ def reroot_at_random(vector_or_matrix) -> np.ndarray:
     -------
     numpy.ndarray
         rerooted vector
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from phylo2vec.utils.vector import reroot_at_random
+    >>> v = np.array([0, 1, 2, 3])
+    >>> v_rerooted = reroot_at_random(v)
+    >>> v_rerooted.shape
+    (4,)
     """
 
     return reroot(vector_or_matrix, random.randint(0, 2 * len(vector_or_matrix) - 1))

@@ -43,12 +43,14 @@ def robinson_foulds(
     --------
     >>> import numpy as np
     >>> from phylo2vec.stats import robinson_foulds
-    >>> v1 = np.array([0, 1, 2, 3], dtype=np.int16)
-    >>> v2 = np.array([0, 0, 1, 2], dtype=np.int16)
+    >>> v1 = np.array([0, 1, 2, 3])
+    >>> v2 = np.array([0, 0, 0, 0])
     >>> robinson_foulds(v1, v1)  # Identical trees
     0.0
     >>> robinson_foulds(v1, v2)  # Different trees
-    2.0
+    4.0
+    >>> robinson_foulds(v1, v2, normalize=True)  # No shared splits
+    1.0
 
     See Also
     --------
