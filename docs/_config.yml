@@ -38,3 +38,5 @@ sphinx:
   config:
     add_module_names: True
     autosummary_generate: True
+    # phylo2vec.opt dependencies (the [opt] extras) are not installed in the docs env
+    autodoc_mock_imports: ['jax', 'numba', 'optax', 'rpy2', 'tqdm']

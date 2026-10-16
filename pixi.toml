@@ -89,7 +89,8 @@ pixi-kernel = ">=0.4.0,<0.5"
 jupyterlab = ">=4.1,<4.2"
 
 [feature.pydocs.dependencies]
-jupyter-book = ">=0.11.0"
+# jupyter-book 2 is a MyST rewrite that ignores the Sphinx config in docs/
+jupyter-book = ">=1.0,<2"
 
 [feature.pydocs.tasks.build-docs]
 cmd = "jupyter-book build docs"
