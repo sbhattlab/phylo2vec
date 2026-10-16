@@ -193,7 +193,6 @@ def load_alignment(
         # Load description
         print(f"Loading {dataset}...")
         descr = load_descr(f"{dataset}.md", descr_module=descr_module)
-        print(descr)
         print(json.dumps(descr, indent=2))
         # Load data format
         the_data_format = DATASETS[dataset]["format"]
@@ -235,9 +234,9 @@ def load_alignment(
             filename = f"{Path(url_path).stem}.{format_ext}"
             dataset_path = resources.files(data_module).joinpath(filename)
 
-            if not dataset_path.exists():
+            if not dataset_path.exists() or overwrite:
                 # Download the file
-                urlretrieve(url_path, dataset_path)
+                urlretrieve(dataset, dataset_path)
             else:
                 print(f"File {filename} already exists. Using the existing file.")
         elif os.path.exists(dataset):
