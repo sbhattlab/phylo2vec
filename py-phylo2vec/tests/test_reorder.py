@@ -10,6 +10,7 @@ import pytest
 
 from phylo2vec.base.ancestry import to_ancestry
 from phylo2vec.base.pairs import from_pairs
+from phylo2vec.stats.nodewise import cophenetic_distances
 from phylo2vec.utils.vector import queue_shuffle, sample_vector
 
 from .config import MAX_N_LEAVES, MIN_N_LEAVES, N_REPEATS
@@ -159,3 +160,30 @@ def test_queue_shuffle(n_leaves):
         }
 
         assert dict_mapping_py == dict_mapping_rust
+
+
+@pytest.mark.parametrize("n_leaves", range(MIN_N_LEAVES, MAX_N_LEAVES))
+def test_queue_shuffle_shuffle_cherries(n_leaves):
+    """Test that queue shuffle with shuffled cherries still encodes the same tree
+
+    Parameters
+    ----------
+    n_leaves : int
+        Number of leaves
+    """
+    for _ in range(N_REPEATS):
+        v = sample_vector(n_leaves)
+
+        v_new, vec_mapping = queue_shuffle(v, shuffle_cherries=True)
+
+        # The new vector should be ordered
+        assert np.all(v_new <= np.arange(len(v_new)))
+
+        # The mapping should be a permutation of the leaves
+        assert sorted(vec_mapping) == list(range(n_leaves))
+
+        # Leaf i in v_new was leaf vec_mapping[i] in v
+        dist = cophenetic_distances(v)
+        dist_new = cophenetic_distances(v_new)
+
+        assert np.array_equal(dist_new, dist[np.ix_(vec_mapping, vec_mapping)])
