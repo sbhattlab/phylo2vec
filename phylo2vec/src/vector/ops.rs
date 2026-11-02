@@ -682,40 +682,39 @@ mod tests {
     /// With `shuffle_cherries`, the output must still be an ordered vector
     /// encoding the same tree under the returned label mapping
     #[rstest]
-    #[case(3)]
+    #[case(5)]
     #[case(10)]
     #[case(50)]
+    #[case(100)]
     fn test_queue_shuffle_shuffle_cherries(#[case] n_leaves: usize) {
         use crate::vector::base::sample_vector;
         use crate::vector::graph::cophenetic_distances;
 
-        for _ in 0..100 {
-            let v = sample_vector(n_leaves, false);
-            let (v_qs, mapping_qs) = queue_shuffle(&v, true);
+        let v = sample_vector(n_leaves, false);
+        let (v_qs, mapping_qs) = queue_shuffle(&v, true);
 
-            assert!(
-                v_qs.iter().enumerate().all(|(i, &vi)| vi <= i),
-                "Expected an ordered vector, but got {v_qs:?}"
-            );
+        assert!(
+            v_qs.iter().enumerate().all(|(i, &vi)| vi <= i),
+            "Expected an ordered vector, but got {v_qs:?}"
+        );
 
-            let mut sorted_mapping = mapping_qs.clone();
-            sorted_mapping.sort_unstable();
-            assert_eq!(
-                sorted_mapping,
-                (0..n_leaves).collect::<Vec<_>>(),
-                "Expected the mapping to be a permutation of the leaves, but got {mapping_qs:?}"
-            );
+        let mut sorted_mapping = mapping_qs.clone();
+        sorted_mapping.sort_unstable();
+        assert_eq!(
+            sorted_mapping,
+            (0..n_leaves).collect::<Vec<_>>(),
+            "Expected the mapping to be a permutation of the leaves, but got {mapping_qs:?}"
+        );
 
-            let d = cophenetic_distances(&v, false);
-            let d_qs = cophenetic_distances(&v_qs, false);
-            for i in 0..n_leaves {
-                for j in 0..n_leaves {
-                    assert_eq!(
-                        d_qs[[i, j]],
-                        d[[mapping_qs[i], mapping_qs[j]]],
-                        "Expected v_qs to encode the same tree as v = {v:?}"
-                    );
-                }
+        let d = cophenetic_distances(&v, false);
+        let d_qs = cophenetic_distances(&v_qs, false);
+        for i in 0..n_leaves {
+            for j in 0..n_leaves {
+                assert_eq!(
+                    d_qs[[i, j]],
+                    d[[mapping_qs[i], mapping_qs[j]]],
+                    "Expected v_qs to encode the same tree as v = {v:?}"
+                );
             }
         }
     }
