@@ -454,10 +454,10 @@ pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<us
 
         // Process leaf nodes --> update the label mapping
         if child_order[1] < n_leaves {
-            label_mapping[new_pair.1] = c2;
+            label_mapping[new_pair.1] = child_order[1];
         }
         if child_order[0] < n_leaves {
-            label_mapping[new_pair.0] = c1;
+            label_mapping[new_pair.0] = child_order[0];
         }
 
         j += 1;
@@ -688,5 +688,46 @@ mod tests {
             mapping_qs, mapping_expected,
             "Expected queue shuffled mapping to be {mapping_expected:?}, but got {mapping_qs:?}"
         );
+    }
+
+    /// With `shuffle_cherries`, the output must still be an ordered vector
+    /// encoding the same tree under the returned label mapping
+    #[rstest]
+    #[case(3)]
+    #[case(10)]
+    #[case(50)]
+    fn test_queue_shuffle_shuffle_cherries(#[case] n_leaves: usize) {
+        use crate::vector::base::sample_vector;
+        use crate::vector::graph::cophenetic_distances;
+
+        for _ in 0..100 {
+            let v = sample_vector(n_leaves, false);
+            let (v_qs, mapping_qs) = queue_shuffle(&v, true);
+
+            assert!(
+                v_qs.iter().enumerate().all(|(i, &vi)| vi <= i),
+                "Expected an ordered vector, but got {v_qs:?}"
+            );
+
+            let mut sorted_mapping = mapping_qs.clone();
+            sorted_mapping.sort_unstable();
+            assert_eq!(
+                sorted_mapping,
+                (0..n_leaves).collect::<Vec<_>>(),
+                "Expected the mapping to be a permutation of the leaves, but got {mapping_qs:?}"
+            );
+
+            let d = cophenetic_distances(&v, false);
+            let d_qs = cophenetic_distances(&v_qs, false);
+            for i in 0..n_leaves {
+                for j in 0..n_leaves {
+                    assert_eq!(
+                        d_qs[[i, j]],
+                        d[[mapping_qs[i], mapping_qs[j]]],
+                        "Expected v_qs to encode the same tree as v = {v:?}"
+                    );
+                }
+            }
+        }
     }
 }
