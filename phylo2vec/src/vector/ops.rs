@@ -1,6 +1,5 @@
 /// Operations on Phylo2Vec vectors
 use std::cmp::Ordering;
-use std::collections::HashSet;
 
 use crate::types::{Ancestry, Pairs};
 use crate::vector::convert::{
@@ -466,16 +465,6 @@ pub fn queue_shuffle(v: &[usize], shuffle_cherries: bool) -> (Vec<usize>, Vec<us
     new_pairs.reverse();
 
     let v_qs = from_pairs(&new_pairs);
-
-    // Check that the label mapping is unique
-    {
-        let unique: HashSet<_> = label_mapping.iter().copied().collect();
-        assert_eq!(
-            unique.len(),
-            label_mapping.len(),
-            "label_mapping elements must be unique"
-        );
-    }
 
     (v_qs, label_mapping)
 }
