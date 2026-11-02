@@ -65,6 +65,34 @@ test_that(desc = "remove_and_add", {
   }
 })
 
+test_that(desc = "queue_shuffle", {
+  for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
+    for (j in seq_len(N_REPEATS)) {
+      # Generate a random vector
+      v <- sample_vector(n_leaves, FALSE)
+
+      for (shuffle_cherries in c(FALSE, TRUE)) {
+        res <- queue_shuffle(v, shuffle_cherries)
+        v_new <- res$v
+        mapping <- res$mapping
+
+        # The new vector should be ordered
+        expect_true(all(v_new <= seq_along(v_new) - 1))
+
+        # The mapping should be a permutation of the leaves
+        expect_equal(sort(mapping), seq(0, n_leaves - 1))
+
+        # Leaf i in v_new was leaf mapping[i + 1] in v
+        # (dimnames are the leaf labels, which differ between the two trees)
+        coph <- cophenetic_distances(v)
+        coph_new <- cophenetic_distances(v_new)
+
+        expect_equal(unname(coph_new), unname(coph[mapping + 1, mapping + 1]))
+      }
+    }
+  }
+})
+
 test_that(desc = "get_common_ancestor", {
   for (n_leaves in seq(MIN_N_LEAVES, MAX_N_LEAVES)) {
     for (j in seq_len(N_REPEATS)) {
