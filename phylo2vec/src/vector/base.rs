@@ -1,5 +1,5 @@
 /// Base functions for `phylo2vec` vectors: sampling, validation, and checking properties.
-use rand::Rng;
+use rand::RngExt;
 
 /// Sample a vector with `n_leaves` elements.
 ///
