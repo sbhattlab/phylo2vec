@@ -199,7 +199,10 @@ pub fn to_ancestry(v: &[usize]) -> Ancestry {
 /// assert_eq!(v, vec![0, 2, 2]);
 /// ```
 pub fn from_edges(edges: &[(usize, usize)]) -> Vec<usize> {
-    assert!(edges.len() % 2 == 0, "The number of edges must be even");
+    assert!(
+        edges.len().is_multiple_of(2),
+        "The number of edges must be even"
+    );
 
     let mut ancestry: Ancestry = Vec::with_capacity(edges.len() / 2);
 
