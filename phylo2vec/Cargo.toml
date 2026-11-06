@@ -10,7 +10,7 @@ license.workspace = true
 [dependencies]
 bit-set = "0.8.0"
 ndarray = "0.16.1"
-rand = "*"
+rand = "0.10"
 regex = "1.11.1"
 ryu = "1.0"
 thiserror = "2.0.12"

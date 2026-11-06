@@ -580,7 +580,7 @@ mod tests {
     use crate::matrix::convert::to_newick as to_newick_from_matrix;
     use crate::vector::base::sample_vector;
     use crate::vector::convert::to_newick as to_newick_from_vector;
-    use rand::{distr::Alphanumeric, Rng};
+    use rand::{distr::Alphanumeric, RngExt};
     use rstest::*;
 
     // Test that default() creates the same patterns as new()
