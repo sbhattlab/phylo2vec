@@ -37,6 +37,7 @@ dependencies = [
 gradme = [
     "jax",
     "optax",
+    "pandas",
     "rpy2",
     "tqdm"
 ]
