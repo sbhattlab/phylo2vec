@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 
+use ndarray::{Array2, ArrayView2};
 use numpy::{IntoPyArray, PyArray2, PyReadonlyArray2};
 use pyo3::exceptions::{PyAssertionError, PyValueError};
 use pyo3::prelude::*;
@@ -15,6 +16,7 @@ use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
 use phylo2vec::vector::distance as vdist;
 use phylo2vec::vector::graph as vgraph;
+use phylo2vec::vector::objectives as vobjectives;
 use phylo2vec::vector::ops as vops;
 
 #[derive(FromPyObject)]
@@ -323,6 +325,48 @@ fn b2(v: Vec<usize>) -> f64 {
     vbalance::b2(&v)
 }
 
+/// Topology of a tree given as a vector or a matrix (BME only uses the topology).
+fn bme_topology(tree: PyTree) -> Vec<usize> {
+    match tree {
+        PyTree::Matrix(m) => mbase::parse_matrix(&m.as_array()).0,
+        PyTree::Vector(v) => v,
+    }
+}
+
+/// Raises a ValueError, instead of a Rust panic, unless `dm` is `n x n` for the leaves of `v`.
+fn check_bme_distances(v: &[usize], dm: &ArrayView2<f64>) -> PyResult<()> {
+    let n = v.len() + 1;
+    if dm.shape() == [n, n] {
+        Ok(())
+    } else {
+        Err(PyValueError::new_err(format!(
+            "Distance matrix must be {n} x {n} for a tree with {n} leaves, got {:?}",
+            dm.shape()
+        )))
+    }
+}
+
+#[pyfunction]
+fn bme_objective(tree: PyTree, dm: PyReadonlyArray2<f64>) -> PyResult<f64> {
+    let v = bme_topology(tree);
+    let dm = dm.as_array();
+    check_bme_distances(&v, &dm)?;
+    Ok(vobjectives::bme_objective(&v, &dm))
+}
+
+#[pyfunction]
+fn bme_branch_lengths<'py>(
+    py: Python<'py>,
+    tree: PyTree<'py>,
+    dm: PyReadonlyArray2<'py, f64>,
+) -> PyResult<Bound<'py, PyArray2<f64>>> {
+    let v = bme_topology(tree);
+    let dm = dm.as_array();
+    check_bme_distances(&v, &dm)?;
+    let bls = vobjectives::bme_branch_lengths(&v, &dm);
+    Ok(Array2::from(bls).into_pyarray(py))
+}
+
 // skipcq: RS-R1000
 /// This module is exposed to Python.
 /// The line below raises an issue in DeepSource stating that this function's cyclomatic complexity is higher than threshold
@@ -332,6 +376,8 @@ fn _phylo2vec_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(add_leaf, m)?)?;
     m.add_function(wrap_pyfunction!(apply_label_mapping, m)?)?;
     m.add_function(wrap_pyfunction!(b2, m)?)?;
+    m.add_function(wrap_pyfunction!(bme_branch_lengths, m)?)?;
+    m.add_function(wrap_pyfunction!(bme_objective, m)?)?;
     m.add_function(wrap_pyfunction!(build_newick, m)?)?;
     m.add_function(wrap_pyfunction!(check_m, m)?)?;
     m.add_function(wrap_pyfunction!(check_v, m)?)?;

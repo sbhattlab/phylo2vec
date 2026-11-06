@@ -3,6 +3,8 @@
 export(add_leaf)
 export(apply_label_mapping)
 export(b2)
+export(bme_branch_lengths)
+export(bme_objective)
 export(check_m)
 export(check_v)
 export(cophenetic_distances)

@@ -14,6 +14,7 @@ use phylo2vec::vector::base as vbase;
 use phylo2vec::vector::convert as vconvert;
 use phylo2vec::vector::distance as vdist;
 use phylo2vec::vector::graph as vgraph;
+use phylo2vec::vector::objectives as vobjectives;
 use phylo2vec::vector::ops as vops;
 
 enum RTree {
@@ -680,6 +681,25 @@ fn b2(vector: Vec<i32>) -> f64 {
     vbalance::b2(&v_usize)
 }
 
+// BME length of a tree topology (exported through bme_objective in R/opt.R,
+// which checks the shape of the distance matrix)
+#[extendr]
+fn bme_objective(vector: Vec<i32>, dm: RMatrix<f64>) -> f64 {
+    let v_usize = as_usize(vector);
+    let dm = convert_from_rmatrix(&dm).unwrap();
+    vobjectives::bme_objective(&v_usize, &dm.view())
+}
+
+// BME branch lengths of a tree topology (exported through bme_branch_lengths in R/opt.R,
+// which checks the shape of the distance matrix)
+#[extendr]
+fn bme_branch_lengths(vector: Vec<i32>, dm: RMatrix<f64>) -> RMatrix<f64> {
+    let v_usize = as_usize(vector);
+    let dm = convert_from_rmatrix(&dm).unwrap();
+    let bls = vobjectives::bme_branch_lengths(&v_usize, &dm.view());
+    RMatrix::new_matrix(bls.len(), 2, |r, c| bls[r][c])
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -687,6 +707,8 @@ extendr_module! {
     mod phylo2vec;
     fn add_leaf;
     fn b2;
+    fn bme_branch_lengths;
+    fn bme_objective;
     fn apply_label_mapping;
     fn check_m;
     fn check_v;

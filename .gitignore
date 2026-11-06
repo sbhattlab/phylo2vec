@@ -201,6 +201,9 @@ r-phylo2vec/benchmarks/
 # Temporary files
 tmp/
 
+# Local notes and hand-offs
+notes/
+
 ### R ###
 # History files
 .Rhistory

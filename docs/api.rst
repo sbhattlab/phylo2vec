@@ -99,5 +99,7 @@ Optimisation
 
     opt.GradME
     opt.HillClimbing
+    opt.bme_branch_lengths
+    opt.bme_objective
     opt.gradme_loss
     opt.list_methods

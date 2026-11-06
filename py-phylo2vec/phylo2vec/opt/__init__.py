@@ -4,9 +4,10 @@ GradME needs the optional dependencies: ``pip install phylo2vec[gradme]``.
 """
 
 from ._api import list_methods
+from ._bme_losses import bme_branch_lengths, bme_objective
 from ._hc import HillClimbing
 
-__all__ = ["HillClimbing", "list_methods"]
+__all__ = ["HillClimbing", "bme_branch_lengths", "bme_objective", "list_methods"]
 
 try:
     from ._gradme import GradME
